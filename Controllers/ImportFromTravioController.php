@@ -16,8 +16,10 @@ class ImportFromTravioController extends Controller
 							'type' => 'geo',
 						];
 
-						$payload['search-type'] = $target['search'];
-						$payload['service-type'] = $target['type'];
+						if (isset($target['search']))
+							$payload['search-type'] = $target['search'];
+						if (isset($target['type']))
+							$payload['service-type'] = $target['type'];
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
