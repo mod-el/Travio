@@ -32,6 +32,21 @@ class ImportFromTravioController extends Controller
 						}
 					}
 					break;
+				case 'tags':
+					$list = $this->model->_Travio->request('static-data', [
+						'type' => 'tags',
+					]);
+
+					foreach ($list['list'] as $id => $item) {
+						$this->model->updateOrInsert('travio_tags', [
+							'id' => $id,
+						], [
+							'name' => $item['name'],
+							'type' => $item['type'],
+							'type_name' => $item['type-name'],
+						]);
+					}
+					break;
 				default:
 					$this->model->error('Unknown type');
 					break;

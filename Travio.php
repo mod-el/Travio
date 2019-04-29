@@ -20,6 +20,13 @@ class Travio extends Module
 					'visualizer' => 'Table',
 					'mobile-visualizer' => 'Table',
 				],
+				[
+					'name' => 'Tags',
+					'page' => 'TravioTags',
+					'rule' => 'travio-tags',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
 			],
 		];
 

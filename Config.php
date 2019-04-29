@@ -45,6 +45,23 @@ class TravioGeo extends TravioGeoBase
 {
 }
 ');
+
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioTag.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioTagBase;
+
+class TravioTag extends TravioTagBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioTags.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioTagsBase;
+
+class TravioTags extends TravioTagsBase
+{
+}
+');
 	}
 
 	/**
@@ -230,6 +247,14 @@ class TravioGeo extends TravioGeoBase
   PRIMARY KEY (`id`),
   KEY `travio_services_custom_texts_idx` (`parent`),
   CONSTRAINT `travio_services_custom_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services_custom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IS NOT EXISTS `travio_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  `type_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		return true;
