@@ -141,7 +141,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_geo` FOREIGN KEY (`geo`) REFERENCES `travio_geo` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_texts` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_texts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent` int(11) NOT NULL,
   `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
@@ -151,7 +151,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_videos` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_videos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
   `video` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -160,7 +160,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_videos` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_tags` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_tags` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
   `tag` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -169,7 +169,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_tags` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_amenities` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_amenities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -179,7 +179,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_amenities` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_files` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_files` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -189,7 +189,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_files` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_descriptions` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_descriptions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
   `tag` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -198,7 +198,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_descriptions` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE `travio_services_descriptions_texts` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_descriptions_texts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent` int(11) NOT NULL,
   `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
@@ -249,7 +249,7 @@ class TravioTags extends TravioTagsBase
   CONSTRAINT `travio_services_custom_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services_custom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->model->_Db->query('CREATE TABLE IS NOT EXISTS `travio_tags` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_tags` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) DEFAULT NULL,
