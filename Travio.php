@@ -21,6 +21,13 @@ class Travio extends Module
 					'mobile-visualizer' => 'Table',
 				],
 				[
+					'name' => 'Servizi',
+					'page' => 'TravioServices',
+					'rule' => 'travio-services',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
+				[
 					'name' => 'Tags',
 					'page' => 'TravioTags',
 					'rule' => 'travio-tags',
@@ -31,6 +38,7 @@ class Travio extends Module
 		];
 
 		$this->model->_Db->linkTable('travio_geo');
+		$this->model->_Db->linkTable('travio_services');
 
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 	}

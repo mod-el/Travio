@@ -62,6 +62,23 @@ class TravioTags extends TravioTagsBase
 {
 }
 ');
+
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioService.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioServiceBase;
+
+class TravioService extends TravioServiceBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioServices.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioServicesBase;
+
+class TravioServices extends TravioServicesBase
+{
+}
+');
 	}
 
 	/**
