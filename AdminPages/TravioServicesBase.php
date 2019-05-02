@@ -23,4 +23,18 @@ class TravioServicesBase extends AdminPage
 			'order_by' => 'code',
 		];
 	}
+
+	public function visualizerOptions(): array
+	{
+		return [
+			'columns' => [
+				'travio',
+				'code',
+				'name',
+				'type',
+				'geo',
+				'last_update',
+			],
+		];
+	}
 }

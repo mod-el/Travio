@@ -75,29 +75,44 @@ class ImportFromTravioController extends Controller
 									'last_update' => $item['last_update'],
 								]);
 
-								/*if ($check) {
-									$this->model->_Db->delete('servizi_tags', ['servizio' => $id]);
-									$this->model->_Db->delete('servizi_descrizioni', ['servizio' => $id]);
+								if ($check) {
+									$this->model->_Db->delete('travio_services_tags', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
 								}
 
 								foreach ($serviceData['tags'] as $tag) {
-									$this->model->_Db->insert('servizi_tags', [
-										'servizio' => $id,
+									$this->model->_Db->insert('travio_services_tags', [
+										'service' => $id,
 										'tag' => $tag,
 									], ['defer' => true]);
 								}
 
-								$this->model->_Db->bulkInsert('servizi_tags');
+								$this->model->_Db->bulkInsert('travio_services_tags');
+
+								/***********************/
 
 								foreach ($serviceData['descriptions'] as $description) {
-									$this->model->_Db->insert('servizi_descrizioni', [
-										'servizio' => $id,
-										'titolo' => $description['title'],
-										'testo' => $description['text'],
+									$this->model->_Db->insert('travio_services_descriptions', [
+										'service' => $id,
+										'tag' => $description['keyword'],
+										'title' => $description['title'],
+										'text' => $description['text'],
+									]);
+								}
+
+								/***********************/
+
+								foreach ($serviceData['photos'] as $photo) {
+									$this->model->_Db->insert('travio_services_photos', [
+										'service' => $id,
+										'url' => $photo['url'],
+										'thumb' => $photo['thumb'],
+										'description' => $photo['description'],
 									], ['defer' => true]);
 								}
 
-								$this->model->_Db->bulkInsert('servizi_descrizioni');*/
+								$this->model->_Db->bulkInsert('travio_services_photos');
 							}
 						}
 					}

@@ -27,6 +27,7 @@ $config = [
 		if ($this->model->isLoaded('Multilang')) {
 			$this->model->_Multilang->checkAndInsertTable('travio_geo');
 			$this->model->_Multilang->checkAndInsertTable('travio_services');
+			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
 		}
 
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioGeo.php', '<?php namespace Model\\TravioAssets\\Elements;
