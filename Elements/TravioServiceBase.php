@@ -46,5 +46,11 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 			'order_by' => 'id',
 		]);
+
+		$this->has('geo', [
+			'table' => 'travio_services_geo',
+			'field' => 'service',
+			'order_by' => 'id',
+		]);
 	}
 }

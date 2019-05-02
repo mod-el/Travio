@@ -79,6 +79,7 @@ class ImportFromTravioController extends Controller
 									$this->model->_Db->delete('travio_services_tags', ['service' => $id]);
 									$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
 									$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_geo', ['service' => $id]);
 								}
 
 								foreach ($serviceData['tags'] as $tag) {
@@ -113,6 +114,17 @@ class ImportFromTravioController extends Controller
 								}
 
 								$this->model->_Db->bulkInsert('travio_services_photos');
+
+								/***********************/
+
+								foreach ($serviceData['geo'] as $geo) {
+									$this->model->_Db->insert('travio_services_geo', [
+										'service' => $id,
+										'geo' => $geo['id'],
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_services_geo');
 							}
 						}
 					}
