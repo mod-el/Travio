@@ -2,6 +2,7 @@
 
 use Model\Core\Globals;
 use Model\Core\Module;
+use Model\TravioAssets\Elements\TravioService;
 
 class Travio extends Module
 {
@@ -115,6 +116,17 @@ class Travio extends Module
 		}
 
 		return $_SESSION['sessionId'];
+	}
+
+	public function getServiceFromResult(array $result): TravioService
+	{
+		$service = $this->model->one('TravioService', ['travio' => $result['id']]);
+		if (!$service) {
+			$service = $this->model->create('TravioService');
+			// TODO: riempire servizio fittizio con i dati da $result
+		}
+
+		return $service;
 	}
 
 	/**
