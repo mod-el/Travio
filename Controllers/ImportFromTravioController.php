@@ -80,6 +80,9 @@ class ImportFromTravioController extends Controller
 									$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
 									$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
 									$this->model->_Db->delete('travio_services_geo', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_files', ['service' => $id]);
+									$this->model->_Db->delete('travio_services_videos', ['service' => $id]);
 								}
 
 								foreach ($serviceData['tags'] as $tag) {
@@ -125,6 +128,41 @@ class ImportFromTravioController extends Controller
 								}
 
 								$this->model->_Db->bulkInsert('travio_services_geo');
+
+								/***********************/
+
+								foreach ($serviceData['amenities'] as $amenity) {
+									$this->model->_Db->insert('travio_services_amenities', [
+										'service' => $id,
+										'name' => $amenity['name'],
+										'tag' => $amenity['tag'] ?: null,
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_services_amenities');
+
+								/***********************/
+
+								foreach ($serviceData['files'] as $file) {
+									$this->model->_Db->insert('travio_services_files', [
+										'service' => $id,
+										'name' => $file['name'],
+										'url' => $file['url'],
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_services_files');
+
+								/***********************/
+
+								foreach ($serviceData['videos'] as $video) {
+									$this->model->_Db->insert('travio_services_videos', [
+										'service' => $id,
+										'video' => $video,
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_services_videos');
 							}
 						}
 					}

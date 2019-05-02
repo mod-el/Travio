@@ -55,5 +55,20 @@ class TravioServiceBase extends Element
 				'field' => 'geo',
 			],
 		]);
+
+		$this->has('amenities', [
+			'table' => 'travio_services_amenities',
+			'field' => 'service',
+		]);
+
+		$this->has('files', [
+			'table' => 'travio_services_files',
+			'field' => 'service',
+		]);
+
+		$this->has('videos', [
+			'table' => 'travio_services_videos',
+			'field' => 'service',
+		]);
 	}
 }
