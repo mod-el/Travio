@@ -54,6 +54,7 @@ class ImportFromTravioController extends Controller
 								$serviceData = $this->model->_Travio->request('static-data', [
 									'type' => 'service',
 									'code' => $item['code'],
+									'all-langs' => true,
 								])['data'];
 
 								$id = $this->model->updateOrInsert('travio_services', [
