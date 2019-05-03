@@ -71,4 +71,31 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 		]);
 	}
+
+	public function getMainImg(): ?string
+	{
+		$photos = $this->photos;
+		foreach ($photos as $photo) {
+			if ($photo['url'])
+				return $photo['url'];
+		}
+
+		return null;
+	}
+
+	public function getThumb(): ?string
+	{
+		$photos = $this->photos;
+		foreach ($photos as $photo) {
+			if ($photo['thumb'])
+				return $photo['thumb'];
+		}
+
+		foreach ($photos as $photo) { // Fallback
+			if ($photo['url'])
+				return $photo['url'];
+		}
+
+		return null;
+	}
 }

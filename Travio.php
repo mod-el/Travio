@@ -6,6 +6,8 @@ use Model\TravioAssets\Elements\TravioService;
 
 class Travio extends Module
 {
+	private $cartCache = null;
+
 	public function init(array $options)
 	{
 		if (!isset(Globals::$data['adminAdditionalPages']))
@@ -130,6 +132,126 @@ class Travio extends Module
 		}
 
 		return $service;
+	}
+
+	/**
+	 * @param string $username
+	 * @param string $password
+	 * @return array
+	 */
+	public function login(string $username, string $password)
+	{
+		if (array_key_exists('travio-login-cache', $_SESSION))
+			unset($_SESSION['travio-login-cache']);
+		return $this->request('login', [
+			'username' => $username,
+			'password' => $password,
+		]);
+	}
+
+	/**
+	 * @return array|null
+	 */
+	public function logged(): ?array
+	{
+		if (isset($_SESSION) and !array_key_exists('travio-login-cache', $_SESSION)) {
+			$req = $this->request('logged');
+			if ($req and $req['user']) {
+				$_SESSION['travio-login-cache'] = $req['user'];
+			} else {
+				$_SESSION['travio-login-cache'] = null;
+			}
+		}
+
+		return $_SESSION['travio-login-cache'];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function logout(): bool
+	{
+		if (array_key_exists('travio-login-cache', $_SESSION))
+			unset($_SESSION['travio-login-cache']);
+		return $this->request('logout')['status'];
+	}
+
+	/**
+	 * @param int $searchId
+	 * @return array
+	 */
+	public function addToCart(int $searchId): array
+	{
+		$this->emptyCartCache();
+		return $this->request('add-to-cart', [], $searchId);
+	}
+
+	/**
+	 *
+	 */
+	public function emptyCartCache()
+	{
+		$this->cartCache = null;
+		if (isset($_SESSION['travio-cart-cache']))
+			unset($_SESSION['travio-cart-cache']);
+	}
+
+	/**
+	 * @param string $idx
+	 * @return array
+	 */
+	public function removeFromCart(string $idx): array
+	{
+		$this->emptyCartCache();
+		return $this->request('remove-from-cart', [
+			'element' => $idx,
+		]);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getCart(): array
+	{
+		return $this->getCartCache();
+	}
+
+	/**
+	 * @return array
+	 */
+	private function getCartCache(): array
+	{
+		if ($this->cartCache === null) {
+			if (isset($_SESSION['travio-cart-cache'])) {
+				$this->cartCache = $_SESSION['travio-cart-cache'];
+			} else {
+				$this->cartCache = $this->request('view-cart');
+				$_SESSION['travio-cart-cache'] = $this->cartCache;
+			}
+		}
+		return $this->cartCache;
+	}
+
+	/**
+	 * @param array $pax
+	 * @param bool $instantConfirmation
+	 * @param array $options
+	 * @return array
+	 */
+	public function book(array $pax, bool $instantConfirmation = false, array $options = []): array
+	{
+		$this->emptyCartCache();
+		$ordine = $this->request('book', array_merge($options, [
+			'pax' => $pax,
+			'instant-confirmation' => $instantConfirmation,
+		]));
+
+		if ($ordine['status'] === 'check')
+			$this->model->error('Attenzione: controllare eventuali variazioni di prezzo da parte dei fornitori.');
+		if ($ordine['status'] !== 'ok')
+			$this->model->error('Errore durante la comunicazione API col sistema.');
+
+		return $ordine;
 	}
 
 	/**

@@ -2,7 +2,7 @@
 
 use Model\InstantSearch\Base;
 
-class TravioGeo extends Base
+class Booking extends Base
 {
 	public function getItem($el): array
 	{
@@ -15,15 +15,15 @@ class TravioGeo extends Base
 					$text = ucwords(strtolower($el['name']));
 				}
 				break;
-			/*case 'Model\Travio\Elements\Servizio':
+			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
 				if (!empty($el['geo'])) {
-					$destinazione = $this->model->_ORM->one('Destinazione', $el['geo']);
+					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
 					$text = ucwords(strtolower($el['name']) . ' | ' . $destinazione['nome'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
 				} else {
 					$text = ucwords(strtolower($el['name']));
 				}
-				break;*/
+				break;
 			default:
 				die('Unknown type');
 				break;
@@ -40,7 +40,7 @@ class TravioGeo extends Base
 		if ($id !== null) {
 			switch ($id{0}) {
 				case 's':
-					return $this->getItem($this->model->one('Servizio', ['travio' => substr($id, 1)]));
+					return $this->getItem($this->model->one('TravioService', ['travio' => substr($id, 1)]));
 					break;
 				case 'd':
 					return $this->getItem($this->model->one('TravioGeo', substr($id, 1)));
@@ -69,7 +69,7 @@ class TravioGeo extends Base
 		];
 		$destinazioni = $this->model->_ORM->all('TravioGeo', $where);
 
-		/*$where = [
+		$where = [
 			[
 				'sub' => [
 					['name', 'LIKE', $query . '%'],
@@ -78,13 +78,13 @@ class TravioGeo extends Base
 				'operator' => 'OR',
 			],
 		];
-		$servizi = $this->model->_ORM->all('Servizio', $where);*/
+		$servizi = $this->model->_ORM->all('TravioService', $where);
 
 		$elements = [];
 		foreach ($destinazioni as $d)
 			$elements[] = $d;
-		/*foreach ($servizi as $s)
-			$elements[] = $s;*/
+		foreach ($servizi as $s)
+			$elements[] = $s;
 
 		usort($elements, function ($a, $b) use ($query) {
 			$nomeA = strtolower($a['name']);
