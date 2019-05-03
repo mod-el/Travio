@@ -59,6 +59,9 @@ class Travio extends Module
 				$get['XDEBUG_SESSION_START'] = $_COOKIE['XDEBUG_SESSION'];
 		}
 
+		if ($this->model->isLoaded('Multilang') and !isset($payload['lang']))
+			$payload['lang'] = $this->model->_Multilang->lang;
+
 		$url = $this->makeUrl($request, $get);
 
 		$c = curl_init($url);
