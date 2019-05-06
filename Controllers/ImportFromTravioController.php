@@ -49,6 +49,9 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
+							if (!$item['code'])
+								continue;
+
 							$check = $this->model->select('travio_services', ['travio' => $item['id']]);
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$serviceData = $this->model->_Travio->request('static-data', [
