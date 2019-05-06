@@ -70,6 +70,7 @@ class Booking extends Base
 		$destinazioni = $this->model->_ORM->all('TravioGeo', $where);
 
 		$where = [
+			'visible' => 1,
 			[
 				'sub' => [
 					['name', 'LIKE', $query . '%'],
