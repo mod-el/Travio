@@ -48,9 +48,13 @@ class ImportFromTravioController extends Controller
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
+						$presents = [];
+
 						foreach ($list['list'] as $item) {
 							if (!$item['code'])
 								continue;
+
+							$presents[] = $item['id'];
 
 							$check = $this->model->select('travio_services', ['travio' => $item['id']]);
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
@@ -169,6 +173,10 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->bulkInsert('travio_services_videos');
 							}
 						}
+
+						$this->model->_Db->update('travio_services', [
+							'id' => ['NOT IN', $presents],
+						], ['visible' => 0]);
 					}
 					break;
 				case 'tags':

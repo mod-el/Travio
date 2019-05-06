@@ -33,6 +33,7 @@ class TravioServicesBase extends AdminPage
 				'name',
 				'type',
 				'geo',
+				'visible' => ['editable' => true],
 				'last_update',
 			],
 		];

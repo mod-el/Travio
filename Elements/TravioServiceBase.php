@@ -28,6 +28,9 @@ class TravioServiceBase extends Element
 				13 => 'Altro',
 			],
 		];
+		$this->settings['fields']['visible'] = [
+			'type' => 'checkbox',
+		];
 
 		$this->has('tags', [
 			'table' => 'travio_services_tags',

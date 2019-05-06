@@ -152,6 +152,7 @@ class TravioServices extends TravioServicesBase
   `price` decimal(7,2) DEFAULT NULL,
   `min_date` date DEFAULT NULL,
   `max_date` date DEFAULT NULL,
+  `visible` tinyint NOT NULL DEFAULT 1,
   `last_update` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `travio` (`travio`),
@@ -275,6 +276,13 @@ class TravioServices extends TravioServicesBase
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
+		return true;
+	}
+
+	public function postUpdate_0_2_1()
+	{
+		$this->model->_Db->query('ALTER TABLE `travio_services` 
+ADD COLUMN `visible` TINYINT NOT NULL DEFAULT 1 AFTER `max_date`;');
 		return true;
 	}
 
