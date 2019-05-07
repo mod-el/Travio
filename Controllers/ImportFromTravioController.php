@@ -34,6 +34,8 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'services':
+					$presents = [];
+
 					foreach ($config['target-types'] as $target) {
 						if ($target['search'] !== 'service')
 							continue;
@@ -47,8 +49,6 @@ class ImportFromTravioController extends Controller
 							$payload['service-type'] = $target['type'];
 
 						$list = $this->model->_Travio->request('static-data', $payload);
-
-						$presents = [];
 
 						foreach ($list['list'] as $item) {
 							if (!$item['code'])
@@ -80,6 +80,7 @@ class ImportFromTravioController extends Controller
 									'price' => $serviceData['price'],
 									'min_date' => $serviceData['min_date'],
 									'max_date' => $serviceData['max_date'],
+									'visibile' => 1,
 									'last_update' => $item['last_update'],
 								]);
 
@@ -173,11 +174,11 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->bulkInsert('travio_services_videos');
 							}
 						}
-
-						$this->model->_Db->update('travio_services', [
-							'id' => ['NOT IN', $presents],
-						], ['visible' => 0]);
 					}
+
+					$this->model->_Db->update('travio_services', [
+						'travio' => ['NOT IN', $presents],
+					], ['visible' => 0]);
 					break;
 				case 'tags':
 					$list = $this->model->_Travio->request('static-data', [
