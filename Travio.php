@@ -143,6 +143,9 @@ class Travio extends Module
 	{
 		if (array_key_exists('travio-login-cache', $_SESSION))
 			unset($_SESSION['travio-login-cache']);
+
+		$this->emptyCartCache();
+
 		return $this->request('login', [
 			'username' => $username,
 			'password' => $password,
@@ -173,6 +176,9 @@ class Travio extends Module
 	{
 		if (array_key_exists('travio-login-cache', $_SESSION))
 			unset($_SESSION['travio-login-cache']);
+
+		$this->emptyCartCache();
+
 		return $this->request('logout')['status'];
 	}
 
