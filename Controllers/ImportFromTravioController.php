@@ -196,6 +196,8 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'ports':
+					$presents = [];
+
 					foreach ($config['target-types'] as $target) {
 						$payload = [
 							'type' => 'ports',
@@ -212,6 +214,8 @@ class ImportFromTravioController extends Controller
 								'id' => $item['id'],
 							]);
 
+							$presents[] = $item['id'];
+
 							if ($check) {
 								$this->model->update('travio_ports', [
 									'id' => $item['id'],
@@ -227,8 +231,17 @@ class ImportFromTravioController extends Controller
 							}
 						}
 					}
+
+					foreach ($this->model->select_all('travio_ports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $port) {
+						try {
+							$this->model->delete('travio_ports', $port['id']);
+						} catch (\Exception $e) {
+						}
+					}
 					break;
 				case 'airports':
+					$presents = [];
+
 					foreach ($config['target-types'] as $target) {
 						$payload = [
 							'type' => 'airports',
@@ -245,6 +258,8 @@ class ImportFromTravioController extends Controller
 								'id' => $item['id'],
 							]);
 
+							$presents[] = $item['id'];
+
 							if ($check) {
 								$this->model->update('travio_airports', [
 									'id' => $item['id'],
@@ -258,6 +273,13 @@ class ImportFromTravioController extends Controller
 									'name' => $item['name'],
 								]);
 							}
+						}
+					}
+
+					foreach ($this->model->select_all('travio_airports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $airport) {
+						try {
+							$this->model->delete('travio_airports', $airport['id']);
+						} catch (\Exception $e) {
 						}
 					}
 					break;
