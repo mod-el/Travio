@@ -195,6 +195,72 @@ class ImportFromTravioController extends Controller
 						]);
 					}
 					break;
+				case 'ports':
+					foreach ($config['target-types'] as $target) {
+						$payload = [
+							'type' => 'ports',
+							'search-type' => $target['search'],
+						];
+
+						if ($target['type'])
+							$payload['service-type'] = $target['type'];
+
+						$list = $this->model->_Travio->request('static-data', $payload);
+
+						foreach ($list['list'] as $item) {
+							$check = $this->model->select('travio_ports', [
+								'id' => $item['id'],
+							]);
+
+							if ($check) {
+								$this->model->update('travio_ports', [
+									'id' => $item['id'],
+								], [
+									'code' => $item['code'],
+								]);
+							} else {
+								$this->model->insert('travio_ports', [
+									'id' => $item['id'],
+									'code' => $item['code'],
+									'name' => $item['name'],
+								]);
+							}
+						}
+					}
+					break;
+				case 'airports':
+					foreach ($config['target-types'] as $target) {
+						$payload = [
+							'type' => 'airports',
+							'search-type' => $target['search'],
+						];
+
+						if ($target['type'])
+							$payload['service-type'] = $target['type'];
+
+						$list = $this->model->_Travio->request('static-data', $payload);
+
+						foreach ($list['list'] as $item) {
+							$check = $this->model->select('travio_airports', [
+								'id' => $item['id'],
+							]);
+
+							if ($check) {
+								$this->model->update('travio_airports', [
+									'id' => $item['id'],
+								], [
+									'code' => $item['code'],
+								]);
+							} else {
+								$this->model->insert('travio_airports', [
+									'id' => $item['id'],
+									'code' => $item['code'],
+									'name' => $item['name'],
+								]);
+							}
+						}
+					}
+					break;
 				default:
 					$this->model->error('Unknown type');
 					break;

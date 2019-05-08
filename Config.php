@@ -80,6 +80,38 @@ class TravioServices extends TravioServicesBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioPort.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioPortBase;
+
+class TravioPort extends TravioPortBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioPorts.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioPortsBase;
+
+class TravioPorts extends TravioPortsBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioAirport.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioAirportBase;
+
+class TravioAirport extends TravioAirportBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioAirports.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioAirportsBase;
+
+class TravioAirports extends TravioAirportsBase
+{
+}
+');
 	}
 
 	/**
@@ -276,6 +308,20 @@ class TravioServices extends TravioServicesBase
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_ports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_airports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
 		return true;
 	}
 
@@ -283,6 +329,25 @@ class TravioServices extends TravioServicesBase
 	{
 		$this->model->_Db->query('ALTER TABLE `travio_services` 
 ADD COLUMN `visible` TINYINT NOT NULL DEFAULT 1 AFTER `max_date`;');
+		return true;
+	}
+
+	public function postUpdate_0_2_2()
+	{
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_ports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_airports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
 		return true;
 	}
 

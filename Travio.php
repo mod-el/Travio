@@ -31,6 +31,20 @@ class Travio extends Module
 					'mobile-visualizer' => 'Table',
 				],
 				[
+					'name' => 'Porti',
+					'page' => 'TravioPorts',
+					'rule' => 'travio-ports',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
+				[
+					'name' => 'Aeroporti',
+					'page' => 'TravioAirports',
+					'rule' => 'travio-airports',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
+				[
 					'name' => 'Tags',
 					'page' => 'TravioTags',
 					'rule' => 'travio-tags',
