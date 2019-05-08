@@ -202,7 +202,7 @@ class ImportFromTravioController extends Controller
 							'search-type' => $target['search'],
 						];
 
-						if ($target['type'])
+						if ($target['type'] ?? null)
 							$payload['service-type'] = $target['type'];
 
 						$list = $this->model->_Travio->request('static-data', $payload);
@@ -235,7 +235,7 @@ class ImportFromTravioController extends Controller
 							'search-type' => $target['search'],
 						];
 
-						if ($target['type'])
+						if ($target['type'] ?? null)
 							$payload['service-type'] = $target['type'];
 
 						$list = $this->model->_Travio->request('static-data', $payload);
