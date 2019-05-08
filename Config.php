@@ -30,6 +30,9 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
 		}
 
+		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
+			mkdir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities', 0777, true);
+
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioGeo.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioGeoBase;
@@ -112,6 +115,22 @@ class TravioAirports extends TravioAirportsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioAmenity.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioAmenityBase;
+
+class TravioAmenity extends TravioAmenityBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioAmenities.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioAmenitiesBase;
+
+class TravioAmenities extends TravioAmenitiesBase
+{
+}
+');
 	}
 
 	/**
@@ -169,6 +188,21 @@ class TravioAirports extends TravioAirportsBase
   CONSTRAINT `travio_geo_custom_texts` FOREIGN KEY (`parent`) REFERENCES `travio_geo_custom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_amenities_type_idx` (`type`),
+  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_tags` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
 		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `travio` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -223,11 +257,14 @@ class TravioAirports extends TravioAirportsBase
 		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_amenities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service` int(11) NOT NULL,
+  `amenity` int(11) DEFAULT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `tag` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `travio_services_amenities_idx` (`service`),
-  CONSTRAINT `travio_services_amenities` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `travio_services_amenity_idx` (`amenity`),
+  CONSTRAINT `travio_services_amenities` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `travio_services_amenity` FOREIGN KEY (`amenity`) REFERENCES `travio_amenities` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_files` (
@@ -347,6 +384,37 @@ ADD COLUMN `visible` TINYINT NOT NULL DEFAULT 1 AFTER `max_date`;');
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		return true;
+	}
+
+	public function postUpdate_0_2_3()
+	{
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_amenities_type_idx` (`type`),
+  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_tags` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('ALTER TABLE `travio_services_amenities` 
+ADD COLUMN `amenity` INT NULL AFTER `service`,
+ADD INDEX `travio_services_amenities_amenity_idx` (`id` ASC);');
+
+		$this->model->_Db->query('ALTER TABLE `travio_services_amenities` 
+ADD CONSTRAINT `travio_services_amenities_amenity`
+  FOREIGN KEY (`amenity`)
+  REFERENCES `travio_amenities` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;');
 
 		return true;
 	}

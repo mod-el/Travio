@@ -1,288 +1,436 @@
 <?php namespace Model\Travio;
 
-use Model\Core\Globals;
-use Model\Core\Module;
-use Model\TravioAssets\Elements\TravioService;
+use Model\Core\Module_Config;
 
-class Travio extends Module
+class Config extends Module_Config
 {
-	private $cartCache = null;
-
-	public function init(array $options)
-	{
-		if (!isset(Globals::$data['adminAdditionalPages']))
-			Globals::$data['adminAdditionalPages'] = [];
-
-		Globals::$data['adminAdditionalPages'][] = [
-			'name' => 'Travio',
-			'sub' => [
-				[
-					'name' => 'Destinazioni',
-					'page' => 'TravioGeo',
-					'rule' => 'travio-geo',
-					'visualizer' => 'Table',
-					'mobile-visualizer' => 'Table',
-				],
-				[
-					'name' => 'Servizi',
-					'page' => 'TravioServices',
-					'rule' => 'travio-services',
-					'visualizer' => 'Table',
-					'mobile-visualizer' => 'Table',
-				],
-				[
-					'name' => 'Porti',
-					'page' => 'TravioPorts',
-					'rule' => 'travio-ports',
-					'visualizer' => 'Table',
-					'mobile-visualizer' => 'Table',
-				],
-				[
-					'name' => 'Aeroporti',
-					'page' => 'TravioAirports',
-					'rule' => 'travio-airports',
-					'visualizer' => 'Table',
-					'mobile-visualizer' => 'Table',
-				],
-				[
-					'name' => 'Tags',
-					'page' => 'TravioTags',
-					'rule' => 'travio-tags',
-					'visualizer' => 'Table',
-					'mobile-visualizer' => 'Table',
-				],
-			],
-		];
-
-		$this->model->_Db->linkTable('travio_geo');
-		$this->model->_Db->linkTable('travio_services');
-
-		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
-	}
-
-	public function request(string $request, array $payload = [], ?int $searchId = null): array
-	{
-		$get = [];
-
-		if ($request !== 'get-session-id')
-			$get['SessionId'] = $this->getSessionId();
-		if ($searchId !== null)
-			$get['SearchId'] = $searchId;
-
-		if (DEBUG_MODE) {
-			$get['debug'] = '';
-			if (isset($_COOKIE['XDEBUG_SESSION']))
-				$get['XDEBUG_SESSION_START'] = $_COOKIE['XDEBUG_SESSION'];
-		}
-
-		if ($this->model->isLoaded('Multilang') and !isset($payload['lang']))
-			$payload['lang'] = $this->model->_Multilang->lang;
-
-		$url = $this->makeUrl($request, $get);
-
-		$c = curl_init($url);
-
-		$body = json_encode($payload);
-		curl_setopt($c, CURLOPT_HTTPHEADER, [
-			'Content-Type: text/json',
-			'Content-length: ' . strlen($body),
-			'Connection: close',
-		]);
-		curl_setopt($c, CURLOPT_POST, 1);
-		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($c, CURLOPT_POSTFIELDS, $body);
-		$data = curl_exec($c);
-
-		if (curl_errno($c))
-			throw new \Exception('Errore cURL: ' . curl_error($c));
-
-		curl_close($c);
-
-		$decoded = json_decode($data, true);
-		if ($decoded === null)
-			throw new \Exception('Errore nella decodifica dei dati: ' . $data);
-
-		if (isset($decoded['err']))
-			throw new \Exception($decoded['err']);
-
-		return $decoded;
-	}
-
-	private function makeUrl(string $request, array $get = []): string
-	{
-		$config = $this->retrieveConfig();
-
-		if (DEBUG_MODE and $config['dev'])
-			$url = 'https://dev.travio.it';
-		else
-			$url = 'https://bo.travio.it';
-
-		$url .= '/api-' . $config['license'] . '/' . $request;
-
-		$get['Key'] = $config['key'];
-		$get = http_build_query($get);
-		if ($get)
-			$url .= '?' . $get;
-
-		return $url;
-	}
-
-	private function getSessionId(): string
-	{
-		if (!isset($_SESSION['sessionId'])) {
-			$response = $this->request('get-session-id');
-			$_SESSION['sessionId'] = $response['SessionId'];
-		}
-
-		return $_SESSION['sessionId'];
-	}
-
-	public function getServiceFromResult(array $result): TravioService
-	{
-		$service = $this->model->one('TravioService', ['travio' => $result['id']]);
-		if (!$service) {
-			$service = $this->model->create('TravioService');
-			// TODO: riempire servizio fittizio con i dati da $result
-		}
-
-		return $service;
-	}
-
 	/**
-	 * @param string $username
-	 * @param string $password
-	 * @return array
 	 */
-	public function login(string $username, string $password)
+	protected function assetsList()
 	{
-		if (array_key_exists('travio-login-cache', $_SESSION))
-			unset($_SESSION['travio-login-cache']);
+		$this->addAsset('config', 'config.php', function () {
+			return '<?php
+$config = [
+	\'license\' => null,
+	\'key\' => null,
+	\'target-types\' => [
+		[
+			\'search\' => \'service\',
+			\'type\' => 2,
+		],
+	],
+	\'dev\' => true,
+];
+';
+		});
 
-		$this->emptyCartCache();
-
-		return $this->request('login', [
-			'username' => $username,
-			'password' => $password,
-		]);
-	}
-
-	/**
-	 * @return array|null
-	 */
-	public function logged(): ?array
-	{
-		if (isset($_SESSION) and !array_key_exists('travio-login-cache', $_SESSION)) {
-			$req = $this->request('logged');
-			if ($req and $req['user']) {
-				$_SESSION['travio-login-cache'] = $req['user'];
-			} else {
-				$_SESSION['travio-login-cache'] = null;
-			}
+		if ($this->model->isLoaded('Multilang')) {
+			$this->model->_Multilang->checkAndInsertTable('travio_geo');
+			$this->model->_Multilang->checkAndInsertTable('travio_services');
+			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
 		}
 
-		return $_SESSION['travio-login-cache'];
+		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
+			mkdir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities', 0777, true);
+
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioGeo.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioGeoBase;
+
+class TravioGeo extends TravioGeoBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioGeo.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioGeoBase;
+
+class TravioGeo extends TravioGeoBase
+{
+}
+');
+
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioTag.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioTagBase;
+
+class TravioTag extends TravioTagBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioTags.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioTagsBase;
+
+class TravioTags extends TravioTagsBase
+{
+}
+');
+
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioService.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioServiceBase;
+
+class TravioService extends TravioServiceBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioServices.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioServicesBase;
+
+class TravioServices extends TravioServicesBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioPort.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioPortBase;
+
+class TravioPort extends TravioPortBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioPorts.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioPortsBase;
+
+class TravioPorts extends TravioPortsBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioAirport.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioAirportBase;
+
+class TravioAirport extends TravioAirportBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioAirports.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioAirportsBase;
+
+class TravioAirports extends TravioAirportsBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioAmenity.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioAmenityBase;
+
+class TravioAmenity extends TravioAmenityBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioAmenities.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioAmenitiesBase;
+
+class TravioAmenities extends TravioAmenitiesBase
+{
+}
+');
 	}
 
 	/**
+	 * @param string $file
+	 * @param string $default
+	 */
+	private function checkFile(string $file, string $default)
+	{
+		if (file_exists(INCLUDE_PATH . $file))
+			return;
+
+		$dir = pathinfo(INCLUDE_PATH . $file, PATHINFO_DIRNAME);
+		if (!is_dir($dir))
+			mkdir($dir, 0777, true);
+
+		file_put_contents(INCLUDE_PATH . $file, $default);
+	}
+
+	/**
+	 * First initialization of module
+	 *
+	 * @param array $data
 	 * @return bool
 	 */
-	public function logout(): bool
+	public function init(?array $data = null): bool
 	{
-		if (array_key_exists('travio-login-cache', $_SESSION))
-			unset($_SESSION['travio-login-cache']);
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_geo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$this->emptyCartCache();
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_geo_texts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) NOT NULL,
+  `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `parent_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_geo_texts_idx` (`parent`),
+  CONSTRAINT `travio_geo_texts` FOREIGN KEY (`parent`) REFERENCES `travio_geo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		return $this->request('logout')['status'];
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_geo_custom` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_geo_custom_texts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) NOT NULL,
+  `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_geo_custom_texts_idx` (`parent`),
+  CONSTRAINT `travio_geo_custom_texts` FOREIGN KEY (`parent`) REFERENCES `travio_geo_custom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_amenities_type_idx` (`type`),
+  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_tags` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `travio` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) NOT NULL,
+  `typology` int(11) DEFAULT NULL,
+  `geo` int(11) DEFAULT NULL,
+  `classification` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `classification_level` tinyint(4) DEFAULT NULL,
+  `lat` decimal(10,7) DEFAULT NULL,
+  `lng` decimal(10,7) DEFAULT NULL,
+  `address` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `price` decimal(7,2) DEFAULT NULL,
+  `min_date` date DEFAULT NULL,
+  `max_date` date DEFAULT NULL,
+  `visible` tinyint NOT NULL DEFAULT 1,
+  `last_update` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio` (`travio`),
+  KEY `travio_services_geo_idx` (`geo`),
+  CONSTRAINT `travio_services_geo` FOREIGN KEY (`geo`) REFERENCES `travio_geo` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_texts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) NOT NULL,
+  `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_texts_idx` (`parent`),
+  CONSTRAINT `travio_services_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_videos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `video` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_videos_idx` (`service`),
+  CONSTRAINT `travio_services_videos` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `tag` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_tags_idx` (`service`),
+  CONSTRAINT `travio_services_tags` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_amenities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `amenity` int(11) DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `tag` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_amenities_idx` (`service`),
+  KEY `travio_services_amenity_idx` (`amenity`),
+  CONSTRAINT `travio_services_amenities` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `travio_services_amenity` FOREIGN KEY (`amenity`) REFERENCES `travio_amenities` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_files_idx` (`service`),
+  CONSTRAINT `travio_services_files` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_descriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `tag` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_descriptions_idx` (`service`),
+  CONSTRAINT `travio_services_descriptions` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_descriptions_texts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) NOT NULL,
+  `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `text` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_descriptions_texts_idx` (`parent`),
+  CONSTRAINT `travio_services_descriptions_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services_descriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_photos` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `service` INT NOT NULL,
+  `url` VARCHAR(255) NOT NULL,
+  `thumb` VARCHAR(255) NOT NULL,
+  `description` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `travio_services_photos_idx` (`service` ASC),
+  CONSTRAINT `travio_services_photos`
+    FOREIGN KEY (`service`)
+    REFERENCES `travio_services` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_geo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service` int(11) NOT NULL,
+  `geo` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_geo_idx` (`service`),
+  KEY `travio_services_geo_geo_idx` (`geo`),
+  CONSTRAINT `travio_services_geo_geo` FOREIGN KEY (`geo`) REFERENCES `travio_geo` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `travio_services_geo_service` FOREIGN KEY (`service`) REFERENCES `travio_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_custom` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services_custom_texts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent` int(11) NOT NULL,
+  `lang` char(2) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_services_custom_texts_idx` (`parent`),
+  CONSTRAINT `travio_services_custom_texts` FOREIGN KEY (`parent`) REFERENCES `travio_services_custom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  `type_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_ports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_airports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		return true;
+	}
+
+	public function postUpdate_0_2_1()
+	{
+		$this->model->_Db->query('ALTER TABLE `travio_services` 
+ADD COLUMN `visible` TINYINT NOT NULL DEFAULT 1 AFTER `max_date`;');
+		return true;
+	}
+
+	public function postUpdate_0_2_2()
+	{
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_ports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_airports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		return true;
+	}
+
+	public function postUpdate_0_2_3()
+	{
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_amenities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `travio_amenities_type_idx` (`type`),
+  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_tags` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+
+		$this->model->_Db->query('ALTER TABLE `travio_services_amenities` 
+ADD COLUMN `amenity` INT NULL AFTER `service`,
+ADD INDEX `travio_services_amenities_amenity_idx` (`id` ASC);');
+
+		$this->model->_Db->query('ALTER TABLE `travio_services_amenities` 
+ADD CONSTRAINT `travio_services_amenities_amenity`
+  FOREIGN KEY (`amenity`)
+  REFERENCES `travio_amenities` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;');
+
+		return true;
 	}
 
 	/**
-	 * @param int $searchId
 	 * @return array
 	 */
-	public function addToCart(int $searchId): array
-	{
-		$this->emptyCartCache();
-		return $this->request('add-to-cart', [], $searchId);
-	}
-
-	/**
-	 *
-	 */
-	public function emptyCartCache()
-	{
-		$this->cartCache = null;
-		if (isset($_SESSION['travio-cart-cache']))
-			unset($_SESSION['travio-cart-cache']);
-	}
-
-	/**
-	 * @param string $idx
-	 * @return array
-	 */
-	public function removeFromCart(string $idx): array
-	{
-		$this->emptyCartCache();
-		return $this->request('remove-from-cart', [
-			'element' => $idx,
-		]);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getCart(): array
-	{
-		return $this->getCartCache();
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getCartCache(): array
-	{
-		if ($this->cartCache === null) {
-			if (isset($_SESSION['travio-cart-cache'])) {
-				$this->cartCache = $_SESSION['travio-cart-cache'];
-			} else {
-				$this->cartCache = $this->request('view-cart');
-				$_SESSION['travio-cart-cache'] = $this->cartCache;
-			}
-		}
-		return $this->cartCache;
-	}
-
-	/**
-	 * @param array $pax
-	 * @param bool $instantConfirmation
-	 * @param array $options
-	 * @return array
-	 */
-	public function book(array $pax, bool $instantConfirmation = false, array $options = []): array
-	{
-		$this->emptyCartCache();
-		$ordine = $this->request('book', array_merge($options, [
-			'pax' => $pax,
-			'instant-confirmation' => $instantConfirmation,
-		]));
-
-		if ($ordine['status'] === 'check')
-			$this->model->error('Attenzione: controllare eventuali variazioni di prezzo da parte dei fornitori.');
-		if ($ordine['status'] !== 'ok')
-			$this->model->error('Errore durante la comunicazione API col sistema.');
-
-		return $ordine;
-	}
-
-	/**
-	 * @param array $request
-	 * @param string $rule
-	 * @return array
-	 */
-	public function getController(array $request, string $rule): ?array
+	public function getRules(): array
 	{
 		return [
-			'controller' => 'ImportFromTravio',
+			'rules' => [
+				'import' => 'import-from-travio',
+			],
+			'controllers' => [
+				'ImportFromTravio',
+			],
 		];
 	}
 }

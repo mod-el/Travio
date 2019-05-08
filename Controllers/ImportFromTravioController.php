@@ -140,9 +140,10 @@ class ImportFromTravioController extends Controller
 
 								/***********************/
 
-								foreach ($serviceData['amenities'] as $amenity) {
+								foreach ($serviceData['amenities'] as $amenity_id => $amenity) {
 									$this->model->_Db->insert('travio_services_amenities', [
 										'service' => $id,
+										'amenity' => $amenity_id,
 										'name' => $amenity['name'],
 										'tag' => $amenity['tag'] ?: null,
 									], ['defer' => true]);
@@ -192,6 +193,28 @@ class ImportFromTravioController extends Controller
 							'name' => $item['name'],
 							'type' => $item['type'],
 							'type_name' => $item['type-name'],
+						]);
+					}
+					break;
+				case 'amenities':
+					$list = $this->model->_Travio->request('static-data', [
+						'type' => 'amenities',
+					]);
+
+					foreach ($list['list'] as $id => $item) {
+						if ($item['tag']) {
+							$type = $this->model->select('travio_amenities_types', ['name' => trim($item['tag'])], 'id');
+							if (!$type)
+								$type = $this->model->insert('travio_amenities_types', ['name' => trim($item['tag'])]);
+						} else {
+							$type = null;
+						}
+
+						$this->model->updateOrInsert('travio_amenities', [
+							'id' => $id,
+						], [
+							'name' => $item['name'],
+							'type' => $type,
 						]);
 					}
 					break;
