@@ -200,7 +200,7 @@ class TravioAmenities extends TravioAmenitiesBase
   `type` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `travio_amenities_type_idx` (`type`),
-  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_tags` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `travio_amenities_type` FOREIGN KEY (`type`) REFERENCES `travio_amenities_types` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `travio_services` (
