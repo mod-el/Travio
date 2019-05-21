@@ -70,6 +70,7 @@ class Travio extends Module
 
 		$this->model->_Db->linkTable('travio_geo');
 		$this->model->_Db->linkTable('travio_services');
+		$this->model->_Db->linkTable('travio_packages');
 
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 	}
