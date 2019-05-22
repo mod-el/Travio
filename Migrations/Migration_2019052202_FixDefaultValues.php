@@ -8,5 +8,6 @@ class Migration_2019052202_FixDefaultValues extends Migration
 	{
 		$this->changeColumn('travio_services', 'visible', ['type' => 'tinyint', 'null' => false, 'default' => 1]);
 		$this->changeColumn('travio_packages', 'visible', ['type' => 'tinyint', 'null' => false, 'default' => 1]);
+		$this->changeColumn('travio_packages', 'last_update', ['type' => 'datetime']);
 	}
 }

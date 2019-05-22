@@ -80,7 +80,7 @@ class ImportFromTravioController extends Controller
 									'price' => $serviceData['price'],
 									'min_date' => $serviceData['min_date'],
 									'max_date' => $serviceData['max_date'],
-									'visibile' => 1,
+									'visible' => 1,
 									'last_update' => $item['last_update'],
 								]);
 
@@ -205,7 +205,7 @@ class ImportFromTravioController extends Controller
 							$presents[] = $item['id'];
 
 							$check = $this->model->select('travio_packages', ['travio' => $item['id']]);
-							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
+							if (DEBUG_MODE or !$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$packageData = $this->model->_Travio->request('static-data', [
 									'type' => 'package',
 									'code' => $item['code'],
@@ -219,7 +219,8 @@ class ImportFromTravioController extends Controller
 									'name' => $packageData['name'],
 									'notes' => $packageData['notes'],
 									'price' => $packageData['price'],
-									'visibile' => 1,
+									'geo' => $packageData['geo'][0]['id'] ?? null,
+									'visible' => 1,
 									'last_update' => $item['last_update'],
 								]);
 
