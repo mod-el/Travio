@@ -205,7 +205,7 @@ class ImportFromTravioController extends Controller
 							$presents[] = $item['id'];
 
 							$check = $this->model->select('travio_packages', ['travio' => $item['id']]);
-							if (DEBUG_MODE or !$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
+							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$packageData = $this->model->_Travio->request('static-data', [
 									'type' => 'package',
 									'code' => $item['code'],
