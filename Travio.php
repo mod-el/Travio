@@ -31,6 +31,13 @@ class Travio extends Module
 					'mobile-visualizer' => 'Table',
 				],
 				[
+					'name' => 'Pacchetti',
+					'page' => 'TravioPackages',
+					'rule' => 'travio-packages',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
+				[
 					'name' => 'Porti',
 					'page' => 'TravioPorts',
 					'rule' => 'travio-ports',

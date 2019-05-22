@@ -84,6 +84,22 @@ class TravioServices extends TravioServicesBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioPackage.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioPackageBase;
+
+class TravioPackage extends TravioPackageBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioPackages.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioPackagesBase;
+
+class TravioPackages extends TravioPackagesBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioPort.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioPortBase;

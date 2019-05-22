@@ -181,6 +181,135 @@ class ImportFromTravioController extends Controller
 						'travio' => ['NOT IN', $presents],
 					], ['visible' => 0]);
 					break;
+				case 'packages':
+					$presents = [];
+
+					foreach ($config['target-types'] as $target) {
+						if ($target['search'] !== 'package')
+							continue;
+
+						$payload = [
+							'type' => 'package',
+							'show-names' => true,
+						];
+
+						if (isset($target['type']))
+							$payload['service-type'] = $target['type'];
+
+						$list = $this->model->_Travio->request('static-data', $payload);
+
+						foreach ($list['list'] as $item) {
+							if (!$item['code'])
+								continue;
+
+							$presents[] = $item['id'];
+
+							$check = $this->model->select('travio_packages', ['travio' => $item['id']]);
+							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
+								$packageData = $this->model->_Travio->request('static-data', [
+									'type' => 'package',
+									'code' => $item['code'],
+									'all-langs' => true,
+								])['data'];
+
+								$id = $this->model->updateOrInsert('travio_packages', [
+									'travio' => $packageData['id'],
+								], [
+									'code' => $packageData['code'],
+									'name' => $packageData['name'],
+									'notes' => $packageData['notes'],
+									'price' => $packageData['price'],
+									'visibile' => 1,
+									'last_update' => $item['last_update'],
+								]);
+
+								if ($check) {
+									$this->model->_Db->delete('travio_packages_tags', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_descriptions', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_photos', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_geo', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
+								}
+
+								foreach ($packageData['tags'] as $tag) {
+									$this->model->_Db->insert('travio_packages_tags', [
+										'package' => $id,
+										'tag' => $tag,
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_tags');
+
+								/***********************/
+
+								foreach ($packageData['descriptions'] as $description) {
+									$this->model->_Db->insert('travio_packages_descriptions', [
+										'package' => $id,
+										'tag' => $description['keyword'],
+										'title' => $description['title'],
+										'text' => $description['text'],
+									]);
+								}
+
+								/***********************/
+
+								foreach ($packageData['photos'] as $photo) {
+									$this->model->_Db->insert('travio_packages_photos', [
+										'package' => $id,
+										'url' => $photo['url'],
+										'thumb' => $photo['thumb'],
+										'description' => $photo['description'],
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_photos');
+
+								/***********************/
+
+								foreach ($packageData['geo'] as $geo) {
+									$this->model->_Db->insert('travio_packages_geo', [
+										'package' => $id,
+										'geo' => $geo['id'],
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_geo');
+
+								/***********************/
+
+								foreach ($packageData['files'] as $file) {
+									$this->model->_Db->insert('travio_packages_files', [
+										'package' => $id,
+										'name' => $file['name'],
+										'url' => $file['url'],
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_files');
+
+								/***********************/
+
+								foreach ($packageData['departures'] as $departure) {
+									$this->model->_Db->insert('travio_packages_departures', [
+										'package' => $id,
+										'date' => $departure['date'],
+										'departure_airport' => $departure['departure-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['departure-airport']], 'id') ?: null) : null,
+										'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']], 'id') ?: null) : null,
+										'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']], 'id') ?: null) : null,
+										'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']], 'id') ?: null) : null,
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_departures');
+							}
+						}
+					}
+
+					$this->model->_Db->update('travio_packages', [
+						'travio' => ['NOT IN', $presents],
+					], ['visible' => 0]);
+					break;
 				case 'tags':
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'tags',

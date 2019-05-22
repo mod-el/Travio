@@ -2,17 +2,17 @@
 
 use Model\Admin\AdminPage;
 
-class TravioServicesBase extends AdminPage
+class TravioPackagesBase extends AdminPage
 {
 	public function options(): array
 	{
 		return [
-			'element' => 'TravioService',
+			'element' => 'TravioPackage',
 			'actions' => [
 				'import' => [
 					'text' => 'Importa',
 					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'services\'); return false',
+					'action' => 'importFromTravio(\'packages\'); return false',
 				],
 			],
 			'privileges' => [
@@ -31,7 +31,6 @@ class TravioServicesBase extends AdminPage
 				'travio',
 				'code',
 				'name',
-				'type',
 				'geo',
 				'visible' => ['editable' => true],
 				'last_update',
