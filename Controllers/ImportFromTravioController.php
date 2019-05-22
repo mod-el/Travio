@@ -177,9 +177,9 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					$this->model->_Db->update('travio_services', [
+					$this->model->_Db->update('travio_services', $presents ? [
 						'travio' => ['NOT IN', $presents],
-					], ['visible' => 0]);
+					] : [], ['visible' => 0]);
 					break;
 				case 'packages':
 					$presents = [];
@@ -205,7 +205,7 @@ class ImportFromTravioController extends Controller
 							$presents[] = $item['id'];
 
 							$check = $this->model->select('travio_packages', ['travio' => $item['id']]);
-							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
+							if (DEBUG_MODE or !$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$packageData = $this->model->_Travio->request('static-data', [
 									'type' => 'package',
 									'code' => $item['code'],
@@ -231,6 +231,7 @@ class ImportFromTravioController extends Controller
 									$this->model->_Db->delete('travio_packages_geo', ['package' => $id]);
 									$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
 									$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
+									$this->model->_Db->delete('travio_packages_hotels', ['package' => $id]);
 								}
 
 								foreach ($packageData['tags'] as $tag) {
@@ -303,13 +304,24 @@ class ImportFromTravioController extends Controller
 								}
 
 								$this->model->_Db->bulkInsert('travio_packages_departures');
+
+								/***********************/
+
+								foreach ($packageData['hotels'] as $hotel) {
+									$this->model->_Db->insert('travio_packages_hotels', [
+										'package' => $id,
+										'hotel' => $this->model->select('travio_services', ['code' => $hotel['code']], 'id'),
+									], ['defer' => true]);
+								}
+
+								$this->model->_Db->bulkInsert('travio_packages_hotels');
 							}
 						}
 					}
 
-					$this->model->_Db->update('travio_packages', [
+					$this->model->_Db->update('travio_packages', $presents ? [
 						'travio' => ['NOT IN', $presents],
-					], ['visible' => 0]);
+					] : [], ['visible' => 0]);
 					break;
 				case 'tags':
 					$list = $this->model->_Travio->request('static-data', [
