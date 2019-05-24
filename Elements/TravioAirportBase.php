@@ -5,4 +5,32 @@ use Model\ORM\Element;
 class TravioAirportBase extends Element
 {
 	public static $table = 'travio_airports';
+
+	public function getDestinations(): array
+	{
+		$select = $this->model->_Db->select_all('travio_packages_departures', [
+			'departure_airport' => $this['id'],
+		], [
+			'joins' => [
+				'travio_packages_geo' => [
+					'on' => 'package',
+					'join_field' => 'package',
+					'fields' => ['geo'],
+				],
+			],
+		]);
+
+		$ids = [];
+		foreach ($select as $row) {
+			if ($row['geo'] and !in_array($row['geo'], $ids))
+				$ids[] = $row['geo'];
+		}
+
+		return $ids ? $this->model->all('TravioGeo', [
+			'id' => ['IN', $ids],
+		], [
+			'order_by' => 'name',
+			'stream' => false,
+		]) : [];
+	}
 }
