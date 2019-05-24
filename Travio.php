@@ -254,7 +254,7 @@ class Travio extends Module
 	{
 		$options = array_merge([
 			'private' => true,
-			'enabled' => true,
+			'enabled' => false,
 		], $options);
 
 		$options['data'] = $data;
