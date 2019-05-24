@@ -6,8 +6,12 @@ use Model\TravioAssets\Elements\TravioService;
 
 class Travio extends Module
 {
+	/** @var array */
 	private $cartCache = null;
 
+	/**
+	 * @param array $options
+	 */
 	public function init(array $options)
 	{
 		if (!isset(Globals::$data['adminAdditionalPages']))
@@ -82,6 +86,12 @@ class Travio extends Module
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 	}
 
+	/**
+	 * @param string $request
+	 * @param array $payload
+	 * @param int|null $searchId
+	 * @return array
+	 */
 	public function request(string $request, array $payload = [], ?int $searchId = null): array
 	{
 		$get = [];
@@ -130,6 +140,11 @@ class Travio extends Module
 		return $decoded;
 	}
 
+	/**
+	 * @param string $request
+	 * @param array $get
+	 * @return string
+	 */
 	private function makeUrl(string $request, array $get = []): string
 	{
 		$config = $this->retrieveConfig();
@@ -149,6 +164,9 @@ class Travio extends Module
 		return $url;
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getSessionId(): string
 	{
 		if (!isset($_SESSION['sessionId'])) {
@@ -159,6 +177,10 @@ class Travio extends Module
 		return $_SESSION['sessionId'];
 	}
 
+	/**
+	 * @param array $result
+	 * @return TravioService
+	 */
 	public function getServiceFromResult(array $result): TravioService
 	{
 		$service = $this->model->one('TravioService', ['travio' => $result['id']]);
@@ -177,9 +199,7 @@ class Travio extends Module
 	 */
 	public function login(string $username, string $password)
 	{
-		if (array_key_exists('travio-login-cache', $_SESSION))
-			unset($_SESSION['travio-login-cache']);
-
+		$this->clearLoginCache();
 		$this->emptyCartCache();
 
 		return $this->request('login', [
@@ -210,12 +230,38 @@ class Travio extends Module
 	 */
 	public function logout(): bool
 	{
-		if (array_key_exists('travio-login-cache', $_SESSION))
-			unset($_SESSION['travio-login-cache']);
-
+		$this->clearLoginCache();
 		$this->emptyCartCache();
 
 		return $this->request('logout')['status'];
+	}
+
+	/**
+	 *
+	 */
+	public function clearLoginCache()
+	{
+		if (array_key_exists('travio-login-cache', $_SESSION))
+			unset($_SESSION['travio-login-cache']);
+	}
+
+	/**
+	 * @param array $data
+	 * @param array $options
+	 * @return array
+	 */
+	public function reg(array $data, array $options = []): array
+	{
+		$options = array_merge([
+			'private' => true,
+			'enabled' => true,
+		], $options);
+
+		$options['data'] = $data;
+		$response = $this->request('reg', $options);
+		$this->clearLoginCache();
+
+		return $response;
 	}
 
 	/**
