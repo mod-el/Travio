@@ -12,56 +12,60 @@ class TravioPackageBase extends Element
 			'type' => 'checkbox',
 		];
 
-		/*$this->has('tags', [
-			'table' => 'travio_services_tags',
-			'field' => 'service',
+		$this->has('tags', [
+			'table' => 'travio_packages_tags',
+			'field' => 'package',
 			'order_by' => 'id',
 		]);
 
 		$this->has('descriptions', [
-			'table' => 'travio_services_descriptions',
-			'field' => 'service',
+			'table' => 'travio_packages_descriptions',
+			'field' => 'package',
 			'order_by' => 'id',
 		]);
 
 		$this->has('photos', [
-			'table' => 'travio_services_photos',
-			'field' => 'service',
+			'table' => 'travio_packages_photos',
+			'field' => 'package',
 			'order_by' => 'id',
 		]);
 
 		$this->has('geo', [
 			'element' => 'TravioGeo',
 			'assoc' => [
-				'table' => 'travio_services_geo',
-				'parent' => 'service',
+				'table' => 'travio_packages_geo',
+				'parent' => 'package',
 				'field' => 'geo',
 			],
 		]);
 
-		$this->has('amenities', [
-			'table' => 'travio_services_amenities',
-			'field' => 'service',
+		$this->has('departures', [
+			'table' => 'travio_packages_departures',
+			'field' => 'package',
 		]);
 
 		$this->has('files', [
-			'table' => 'travio_services_files',
-			'field' => 'service',
+			'table' => 'travio_packages_files',
+			'field' => 'package',
 		]);
 
-		$this->has('videos', [
-			'table' => 'travio_services_videos',
-			'field' => 'service',
-		]);*/
+		$this->has('hotels', [
+			'element' => 'TravioService',
+			'assoc' => [
+				'table' => 'travio_packages_hotels',
+				'parent' => 'package',
+				'field' => 'hotel',
+			],
+		]);
 	}
 
 	public function getMainImg(): ?string
 	{
-		/*$photos = $this->photos;
+		$photos = $this->photos;
 		foreach ($photos as $photo) {
 			if ($photo['url'])
 				return $photo['url'];
-		}*/
+		}
 
 		return null;
 	}
