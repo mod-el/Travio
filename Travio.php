@@ -299,6 +299,15 @@ class Travio extends Module
 	/**
 	 * @return array
 	 */
+	public function emptyCart(): array
+	{
+		$this->emptyCartCache();
+		return $this->request('empty-cart');
+	}
+
+	/**
+	 * @return array
+	 */
 	public function getCart(): array
 	{
 		return $this->getCartCache();
