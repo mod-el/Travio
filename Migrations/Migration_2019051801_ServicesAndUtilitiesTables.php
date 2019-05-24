@@ -38,7 +38,7 @@ class Migration_2019051801_ServicesAndUtilitiesTables extends Migration
 		$this->addColumn('travio_services', 'travio', ['null' => false]);
 		$this->addColumn('travio_services', 'code', ['null' => false]);
 		$this->addColumn('travio_services', 'type', ['type' => 'int', 'null' => false]);
-		$this->addColumn('travio_services', 'type', ['type' => 'int']);
+		$this->addColumn('travio_services', 'typology', ['type' => 'int']);
 		$this->addColumn('travio_services', 'geo', ['type' => 'int']);
 		$this->addColumn('travio_services', 'classification');
 		$this->addColumn('travio_services', 'classification_level', ['type' => 'tinyint']);
