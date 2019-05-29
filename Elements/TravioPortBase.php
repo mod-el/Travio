@@ -6,6 +6,13 @@ class TravioPortBase extends Element
 {
 	public static $table = 'travio_ports';
 
+	public function init()
+	{
+		$this->settings['fields']['departure'] = [
+			'type' => 'checkbox',
+		];
+	}
+
 	public function getDestinations(): array
 	{
 		$select = $this->model->_Db->select_all('travio_packages_departures', [

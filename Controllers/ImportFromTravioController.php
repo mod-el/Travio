@@ -405,12 +405,15 @@ class ImportFromTravioController extends Controller
 									'id' => $item['id'],
 								], [
 									'code' => $item['code'],
+									'departure' => $item['departure'] ? 1 : 0,
+									// TODO: far scegliere in config cosa sovrascrivere e cosa no (tipo il name)
 								]);
 							} else {
 								$this->model->insert('travio_ports', [
 									'id' => $item['id'],
 									'code' => $item['code'],
 									'name' => $item['name'],
+									'departure' => $item['departure'] ? 1 : 0,
 								]);
 							}
 						}
@@ -449,12 +452,15 @@ class ImportFromTravioController extends Controller
 									'id' => $item['id'],
 								], [
 									'code' => $item['code'],
+									'departure' => $item['departure'] ? 1 : 0,
+									// TODO: far scegliere in config cosa sovrascrivere e cosa no (tipo il name)
 								]);
 							} else {
 								$this->model->insert('travio_airports', [
 									'id' => $item['id'],
 									'code' => $item['code'],
 									'name' => $item['name'],
+									'departure' => $item['departure'] ? 1 : 0,
 								]);
 							}
 						}
