@@ -30,6 +30,8 @@ class ImportFromTravioController extends Controller
 								'parent' => $item['parent'],
 								'parent_name' => $item['parent-name'],
 							]);
+
+							$this->model->_TravioAssets->importGeo($item['id']);
 						}
 					}
 					break;
@@ -176,6 +178,10 @@ class ImportFromTravioController extends Controller
 									}
 
 									$this->model->_Db->bulkInsert('travio_services_videos');
+
+									/***********************/
+
+									$this->model->_TravioAssets->importService($id, $serviceData['id']);
 
 									$this->model->_Db->commit();
 								} catch (\Exception $e) {
@@ -329,6 +335,10 @@ class ImportFromTravioController extends Controller
 										}
 									}
 
+									/***********************/
+
+									$this->model->_TravioAssets->importPackage($id, $packageData['id']);
+
 									$this->model->_Db->commit();
 								} catch (\Exception $e) {
 									$this->model->_Db->rollBack();
@@ -355,6 +365,8 @@ class ImportFromTravioController extends Controller
 							'type' => $item['type'],
 							'type_name' => $item['type-name'],
 						]);
+
+						$this->model->_TravioAssets->importTag($id);
 					}
 					break;
 				case 'amenities':
@@ -377,6 +389,8 @@ class ImportFromTravioController extends Controller
 							'name' => $item['name'],
 							'type' => $type,
 						]);
+
+						$this->model->_TravioAssets->importAmenity($id);
 					}
 					break;
 				case 'ports':
@@ -416,6 +430,8 @@ class ImportFromTravioController extends Controller
 									'departure' => $item['departure'] ? 1 : 0,
 								]);
 							}
+
+							$this->model->_TravioAssets->importPort($item['id']);
 						}
 					}
 
@@ -463,6 +479,8 @@ class ImportFromTravioController extends Controller
 									'departure' => $item['departure'] ? 1 : 0,
 								]);
 							}
+
+							$this->model->_TravioAssets->importAirport($item['id']);
 						}
 					}
 

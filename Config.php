@@ -34,6 +34,14 @@ $config = [
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
 			mkdir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities', 0777, true);
 
+		$this->checkFile('app/modules/TravioAssets/TravioAssets.php', '<?php namespace Model\\TravioAssets;
+
+use Model\\Travio\\TravioAssetsBase;
+
+class TravioAssets extends TravioAssetsBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioGeo.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioGeoBase;

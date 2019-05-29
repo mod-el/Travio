@@ -1,0 +1,34 @@
+<?php namespace Model\Travio;
+
+use Model\Core\Module;
+
+class TravioAssetsBase extends Module
+{
+	public function importGeo(int $geo)
+	{
+	}
+
+	public function importService(int $service, int $travio)
+	{
+	}
+
+	public function importPackage(int $package, int $travio)
+	{
+	}
+
+	public function importTag(int $tag)
+	{
+	}
+
+	public function importAmenity(int $amenity)
+	{
+	}
+
+	public function importPort(int $port)
+	{
+	}
+
+	public function importAirport(int $airport)
+	{
+	}
+}
