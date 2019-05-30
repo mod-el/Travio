@@ -8,13 +8,6 @@ class TravioAirportsBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioAirport',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'airports\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'R' => false,

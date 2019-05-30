@@ -8,13 +8,6 @@ class TravioAmenitiesBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioAmenity',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'amenities\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'R' => false,

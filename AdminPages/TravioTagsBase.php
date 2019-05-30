@@ -8,13 +8,6 @@ class TravioTagsBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioTag',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'tags\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'R' => false,

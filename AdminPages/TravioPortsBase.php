@@ -8,13 +8,6 @@ class TravioPortsBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioPort',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'ports\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'R' => false,

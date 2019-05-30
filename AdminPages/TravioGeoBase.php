@@ -8,13 +8,6 @@ class TravioGeoBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioGeo',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'geo\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'D' => false,

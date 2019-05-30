@@ -8,13 +8,6 @@ class TravioPackagesBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioPackage',
-			'actions' => [
-				'import' => [
-					'text' => 'Importa',
-					'fa-icon' => 'fas fa-file-import',
-					'action' => 'importFromTravio(\'packages\'); return false',
-				],
-			],
 			'privileges' => [
 				'C' => false,
 				'R' => false,

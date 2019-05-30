@@ -19,6 +19,8 @@ class Travio extends Module
 
 		Globals::$data['adminAdditionalPages'][] = [
 			'name' => 'Travio',
+			'page' => 'TravioImport',
+			'rule' => 'travio-import',
 			'sub' => [
 				[
 					'name' => 'Destinazioni',
