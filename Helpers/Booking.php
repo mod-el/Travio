@@ -67,7 +67,9 @@ class Booking extends Base
 				'operator' => 'OR',
 			],
 		];
-		$destinazioni = $this->model->_ORM->all('TravioGeo', $where);
+		$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
+			'order_by' => 'parent, lang!=' . $this->model->_Db->quote($this->model->_Multilang->lang),
+		]);
 
 		$where = [
 			'visible' => 1,
@@ -82,8 +84,12 @@ class Booking extends Base
 		$servizi = $this->model->_ORM->all('TravioService', $where);
 
 		$elements = [];
-		foreach ($destinazioni as $d)
-			$elements[] = $d;
+		foreach ($destinazioni as $d) {
+			if (!isset($elements['d' . $d['parent']]))
+				$elements['d' . $d['parent']] = $this->model->one('TravioGeo', $d['parent']);
+		}
+		$elements = array_values($elements);
+
 		foreach ($servizi as $s)
 			$elements[] = $s;
 
