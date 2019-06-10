@@ -6,6 +6,14 @@ class TravioGeoBase extends Element
 {
 	public static $table = 'travio_geo';
 
+	public function init()
+	{
+		$this->has('sub', [
+			'element' => 'TravioGeo',
+			'field' => 'parent',
+		]);
+	}
+
 	public function getAirports(): array
 	{
 		$select = $this->model->_Db->select_all('travio_packages_departures', [

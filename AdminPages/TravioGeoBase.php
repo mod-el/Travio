@@ -10,6 +10,7 @@ class TravioGeoBase extends AdminPage
 			'element' => 'TravioGeo',
 			'privileges' => [
 				'C' => false,
+				'R' => false,
 				'D' => false,
 			],
 		];
