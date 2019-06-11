@@ -15,6 +15,7 @@ class ImportFromTravioController extends Controller
 						$payload = [
 							'type' => 'geo',
 							'search-type' => $target['search'],
+							'all-langs' => true,
 						];
 
 						if (isset($target['type']))
