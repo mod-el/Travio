@@ -83,6 +83,7 @@ class ImportFromTravioController extends Controller
 										'lat' => $serviceData['lat'],
 										'lng' => $serviceData['lng'],
 										'address' => $serviceData['address'],
+										'notes' => $serviceData['notes'],
 										'price' => $serviceData['price'],
 										'min_date' => $serviceData['min_date'],
 										'max_date' => $serviceData['max_date'],
