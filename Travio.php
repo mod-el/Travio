@@ -14,6 +14,9 @@ class Travio extends Module
 	 */
 	public function init(array $options)
 	{
+		if (!$this->model->isLoaded('Multilang')) // La presenza di Multilang fra i moduli caricati è requisito fondamentale per il buon funzionamento di questo modulo
+			$this->model->load('Multilang');
+
 		if (!isset(Globals::$data['adminAdditionalPages']))
 			Globals::$data['adminAdditionalPages'] = [];
 
@@ -109,7 +112,7 @@ class Travio extends Module
 				$get['XDEBUG_SESSION_START'] = $_COOKIE['XDEBUG_SESSION'];
 		}
 
-		if ($this->model->isLoaded('Multilang') and !isset($payload['lang']))
+		if (!isset($payload['lang']))
 			$payload['lang'] = $this->model->_Multilang->lang;
 
 		$url = $this->makeUrl($request, $get);
