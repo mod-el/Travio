@@ -4,6 +4,11 @@ use Model\Core\Controller;
 
 class ImportFromTravioController extends Controller
 {
+	public function init()
+	{
+		$this->model->_Db->setQueryLimit('table', 0);
+	}
+
 	public function index()
 	{
 		$config = $this->model->_Travio->retrieveConfig();
