@@ -51,6 +51,7 @@ class ImportFromTravioController extends Controller
 
 						$payload = [
 							'type' => 'service',
+							'allow-external' => true,
 							'show-names' => true,
 						];
 
