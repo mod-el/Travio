@@ -8,7 +8,7 @@ class TravioAssetsBase extends Module
 	{
 	}
 
-	public function importService(int $service, int $travio)
+	public function importService(int $service, string $travio)
 	{
 	}
 
