@@ -6,6 +6,7 @@ class ImportFromTravioController extends Controller
 {
 	public function init()
 	{
+		$this->model->switchEvents(false);
 		$this->model->_Db->setQueryLimit('table', 0);
 	}
 
