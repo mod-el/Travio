@@ -144,6 +144,8 @@ class ImportFromTravioController extends Controller
 									/***********************/
 
 									foreach ($serviceData['geo'] as $geo) {
+										if (!$geo['id'])
+											continue;
 										$this->model->_Db->insert('travio_services_geo', [
 											'service' => $id,
 											'geo' => $geo['id'],
