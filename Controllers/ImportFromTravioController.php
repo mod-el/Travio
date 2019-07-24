@@ -203,9 +203,17 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					$this->model->_Db->update('travio_services', $presents ? [
-						'travio' => ['NOT IN', $presents],
-					] : [], ['visible' => 0], ['confirm' => true]);
+					if ($presents) {
+						$this->model->_Db->update('travio_services', [
+							'travio' => ['NOT IN', $presents],
+						], ['visible' => 0]);
+
+						$this->model->_Db->update('travio_services', [
+							'travio' => ['IN', $presents],
+						], ['visible' => 1]);
+					} else {
+						$this->model->_Db->update('travio_services', [], ['visible' => 0], ['confirm' => true]);
+					}
 					break;
 				case 'packages':
 					$presents = [];
@@ -359,9 +367,17 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					$this->model->_Db->update('travio_packages', $presents ? [
-						'travio' => ['NOT IN', $presents],
-					] : [], ['visible' => 0], ['confirm' => true]);
+					if ($presents) {
+						$this->model->_Db->update('travio_packages', [
+							'travio' => ['NOT IN', $presents],
+						], ['visible' => 0]);
+
+						$this->model->_Db->update('travio_packages', [
+							'travio' => ['IN', $presents],
+						], ['visible' => 1]);
+					} else {
+						$this->model->_Db->update('travio_packages', [], ['visible' => 0], ['confirm' => true]);
+					}
 					break;
 				case 'tags':
 					$list = $this->model->_Travio->request('static-data', [
