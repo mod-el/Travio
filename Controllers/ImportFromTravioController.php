@@ -61,7 +61,7 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							if (!$item['code'])
+							if (!$item['id'])
 								continue;
 
 							$presents[] = $item['id'];
@@ -70,7 +70,7 @@ class ImportFromTravioController extends Controller
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$serviceData = $this->model->_Travio->request('static-data', [
 									'type' => 'service',
-									'code' => $item['code'],
+									'id' => $item['id'],
 									'all-langs' => true,
 								])['data'];
 
@@ -223,7 +223,7 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							if (!$item['code'])
+							if (!$item['id'])
 								continue;
 
 							$presents[] = $item['id'];
@@ -232,7 +232,7 @@ class ImportFromTravioController extends Controller
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$packageData = $this->model->_Travio->request('static-data', [
 									'type' => 'package',
-									'code' => $item['code'],
+									'id' => $item['id'],
 									'all-langs' => true,
 								])['data'];
 
