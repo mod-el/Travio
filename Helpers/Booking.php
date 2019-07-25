@@ -19,7 +19,7 @@ class Booking extends Base
 				$id = 's' . $el['travio'];
 				if (!empty($el['geo'])) {
 					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
-					$text = ucwords(strtolower($el['name']) . ' | ' . $destinazione['nome'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
+					$text = ucwords(strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
 				} else {
 					$text = ucwords(strtolower($el['name']));
 				}
