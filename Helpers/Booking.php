@@ -10,18 +10,18 @@ class Booking extends Base
 			case 'Model\TravioAssets\Elements\TravioGeo':
 				$id = 'd' . $el['id'];
 				if (!empty($el['parent_name'])) {
-					$text = ucwords(strtolower($el['name'])) . ' | ' . ucwords(strtolower($el['parent_name']));
+					$text = ucwords(mb_strtolower($el['name'])) . ' | ' . ucwords(mb_strtolower($el['parent_name']));
 				} else {
-					$text = ucwords(strtolower($el['name']));
+					$text = ucwords(mb_strtolower($el['name']));
 				}
 				break;
 			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
 				if (!empty($el['geo'])) {
 					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
-					$text = ucwords(strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
+					$text = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
 				} else {
-					$text = ucwords(strtolower($el['name']));
+					$text = ucwords(mb_strtolower($el['name']));
 				}
 				break;
 			default:
@@ -94,28 +94,28 @@ class Booking extends Base
 			$elements[] = $s;
 
 		usort($elements, function ($a, $b) use ($query) {
-			$nomeA = strtolower($a['name']);
-			$nomeB = strtolower($b['name']);
-			$parentA = strtolower($a['parent_name'] ?? '');
-			$parentB = strtolower($b['parent_name'] ?? '');
+			$nomeA = mb_strtolower($a['name']);
+			$nomeB = mb_strtolower($b['name']);
+			$parentA = mb_strtolower($a['parent_name'] ?? '');
+			$parentB = mb_strtolower($b['parent_name'] ?? '');
 
 			if ($nomeA == $query) $va = 0;
 			elseif ($parentA == $query) $va = 1;
-			elseif (stripos($nomeA, $query) !== false) $va = 2;
-			elseif (stripos($nomeA, $query) === 0) $va = 3;
-			elseif (stripos($parentA, $query) === 0) $va = 4;
-			elseif (stripos($parentA, $query) !== false) $va = 5;
+			elseif (mb_stripos($nomeA, $query) !== false) $va = 2;
+			elseif (mb_stripos($nomeA, $query) === 0) $va = 3;
+			elseif (mb_stripos($parentA, $query) === 0) $va = 4;
+			elseif (mb_stripos($parentA, $query) !== false) $va = 5;
 			else $va = 6;
 
 			if ($nomeB == $query) $vb = 0;
 			elseif ($parentB == $query) $vb = 1;
-			elseif (stripos($nomeB, $query) !== false) $vb = 2;
-			elseif (stripos($nomeB, $query) === 0) $vb = 3;
-			elseif (stripos($parentB, $query) === 0) $vb = 4;
-			elseif (stripos($parentB, $query) !== false) $vb = 5;
+			elseif (mb_stripos($nomeB, $query) !== false) $vb = 2;
+			elseif (mb_stripos($nomeB, $query) === 0) $vb = 3;
+			elseif (mb_stripos($parentB, $query) === 0) $vb = 4;
+			elseif (mb_stripos($parentB, $query) !== false) $vb = 5;
 			else $vb = 6;
 
-			return $va <=> $vb ?: strlen($nomeA) <=> strlen($nomeB);
+			return $va <=> $vb ?: mb_strlen($nomeA) <=> mb_strlen($nomeB);
 		});
 
 		return $elements;
