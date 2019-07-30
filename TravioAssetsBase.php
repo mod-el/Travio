@@ -31,4 +31,8 @@ class TravioAssetsBase extends Module
 	public function importAirport(int $airport)
 	{
 	}
+
+	public function importStation(int $station)
+	{
+	}
 }

@@ -45,6 +45,13 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
+			Stazioni transfer
+		</div>
+		<div class="col-1" data-import="stations"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
 			Servizi
 		</div>
 		<div class="col-1" data-import="services"></div>

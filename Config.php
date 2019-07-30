@@ -30,6 +30,7 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
+			$this->model->_Multilang->checkAndInsertTable('travio_stations');
 		}
 
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
@@ -154,6 +155,22 @@ class TravioAmenity extends TravioAmenityBase
 use Model\\Travio\\AdminPages\\TravioAmenitiesBase;
 
 class TravioAmenities extends TravioAmenitiesBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioStation.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioStationBase;
+
+class TravioStation extends TravioStationBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioStations.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioStationsBase;
+
+class TravioStations extends TravioStationsBase
 {
 }
 ');

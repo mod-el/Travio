@@ -81,6 +81,13 @@ class Travio extends Module
 					'visualizer' => 'FormList',
 					'mobile-visualizer' => 'FormList',
 				],
+				[
+					'name' => 'Stazioni transfer',
+					'page' => 'TravioStations',
+					'rule' => 'travio-stations',
+					'visualizer' => 'Table',
+					'mobile-visualizer' => 'Table',
+				],
 			],
 		];
 

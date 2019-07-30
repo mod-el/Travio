@@ -518,6 +518,33 @@ class ImportFromTravioController extends Controller
 						}
 					}
 					break;
+				case 'stations':
+					foreach ($config['target-types'] as $target) {
+						if ($target['search'] !== 'service')
+							continue;
+
+						$payload = [
+							'type' => 'stations',
+							'all-langs' => true,
+						];
+
+						if (isset($target['type']))
+							$payload['service-type'] = $target['type'];
+
+						$list = $this->model->_Travio->request('static-data', $payload);
+
+						foreach ($list['list'] as $id => $item) {
+							$this->model->updateOrInsert('travio_stations', [
+								'id' => $id,
+							], [
+								'code' => $item['code'],
+								'name' => $item['name'],
+							]);
+
+							$this->model->_TravioAssets->importStation($item['id']);
+						}
+					}
+					break;
 				default:
 					$this->model->error('Unknown type');
 					break;
