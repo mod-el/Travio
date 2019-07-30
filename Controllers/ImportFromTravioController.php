@@ -519,6 +519,8 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'stations':
+					$presents = [];
+
 					foreach ($config['target-types'] as $target) {
 						if ($target['search'] !== 'service')
 							continue;
@@ -534,14 +536,31 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $id => $item) {
-							$this->model->updateOrInsert('travio_stations', [
-								'id' => $id,
-							], [
-								'code' => $item['code'],
-								'name' => $item['name'],
-							]);
+							$check = $this->model->select('travio_stations', $id);
 
-							$this->model->_TravioAssets->importStation($item['id']);
+							$presents[] = $id;
+
+							if ($check) {
+								$this->model->update('travio_stations', $id, [
+									'code' => $item['code'],
+									'name' => $item['name'],
+								]);
+							} else {
+								$this->model->insert('travio_stations', [
+									'id' => $id,
+									'code' => $item['code'],
+									'name' => $item['name'],
+								]);
+							}
+
+							$this->model->_TravioAssets->importStation($id);
+						}
+
+						foreach ($this->model->select_all('travio_stations', $presents ? ['id' => ['NOT IN', $presents]] : []) as $station) {
+							try {
+								$this->model->delete('travio_stations', $station['id']);
+							} catch (\Exception $e) {
+							}
 						}
 					}
 					break;
