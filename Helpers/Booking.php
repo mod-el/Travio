@@ -14,6 +14,7 @@ class Booking extends Base
 				} else {
 					$text = ucwords(mb_strtolower($el['name']));
 				}
+				$text = '<i class="fas fa-map-marker-alt"></i> ' . $text;
 				break;
 			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
@@ -23,6 +24,7 @@ class Booking extends Base
 				} else {
 					$text = ucwords(mb_strtolower($el['name']));
 				}
+				$text = '<i class="fas fa-hotel"></i> ' . $text;
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
@@ -32,6 +34,7 @@ class Booking extends Base
 				} else {
 					$text = ucwords(mb_strtolower($el['name']));
 				}
+				$text = '<i class="fas fa-plane-departure"></i> ' . $text;
 				break;
 			default:
 				die('Unknown type');
