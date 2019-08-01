@@ -254,6 +254,7 @@ class ImportFromTravioController extends Controller
 									], [
 										'code' => $packageData['code'],
 										'name' => $packageData['name'],
+										'type' => $packageData['type'],
 										'notes' => $packageData['notes'],
 //										'price' => $packageData['price'], // TODO: rendere gestibile nel config cosa viene sovrascritto all'update e cosa no
 										'geo' => $packageData['geo'][0]['id'] ?? null,

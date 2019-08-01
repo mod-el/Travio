@@ -24,6 +24,15 @@ class Booking extends Base
 					$text = ucwords(mb_strtolower($el['name']));
 				}
 				break;
+			case 'Model\TravioAssets\Elements\TravioPackage':
+				$id = 'p' . $el['travio'];
+				if (!empty($el['geo'])) {
+					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
+					$text = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
+				} else {
+					$text = ucwords(mb_strtolower($el['name']));
+				}
+				break;
 			default:
 				die('Unknown type');
 				break;
@@ -42,6 +51,9 @@ class Booking extends Base
 				case 's':
 					return $this->getItem($this->model->one('TravioService', ['travio' => substr($id, 1)]));
 					break;
+				case 'p':
+					return $this->getItem($this->model->one('TravioPackage', ['travio' => substr($id, 1)]));
+					break;
 				case 'd':
 					return $this->getItem($this->model->one('TravioGeo', substr($id, 1)));
 					break;
@@ -56,42 +68,98 @@ class Booking extends Base
 
 	public function getList(string $query, bool $is_popup = false): iterable
 	{
-		$where = [
-			[
-				'sub' => [
-					['name', 'LIKE', $query . '%'],
-					['parent_name', 'LIKE', $query . '%'],
-					['name', 'LIKE', '% ' . $query . '%'],
-					['parent_name', 'LIKE', '% ' . $query . '%'],
-				],
-				'operator' => 'OR',
-			],
-		];
-		$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
-			'order_by' => 'parent, lang!=' . $this->model->_Db->quote($this->model->_Multilang->lang),
-		]);
-
-		$where = [
-			'visible' => 1,
-			[
-				'sub' => [
-					['name', 'LIKE', $query . '%'],
-					['name', 'LIKE', '% ' . $query . '%'],
-				],
-				'operator' => 'OR',
-			],
-		];
-		$servizi = $this->model->_ORM->all('TravioService', $where);
+		$show = (isset($_POST['show']) and in_array($_POST['show'], ['geo', 'services', 'both'])) ? $_POST['show'] : 'both';
+		$type = isset($_POST['type']) ? explode('-', $_POST['type']) : [null, null];
+		if (count($type) !== 2)
+			return [];
 
 		$elements = [];
-		foreach ($destinazioni as $d) {
-			if (!isset($elements['d' . $d['parent']]))
-				$elements['d' . $d['parent']] = $this->model->one('TravioGeo', $d['parent']);
-		}
-		$elements = array_values($elements);
 
-		foreach ($servizi as $s)
-			$elements[] = $s;
+		if (in_array($show, ['geo', 'both'])) {
+			$where = [
+				[
+					'sub' => [
+						['name', 'LIKE', $query . '%'],
+						['parent_name', 'LIKE', $query . '%'],
+						['name', 'LIKE', '% ' . $query . '%'],
+						['parent_name', 'LIKE', '% ' . $query . '%'],
+					],
+					'operator' => 'OR',
+				],
+			];
+
+			$joins = [];
+
+			switch ($type[0]) {
+				case 'services':
+					$joins['travio_services_geo'] = [
+						'on' => 'parent',
+						'join_field' => 'geo',
+						'fields' => [],
+					];
+					if ($type[1]) {
+						$joins['travio_services'] = [
+							'full_on' => 'j0.service = j1.id AND j1.visible = 1',
+							'fields' => ['type'],
+						];
+						$where['type'] = $type[1];
+					}
+					break;
+				case 'packages':
+					$joins['travio_packages_geo'] = [
+						'on' => 'parent',
+						'join_field' => 'geo',
+						'fields' => [],
+					];
+					if ($type[1]) {
+						$joins['travio_packages'] = [
+							'full_on' => 'j0.package = j1.id AND j1.visible = 1',
+							'fields' => ['type'],
+						];
+						$where['type'] = $type[1];
+					}
+					break;
+			}
+
+			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
+				'order_by' => 'parent, lang!=' . $this->model->_Db->quote($this->model->_Multilang->lang),
+				'joins' => $joins,
+			]);
+
+			foreach ($destinazioni as $d) {
+				if (!isset($elements['d' . $d['parent']]))
+					$elements['d' . $d['parent']] = $this->model->one('TravioGeo', $d['parent']);
+			}
+			$elements = array_values($elements);
+		}
+
+		if (in_array($show, ['services', 'both'])) {
+			$where = [
+				'visible' => 1,
+				[
+					'sub' => [
+						['name', 'LIKE', $query . '%'],
+						['name', 'LIKE', '% ' . $query . '%'],
+					],
+					'operator' => 'OR',
+				],
+			];
+			if ($type[1])
+				$where['type'] = $type[1];
+
+			switch ($type[0]) {
+				case 'packages':
+					$packages = $this->model->_ORM->all('TravioPackage', $where);
+					foreach ($packages as $s)
+						$elements[] = $s;
+					break;
+				default:
+					$services = $this->model->_ORM->all('TravioService', $where);
+					foreach ($services as $s)
+						$elements[] = $s;
+					break;
+			}
+		}
 
 		usort($elements, function ($a, $b) use ($query) {
 			$nomeA = mb_strtolower($a['name']);
