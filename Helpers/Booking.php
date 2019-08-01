@@ -10,31 +10,31 @@ class Booking extends Base
 			case 'Model\TravioAssets\Elements\TravioGeo':
 				$id = 'd' . $el['id'];
 				if (!empty($el['parent_name'])) {
-					$text = ucwords(mb_strtolower($el['name'])) . ' | ' . ucwords(mb_strtolower($el['parent_name']));
+					$plainText = ucwords(mb_strtolower($el['name'])) . ' | ' . ucwords(mb_strtolower($el['parent_name']));
 				} else {
-					$text = ucwords(mb_strtolower($el['name']));
+					$plainText = ucwords(mb_strtolower($el['name']));
 				}
-				$text = '<i class="fas fa-map-marker-alt"></i> ' . $text;
+				$text = '<i class="fas fa-map-marker-alt"></i> ' . entities($plainText);
 				break;
 			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
 				if (!empty($el['geo'])) {
 					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
-					$text = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
+					$plainText = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
 				} else {
-					$text = ucwords(mb_strtolower($el['name']));
+					$plainText = ucwords(mb_strtolower($el['name']));
 				}
-				$text = '<i class="fas fa-hotel"></i> ' . $text;
+				$text = '<i class="fas fa-hotel"></i> ' . entities($plainText);
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
 				if (!empty($el['geo'])) {
 					$destinazione = $this->model->_ORM->one('TravioGeo', $el['geo']);
-					$text = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
+					$plainText = ucwords(mb_strtolower($el['name']) . ' | ' . $destinazione['name'] . ($destinazione['parent_name'] ? ' | ' . $destinazione['parent_name'] : ''));
 				} else {
-					$text = ucwords(mb_strtolower($el['name']));
+					$plainText = ucwords(mb_strtolower($el['name']));
 				}
-				$text = '<i class="fas fa-plane-departure"></i> ' . $text;
+				$text = '<i class="fas fa-plane-departure"></i> ' . entities($plainText);
 				break;
 			default:
 				die('Unknown type');
@@ -44,6 +44,7 @@ class Booking extends Base
 		return [
 			'id' => $id,
 			'text' => $text,
+			'plainText' => $plainText,
 		];
 	}
 
