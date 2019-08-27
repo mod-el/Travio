@@ -10,7 +10,7 @@ class TravioServicesBase extends AdminPage
 			'element' => 'TravioService',
 			'privileges' => [
 				'C' => false,
-				'R' => false,
+				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-services.php'),
 				'D' => DEBUG_MODE,
 			],
 			'order_by' => 'code',
