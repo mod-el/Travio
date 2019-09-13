@@ -31,6 +31,7 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_packages');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_stations');
+			$this->model->_Multilang->checkAndInsertTable('travio_amenities');
 		}
 
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))

@@ -400,6 +400,7 @@ class ImportFromTravioController extends Controller
 				case 'amenities':
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'amenities',
+						'all-langs' => true,
 					]);
 
 					foreach ($list['list'] as $id => $item) {
