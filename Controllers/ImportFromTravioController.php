@@ -352,6 +352,7 @@ class ImportFromTravioController extends Controller
 												'hotel' => $this->model->select('travio_services', ['code' => $hotel['code']], 'id'),
 											]);
 										} catch (\Exception $e) {
+											$this->model->error('L\'hotel ' . $hotel['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
 										}
 									}
 
