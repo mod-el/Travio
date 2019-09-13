@@ -36,6 +36,11 @@ class Booking extends Base
 				}
 				$text = '<i class="fas fa-plane-departure"></i> ' . entities($plainText);
 				break;
+			case 'Model\TravioAssets\Elements\TravioTag':
+				$id = 't' . $el['id'];
+				$plainText = ucwords(mb_strtolower($el['name']));
+				$text = '<i class="fas fa-tag"></i> ' . entities($plainText);
+				break;
 			default:
 				die('Unknown type');
 				break;
@@ -60,6 +65,9 @@ class Booking extends Base
 					break;
 				case 'd':
 					return $this->getItem($this->model->one('TravioGeo', substr($id, 1)));
+					break;
+				case 't':
+					return $this->getItem($this->model->one('TravioTag', substr($id, 1)));
 					break;
 			}
 		}
