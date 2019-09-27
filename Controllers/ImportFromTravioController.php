@@ -66,7 +66,10 @@ class ImportFromTravioController extends Controller
 
 							$presents[] = $item['id'];
 
-							$check = $this->model->select('travio_services', ['travio' => $item['id']]);
+							$check = $this->model->select('travio_services', ['travio' => $item['id']], [
+								'auto_ml' => false,
+								'auto-join-linked-tables' => false,
+							]);
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$serviceData = $this->model->_Travio->request('static-data', [
 									'type' => 'service',
@@ -77,9 +80,7 @@ class ImportFromTravioController extends Controller
 								try {
 									$this->model->_Db->beginTransaction();
 
-									$id = $this->model->updateOrInsert('travio_services', [
-										'travio' => $serviceData['id'],
-									], [
+									$data = [
 										'code' => $serviceData['code'],
 										'name' => $serviceData['name'],
 										'type' => $serviceData['type'],
@@ -99,9 +100,17 @@ class ImportFromTravioController extends Controller
 										'max_date' => $serviceData['max_date'],
 										'visible' => 1,
 										'last_update' => $item['last_update'],
-									]);
+									];
 
 									if ($check) {
+										foreach (($config['override-on-import']['services'] ?? []) as $k => $override) {
+											if (!$override)
+												unset($data[$k]);
+										}
+
+										$id = $check['id'];
+										$this->model->update('travio_services', $id, $data);
+
 										$this->model->_Db->delete('travio_services_tags', ['service' => $id]);
 										$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
 										$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
@@ -109,7 +118,12 @@ class ImportFromTravioController extends Controller
 										$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
 										$this->model->_Db->delete('travio_services_files', ['service' => $id]);
 										$this->model->_Db->delete('travio_services_videos', ['service' => $id]);
+									} else {
+										$data['travio'] = $serviceData['id'];
+										$id = $this->model->insert('travio_services', $data);
 									}
+
+									/***********************/
 
 									foreach ($serviceData['tags'] as $tag) {
 										$this->model->_Db->insert('travio_services_tags', [
@@ -241,7 +255,10 @@ class ImportFromTravioController extends Controller
 
 							$presents[] = $item['id'];
 
-							$check = $this->model->select('travio_packages', ['travio' => $item['id']]);
+							$check = $this->model->select('travio_packages', ['travio' => $item['id']], [
+								'auto_ml' => false,
+								'auto-join-linked-tables' => false,
+							]);
 							if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
 								$packageData = $this->model->_Travio->request('static-data', [
 									'type' => 'package',
@@ -252,20 +269,26 @@ class ImportFromTravioController extends Controller
 								try {
 									$this->model->_Db->beginTransaction();
 
-									$id = $this->model->updateOrInsert('travio_packages', [
-										'travio' => $packageData['id'],
-									], [
+									$data = [
 										'code' => $packageData['code'],
 										'name' => $packageData['name'],
 										'type' => $packageData['type'],
 										'notes' => $packageData['notes'],
-//										'price' => $packageData['price'], // TODO: rendere gestibile nel config cosa viene sovrascritto all'update e cosa no
+										'price' => $packageData['price'],
 										'geo' => $packageData['geo'][0]['id'] ?? null,
 										'visible' => 1,
 										'last_update' => $item['last_update'],
-									]);
+									];
 
 									if ($check) {
+										foreach (($config['override-on-import']['packages'] ?? []) as $k => $override) {
+											if (!$override)
+												unset($data[$k]);
+										}
+
+										$id = $check['id'];
+										$this->model->update('travio_packages', $id, $data);
+
 										$this->model->_Db->delete('travio_packages_tags', ['package' => $id]);
 										$this->model->_Db->delete('travio_packages_descriptions', ['package' => $id]);
 										$this->model->_Db->delete('travio_packages_photos', ['package' => $id]);
@@ -273,7 +296,12 @@ class ImportFromTravioController extends Controller
 										$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
 										$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
 										$this->model->_Db->delete('travio_packages_hotels', ['package' => $id]);
+									} else {
+										$data['travio'] = $packageData['id'];
+										$id = $this->model->insert('travio_packages', $data);
 									}
+
+									/***********************/
 
 									foreach ($packageData['tags'] as $tag) {
 										$this->model->_Db->insert('travio_packages_tags', [
@@ -441,20 +469,26 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							$check = $this->model->select('travio_ports', [
-								'id' => $item['id'],
+							$check = $this->model->select('travio_ports', $item['id'], [
+								'auto_ml' => false,
+								'auto-join-linked-tables' => false,
 							]);
 
 							$presents[] = $item['id'];
 
 							if ($check) {
-								$this->model->update('travio_ports', [
-									'id' => $item['id'],
-								], [
+								$data = [
 									'code' => $item['code'],
+									'name' => $item['name'],
 									'departure' => $item['departure'] ? 1 : 0,
-									// TODO: far scegliere in config cosa sovrascrivere e cosa no (tipo il name)
-								]);
+								];
+
+								foreach (($config['override-on-import']['ports'] ?? []) as $k => $override) {
+									if (!$override)
+										unset($data[$k]);
+								}
+
+								$this->model->update('travio_ports', $item['id'], $data);
 							} else {
 								$this->model->insert('travio_ports', [
 									'id' => $item['id'],
@@ -490,20 +524,26 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							$check = $this->model->select('travio_airports', [
-								'id' => $item['id'],
+							$check = $this->model->select('travio_airports', $item['id'], [
+								'auto_ml' => false,
+								'auto-join-linked-tables' => false,
 							]);
 
 							$presents[] = $item['id'];
 
 							if ($check) {
-								$this->model->update('travio_airports', [
-									'id' => $item['id'],
-								], [
+								$data = [
 									'code' => $item['code'],
+									'name' => $item['name'],
 									'departure' => $item['departure'] ? 1 : 0,
-									// TODO: far scegliere in config cosa sovrascrivere e cosa no (tipo il name)
-								]);
+								];
+
+								foreach (($config['override-on-import']['airports'] ?? []) as $k => $override) {
+									if (!$override)
+										unset($data[$k]);
+								}
+
+								$this->model->update('travio_airports', $item['id'], $data);
 							} else {
 								$this->model->insert('travio_airports', [
 									'id' => $item['id'],
@@ -542,15 +582,25 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $id => $item) {
-							$check = $this->model->select('travio_stations', $id);
+							$check = $this->model->select('travio_stations', $id, [
+								'auto_ml' => false,
+								'auto-join-linked-tables' => false,
+							]);
 
 							$presents[] = $id;
 
 							if ($check) {
-								$this->model->update('travio_stations', $id, [
+								$data = [
 									'code' => $item['code'],
 									'name' => $item['name'],
-								]);
+								];
+
+								foreach (($config['override-on-import']['stations'] ?? []) as $k => $override) {
+									if (!$override)
+										unset($data[$k]);
+								}
+
+								$this->model->update('travio_stations', $id, $data);
 							} else {
 								$this->model->insert('travio_stations', [
 									'id' => $id,

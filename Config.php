@@ -20,6 +20,31 @@ $config = [
 		],
 	],
 	\'dev\' => true,
+	\'override-on-import\' => [
+		\'services\' => [
+			\'price\' => true,
+			\'classification\' => true,
+			\'classification_level\' => true,
+			\'min_date\' => true,
+			\'max_date\' => true,
+			\'lat\' => true,
+			\'lng\' => true,
+		],
+		\'packages\' => [
+			\'price\' => true,
+		],
+		\'airports\' => [
+			\'name\' => true,
+			\'departure\' => true,
+		],
+		\'ports\' => [
+			\'name\' => true,
+			\'departure\' => true,
+		],
+		\'stations\' => [
+			\'name\' => true,
+		],
+	],
 ];
 ';
 		});
@@ -190,5 +215,44 @@ class TravioStations extends TravioStationsBase
 				'ImportFromTravio',
 			],
 		];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function makeCache(): bool
+	{
+		$config = $this->retrieveConfig();
+		if ($config and !isset($config['override-on-import'])) {
+			$config['override-on-import'] = [
+				'services' => [
+					'price' => true,
+					'classification' => true,
+					'classification_level' => true,
+					'min_date' => true,
+					'max_date' => true,
+					'lat' => true,
+					'lng' => true,
+				],
+				'packages' => [
+					'price' => true,
+				],
+				'airports' => [
+					'name' => true,
+					'departure' => true,
+				],
+				'ports' => [
+					'name' => true,
+					'departure' => true,
+				],
+				'stations' => [
+					'name' => true,
+				],
+			];
+
+			$this->saveConfig('config', $config);
+		}
+
+		return true;
 	}
 }
