@@ -17,12 +17,18 @@ class TravioPortBase extends Element
 	{
 		$select = $this->model->_Db->select_all('travio_packages_departures', [
 			'departure_port' => $this['id'],
+			'visible' => 1,
 		], [
 			'joins' => [
 				'travio_packages_geo' => [
 					'on' => 'package',
 					'join_field' => 'package',
 					'fields' => ['geo'],
+				],
+				'travio_packages' => [
+					'on' => 'package',
+					'join_field' => 'id',
+					'fields' => ['visible'],
 				],
 			],
 		]);
