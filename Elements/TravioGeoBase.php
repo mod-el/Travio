@@ -19,12 +19,18 @@ class TravioGeoBase extends Element
 		$select = $this->model->_Db->select_all('travio_packages_departures', [
 			'geo' => $this['id'],
 			'departure_airport' => ['!=', null],
+			'visible' => 1,
 		], [
 			'joins' => [
 				'travio_packages_geo' => [
 					'on' => 'package',
 					'join_field' => 'package',
 					'fields' => ['geo'],
+				],
+				'travio_packages' => [
+					'on' => 'package',
+					'join_field' => 'id',
+					'fields' => ['visible'],
 				],
 			],
 		]);
@@ -48,12 +54,18 @@ class TravioGeoBase extends Element
 		$select = $this->model->_Db->select_all('travio_packages_departures', [
 			'geo' => $this['id'],
 			'departure_port' => ['!=', null],
+			'visible' => 1,
 		], [
 			'joins' => [
 				'travio_packages_geo' => [
 					'on' => 'package',
 					'join_field' => 'package',
 					'fields' => ['geo'],
+				],
+				'travio_packages' => [
+					'on' => 'package',
+					'join_field' => 'id',
+					'fields' => ['visible'],
 				],
 			],
 		]);
