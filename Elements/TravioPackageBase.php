@@ -22,6 +22,11 @@ class TravioPackageBase extends Element
 			'table' => 'travio_packages_descriptions',
 			'field' => 'package',
 			'order_by' => 'id',
+			'fields' => [
+				'text' => [
+					'type' => 'ckeditor',
+				],
+			],
 		]);
 
 		$this->has('photos', [

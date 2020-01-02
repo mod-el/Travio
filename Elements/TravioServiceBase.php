@@ -42,6 +42,11 @@ class TravioServiceBase extends Element
 			'table' => 'travio_services_descriptions',
 			'field' => 'service',
 			'order_by' => 'id',
+			'fields' => [
+				'text' => [
+					'type' => 'ckeditor',
+				],
+			],
 		]);
 
 		$this->has('photos', [
