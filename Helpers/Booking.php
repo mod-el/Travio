@@ -6,6 +6,8 @@ class Booking extends Base
 {
 	public function getItem($el): array
 	{
+		$fill = [];
+
 		switch (get_class($el)) {
 			case 'Model\TravioAssets\Elements\TravioGeo':
 				$id = 'd' . $el['id'];
@@ -25,6 +27,24 @@ class Booking extends Base
 					$plainText = ucwords(mb_strtolower($el['name']));
 				}
 				$text = '<i class="fas fa-hotel"></i> ' . entities($plainText);
+
+				$dates = [];
+				if ($el['min_date']) {
+					$today = date_create();
+					$minDate = date_create($el['min_date']);
+					if ($minDate < $today)
+						$minDate = $today;
+
+					$dates['min'] = $minDate->format('Y-m-d');
+
+					if ($el['max_date']) {
+						$maxDate = date_create($el['max_date']);
+						if ($maxDate >= $minDate)
+							$dates['max'] = $maxDate->format('Y-m-d');
+					}
+				}
+				if($dates)
+					$fill['travioDates'] = json_encode($dates);
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
@@ -50,6 +70,7 @@ class Booking extends Base
 			'id' => $id,
 			'text' => $text,
 			'plainText' => $plainText,
+			'fill' => $fill,
 		];
 	}
 
