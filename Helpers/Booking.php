@@ -7,6 +7,7 @@ class Booking extends Base
 	public function getItem($el): array
 	{
 		$fill = [];
+		$dates = [];
 
 		switch (get_class($el)) {
 			case 'Model\TravioAssets\Elements\TravioGeo':
@@ -17,6 +18,42 @@ class Booking extends Base
 					$plainText = ucwords(mb_strtolower($el['name']));
 				}
 				$text = '<i class="fas fa-map-marker-alt"></i> ' . entities($plainText);
+
+				$services = $this->model->select_all('travio_services', ['join_geo' => $el['id']], [
+					'joins' => [
+						'travio_services_geo' => [
+							'on' => 'id',
+							'join_field' => 'service',
+							'fields' => ['geo' => 'join_geo'],
+						],
+					],
+				]);
+
+				$today = date_create();
+				$totalMinDate = null;
+				$totalMaxDate = null;
+
+				foreach ($services as $service) {
+					if ($service['min_date']) {
+						$minDate = date_create($service['min_date']);
+						if ($minDate < $today)
+							$minDate = $today;
+
+						if ($totalMinDate === null or $minDate < $totalMinDate)
+							$totalMinDate = $minDate;
+
+						if ($service['max_date']) {
+							$maxDate = date_create($service['max_date']);
+							if ($totalMaxDate === null or $maxDate > $totalMaxDate)
+								$totalMaxDate = $maxDate;
+						}
+					}
+				}
+
+				if ($totalMinDate and $totalMaxDate) {
+					$dates['min'] = $totalMinDate->format('Y-m-d');
+					$dates['max'] = $totalMaxDate->format('Y-m-d');
+				}
 				break;
 			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
@@ -28,7 +65,6 @@ class Booking extends Base
 				}
 				$text = '<i class="fas fa-hotel"></i> ' . entities($plainText);
 
-				$dates = [];
 				if ($el['min_date']) {
 					$today = date_create();
 					$minDate = date_create($el['min_date']);
@@ -43,8 +79,6 @@ class Booking extends Base
 							$dates['max'] = $maxDate->format('Y-m-d');
 					}
 				}
-				if($dates)
-					$fill['travioDates'] = json_encode($dates);
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
@@ -60,11 +94,50 @@ class Booking extends Base
 				$id = 't' . $el['id'];
 				$plainText = ucwords(mb_strtolower($el['name']));
 				$text = '<i class="fas fa-tag"></i> ' . entities($plainText);
+
+				$services = $this->model->select_all('travio_services', ['tag' => ['LIKE', $el['name']]], [
+					'joins' => [
+						'travio_services_tags' => [
+							'on' => 'id',
+							'join_field' => 'service',
+							'fields' => ['tag'],
+						],
+					],
+				]);
+
+				$today = date_create();
+				$totalMinDate = null;
+				$totalMaxDate = null;
+
+				foreach ($services as $service) {
+					if ($service['min_date']) {
+						$minDate = date_create($service['min_date']);
+						if ($minDate < $today)
+							$minDate = $today;
+
+						if ($totalMinDate === null or $minDate < $totalMinDate)
+							$totalMinDate = $minDate;
+
+						if ($service['max_date']) {
+							$maxDate = date_create($service['max_date']);
+							if ($totalMaxDate === null or $maxDate > $totalMaxDate)
+								$totalMaxDate = $maxDate;
+						}
+					}
+				}
+
+				if ($totalMinDate and $totalMaxDate) {
+					$dates['min'] = $totalMinDate->format('Y-m-d');
+					$dates['max'] = $totalMaxDate->format('Y-m-d');
+				}
 				break;
 			default:
 				die('Unknown type');
 				break;
 		}
+
+		if ($dates)
+			$fill['travioDates'] = json_encode($dates);
 
 		return [
 			'id' => $id,
