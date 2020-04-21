@@ -22,6 +22,7 @@ $config = [
 	\'dev\' => true,
 	\'override-on-import\' => [
 		\'services\' => [
+			\'name\' => true,
 			\'price\' => true,
 			\'classification\' => true,
 			\'classification_level\' => true,
@@ -31,6 +32,7 @@ $config = [
 			\'lng\' => true,
 		],
 		\'packages\' => [
+			\'name\' => true,
 			\'price\' => true,
 		],
 		\'airports\' => [
@@ -226,6 +228,7 @@ class TravioStations extends TravioStationsBase
 		if ($config and !isset($config['override-on-import'])) {
 			$config['override-on-import'] = [
 				'services' => [
+					'name' => true,
 					'price' => true,
 					'classification' => true,
 					'classification_level' => true,
@@ -235,6 +238,7 @@ class TravioStations extends TravioStationsBase
 					'lng' => true,
 				],
 				'packages' => [
+					'name' => true,
 					'price' => true,
 				],
 				'airports' => [
