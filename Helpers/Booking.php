@@ -150,7 +150,7 @@ class Booking extends Base
 	public function getItemFromId($id): array
 	{
 		if ($id !== null) {
-			switch ($id{0}) {
+			switch ($id[0]) {
 				case 's':
 					return $this->getItem($this->model->one('TravioService', ['travio' => substr($id, 1)]));
 					break;
