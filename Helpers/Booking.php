@@ -199,13 +199,16 @@ class Booking extends Base
 			switch ($type[0]) {
 				case 'services':
 					$joins['travio_services_geo'] = [
+						'alias' => 'tsg',
 						'on' => 'parent',
 						'join_field' => 'geo',
 						'fields' => [],
 					];
+
 					if ($type[1]) {
 						$joins['travio_services'] = [
-							'full_on' => 'j0.service = j1.id AND j1.visible = 1',
+							'alias' => 'ts',
+							'full_on' => 'tsg.service = ts.id AND ts.visible = 1',
 							'fields' => ['type'],
 						];
 						$where['type'] = $type[1];
@@ -213,18 +216,32 @@ class Booking extends Base
 					break;
 				case 'packages':
 					$joins['travio_packages_geo'] = [
+						'alias' => 'tpg',
 						'on' => 'parent',
 						'join_field' => 'geo',
 						'fields' => [],
 					];
+
 					if ($type[1]) {
 						$joins['travio_packages'] = [
-							'full_on' => 'j0.package = j1.id AND j1.visible = 1',
+							'alias' => 'tp',
+							'full_on' => 'tpg.package = tp.id AND tp.visible = 1',
 							'fields' => ['type'],
 						];
 						$where['type'] = $type[1];
 					}
 					break;
+			}
+
+			if (isset($_POST['geo-parent'])) {
+				$joins['travio_geo_parents'] = [
+					'type' => 'LEFT',
+					'alias' => 'tgp',
+					'on' => 'parent',
+					'join_field' => 'geo',
+					'fields' => [],
+				];
+				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR t.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
 			}
 
 			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
@@ -253,14 +270,40 @@ class Booking extends Base
 			if ($type[1])
 				$where['type'] = $type[1];
 
+			$joins = [];
+			if (isset($_POST['geo-parent'])) {
+				switch ($type[0]) {
+					case 'packages':
+						$joins['travio_packages_geo'] = [
+							'alias' => 'tpg',
+							'on' => 'id',
+							'join_field' => 'package',
+							'fields' => [],
+						];
+
+						$where[] = 'tpg.geo = ' . $this->model->_Db->quote($_POST['geo-parent']);
+						break;
+					default:
+						$joins['travio_services_geo'] = [
+							'alias' => 'tsg',
+							'on' => 'id',
+							'join_field' => 'service',
+							'fields' => [],
+						];
+
+						$where[] = 'tsg.geo = ' . $this->model->_Db->quote($_POST['geo-parent']);
+						break;
+				}
+			}
+
 			switch ($type[0]) {
 				case 'packages':
-					$packages = $this->model->_ORM->all('TravioPackage', $where);
+					$packages = $this->model->_ORM->all('TravioPackage', $where, ['joins' => $joins]);
 					foreach ($packages as $s)
 						$elements[] = $s;
 					break;
 				default:
-					$services = $this->model->_ORM->all('TravioService', $where);
+					$services = $this->model->_ORM->all('TravioService', $where, ['joins' => $joins]);
 					foreach ($services as $s)
 						$elements[] = $s;
 					break;

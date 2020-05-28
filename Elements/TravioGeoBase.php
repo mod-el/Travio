@@ -12,6 +12,11 @@ class TravioGeoBase extends Element
 			'element' => 'TravioGeo',
 			'field' => 'parent',
 		]);
+
+		$this->belongsTo('TravioGeo', [
+			'field' => 'parent',
+			'children' => 'sub',
+		]);
 	}
 
 	public function getAirports(): array

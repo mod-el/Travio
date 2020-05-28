@@ -41,6 +41,26 @@ class ImportFromTravioController extends Controller
 							$this->model->_TravioAssets->importGeo($item['id']);
 						}
 					}
+
+					$this->model->delete('travio_geo_parents', [], ['confirm' => true]);
+
+					foreach ($this->model->all('TravioGeo') as $geo) {
+						$parents = [];
+						$el = clone $geo;
+						while ($el['parent']) {
+							$parents[] = $el['parent'];
+							$el = $el->parent;
+						}
+
+						foreach ($parents as $parent) {
+							$this->model->insert('travio_geo_parents', [
+								'geo' => $geo['id'],
+								'parent' => $parent,
+							], [
+								'defer' => 100,
+							]);
+						}
+					}
 					break;
 				case 'services':
 					$presents = [];
