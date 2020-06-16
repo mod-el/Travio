@@ -179,7 +179,7 @@ class Travio extends Module
 	/**
 	 * @return string
 	 */
-	private function getSessionId(): string
+	public function getSessionId(): string
 	{
 		if (!isset($_SESSION['sessionId'])) {
 			$response = $this->request('get-session-id');
@@ -187,6 +187,14 @@ class Travio extends Module
 		}
 
 		return $_SESSION['sessionId'];
+	}
+
+	/**
+	 * @param string $code
+	 */
+	public function setSessionId(string $code)
+	{
+		$_SESSION['sessionId'] = $code;
 	}
 
 	/**
