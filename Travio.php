@@ -2,6 +2,7 @@
 
 use Model\Core\Globals;
 use Model\Core\Module;
+use Model\TravioAssets\Elements\TravioOrder;
 use Model\TravioAssets\Elements\TravioService;
 
 class Travio extends Module
@@ -369,6 +370,28 @@ class Travio extends Module
 			$this->model->error('Errore durante la comunicazione API col sistema.');
 
 		return $ordine;
+	}
+
+	/**
+	 * @param array $pax
+	 * @param bool $instantConfirmation
+	 * @param string|null $gateway
+	 * @param array $options
+	 * @return TravioOrder
+	 */
+	public function placeOrder(array $pax, bool $instantConfirmation = false, ?string $gateway = null, array $options = []): TravioOrder
+	{
+		$data = $this->book($pax, $instantConfirmation, $options);
+
+		$order = $this->model->_ORM->create('TravioOrder');
+		$order->save([
+			'reference' => $data['reference'],
+			'amount' => (float)$data['amount'],
+			'date' => date('Y-m-d H:i:s'),
+			'gateway' => $gateway,
+		]);
+
+		return $order;
 	}
 
 	/**

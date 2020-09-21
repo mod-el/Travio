@@ -202,6 +202,7 @@ class TravioStations extends TravioStationsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
 	}
 
 	/**
