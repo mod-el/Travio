@@ -4,11 +4,9 @@ use Model\Admin\AdminPage;
 
 class TravioImport extends AdminPage
 {
-	public function viewOptions(): array
+	public function customize()
 	{
-		return [
-			'template-module' => 'Travio',
-			'template' => 'travio-import',
-		];
+		$this->model->viewOptions['template-module'] = 'Travio';
+		$this->model->viewOptions['template'] = 'travio-import';
 	}
 }
