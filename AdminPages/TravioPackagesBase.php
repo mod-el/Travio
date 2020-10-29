@@ -14,13 +14,7 @@ class TravioPackagesBase extends AdminPage
 				'D' => DEBUG_MODE,
 			],
 			'order_by' => 'code',
-		];
-	}
-
-	public function visualizerOptions(): array
-	{
-		return [
-			'columns' => [
+			'fields' => [
 				'travio',
 				'code',
 				'name',

@@ -13,13 +13,7 @@ class TravioStationsBase extends AdminPage
 				'R' => false,
 				'D' => false,
 			],
-		];
-	}
-
-	public function visualizerOptions(): array
-	{
-		return [
-			'columns' => [
+			'fields' => [
 				'code',
 				'name',
 			],

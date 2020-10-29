@@ -13,13 +13,7 @@ class TravioGeoBase extends AdminPage
 				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-geo.php'),
 				'D' => false,
 			],
-		];
-	}
-
-	public function visualizerOptions(): array
-	{
-		return [
-			'columns' => [
+			'fields' => [
 				'name',
 				'parent_name',
 			],

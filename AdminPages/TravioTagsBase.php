@@ -13,17 +13,11 @@ class TravioTagsBase extends AdminPage
 				'R' => false,
 				'D' => false,
 			],
-			'order_by' => 'type_name, name',
-		];
-	}
-
-	public function visualizerOptions(): array
-	{
-		return [
-			'columns' => [
+			'fields' => [
 				'type_name',
 				'name',
 			],
+			'order_by' => 'type_name, name',
 		];
 	}
 }
