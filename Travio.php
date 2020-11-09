@@ -327,6 +327,20 @@ class Travio extends Module
 	}
 
 	/**
+	 * @param string $index
+	 * @param bool $add
+	 * @return array
+	 */
+	public function optionalService(string $index, bool $add): array
+	{
+		$this->emptyCartCache();
+		return $this->request('optional-service', [
+			'index' => $index,
+			'add' => $add,
+		]);
+	}
+
+	/**
 	 * @return array
 	 */
 	public function getCart(): array
