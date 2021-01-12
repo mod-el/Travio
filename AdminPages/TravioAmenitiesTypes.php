@@ -12,6 +12,7 @@ class TravioAmenitiesTypes extends AdminPage
 				'C' => false,
 				'D' => false,
 			],
+			'visualizer' => 'FormList',
 		];
 	}
 
