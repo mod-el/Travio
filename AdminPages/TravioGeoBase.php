@@ -8,6 +8,7 @@ class TravioGeoBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioGeo',
+			'visualizer' => 'Tree',
 			'privileges' => [
 				'C' => false,
 				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-geo.php'),
@@ -15,7 +16,6 @@ class TravioGeoBase extends AdminPage
 			],
 			'fields' => [
 				'name',
-				'parent_name',
 			],
 		];
 	}
