@@ -145,10 +145,10 @@ class ImportFromTravioController extends Controller
 
 									/***********************/
 
-									foreach ($serviceData['tags'] as $tag) {
+									foreach ($serviceData['tags'] as $tagId => $tag) {
 										$this->model->_Db->insert('travio_services_tags', [
 											'service' => $id,
-											'tag' => $tag,
+											'tag' => $tagId,
 										], ['defer' => true]);
 									}
 
@@ -323,10 +323,10 @@ class ImportFromTravioController extends Controller
 
 									/***********************/
 
-									foreach ($packageData['tags'] as $tag) {
+									foreach ($packageData['tags'] as $tagId => $tag) {
 										$this->model->_Db->insert('travio_packages_tags', [
 											'package' => $id,
-											'tag' => $tag,
+											'tag' => $tagId,
 										], ['defer' => true]);
 									}
 
@@ -438,12 +438,19 @@ class ImportFromTravioController extends Controller
 					]);
 
 					foreach ($list['list'] as $id => $item) {
+						if ($item['type']) {
+							$this->model->updateOrInsert('travio_tags_types', [
+								'id' => $item['type'],
+							], [
+								'name' => $item['type-name'],
+							]);
+						}
+
 						$this->model->updateOrInsert('travio_tags', [
 							'id' => $id,
 						], [
 							'name' => $item['name'],
-							'type' => $item['type'],
-							'type_name' => $item['type-name'],
+							'type' => $item['type'] ?: null,
 						]);
 
 						$this->model->_TravioAssets->importTag($id);

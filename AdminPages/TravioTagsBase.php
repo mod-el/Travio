@@ -14,10 +14,10 @@ class TravioTagsBase extends AdminPage
 				'D' => false,
 			],
 			'fields' => [
-				'type_name',
+				'type',
 				'name',
 			],
-			'order_by' => 'type_name, name',
+			'order_by' => 'type, name',
 		];
 	}
 }
