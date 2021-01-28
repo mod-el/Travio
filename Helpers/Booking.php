@@ -183,6 +183,7 @@ class Booking extends Base
 
 		if (in_array($show, ['geo', 'both'])) {
 			$where = [
+				'visible' => 1,
 				[
 					'sub' => [
 						['name', 'LIKE', $query . '%'],
@@ -194,7 +195,11 @@ class Booking extends Base
 				],
 			];
 
-			$joins = [];
+			$joins = [
+				'travio_geo' => [
+					'visible',
+				],
+			];
 
 			switch ($type[0]) {
 				case 'services':

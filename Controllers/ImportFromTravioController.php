@@ -17,6 +17,8 @@ class ImportFromTravioController extends Controller
 		try {
 			switch ($this->model->getInput('type')) {
 				case 'geo':
+					$presents = [];
+
 					foreach ($config['target-types'] as $target) {
 						$payload = [
 							'type' => 'geo',
@@ -30,12 +32,18 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
+							if (in_array($item['id'], $presents))
+								continue;
+
+							$presents[] = $item['id'];
+
 							$this->model->updateOrInsert('travio_geo', [
 								'id' => $item['id'],
 							], [
 								'name' => $item['name'],
 								'parent' => $item['parent'],
 								'parent_name' => $item['parent-name'],
+								'visible' => 1,
 							]);
 
 							$this->model->_TravioAssets->importGeo($item['id']);
@@ -60,6 +68,18 @@ class ImportFromTravioController extends Controller
 								'defer' => 100,
 							]);
 						}
+					}
+
+					if ($presents) {
+						$this->model->_Db->update('travio_geo', [
+							'id' => ['NOT IN', $presents],
+						], ['visible' => 0]);
+
+						$this->model->_Db->update('travio_geo', [
+							'id' => ['IN', $presents],
+						], ['visible' => 1]);
+					} else {
+						$this->model->_Db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
 					}
 					break;
 				case 'services':
