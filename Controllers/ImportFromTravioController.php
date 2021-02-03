@@ -17,6 +17,9 @@ class ImportFromTravioController extends Controller
 		try {
 			switch ($this->model->getInput('type')) {
 				case 'geo':
+					if (!$config['import']['geo']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -83,6 +86,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'services':
+					if (!$config['import']['services']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -143,7 +149,7 @@ class ImportFromTravioController extends Controller
 									];
 
 									if ($check) {
-										foreach (($config['override-on-import']['services'] ?? []) as $k => $override) {
+										foreach (($config['import']['services']['override'] ?? []) as $k => $override) {
 											if (!$override)
 												unset($data[$k]);
 										}
@@ -273,6 +279,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'packages':
+					if (!$config['import']['packages']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -321,7 +330,7 @@ class ImportFromTravioController extends Controller
 									];
 
 									if ($check) {
-										foreach (($config['override-on-import']['packages'] ?? []) as $k => $override) {
+										foreach (($config['import']['packages']['override'] ?? []) as $k => $override) {
 											if (!$override)
 												unset($data[$k]);
 										}
@@ -453,6 +462,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'tags':
+					if (!$config['import']['tags']['import'])
+						break;
+
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'tags',
 					]);
@@ -477,6 +489,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'amenities':
+					if (!$config['import']['amenities']['import'])
+						break;
+
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'amenities',
 						'all-langs' => true,
@@ -502,6 +517,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'ports':
+					if (!$config['import']['ports']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -530,7 +548,7 @@ class ImportFromTravioController extends Controller
 									'departure' => $item['departure'] ? 1 : 0,
 								];
 
-								foreach (($config['override-on-import']['ports'] ?? []) as $k => $override) {
+								foreach (($config['import']['ports']['override'] ?? []) as $k => $override) {
 									if (!$override)
 										unset($data[$k]);
 								}
@@ -557,6 +575,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'airports':
+					if (!$config['import']['airports']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -585,7 +606,7 @@ class ImportFromTravioController extends Controller
 									'departure' => $item['departure'] ? 1 : 0,
 								];
 
-								foreach (($config['override-on-import']['airports'] ?? []) as $k => $override) {
+								foreach (($config['import']['airports']['override'] ?? []) as $k => $override) {
 									if (!$override)
 										unset($data[$k]);
 								}
@@ -612,6 +633,9 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'stations':
+					if (!$config['import']['stations']['import'])
+						break;
+
 					$presents = [];
 
 					foreach ($config['target-types'] as $target) {
@@ -642,7 +666,7 @@ class ImportFromTravioController extends Controller
 									'name' => $item['name'],
 								];
 
-								foreach (($config['override-on-import']['stations'] ?? []) as $k => $override) {
+								foreach (($config['import']['stations']['override'] ?? []) as $k => $override) {
 									if (!$override)
 										unset($data[$k]);
 								}
@@ -665,6 +689,30 @@ class ImportFromTravioController extends Controller
 							} catch (\Exception $e) {
 							}
 						}
+					}
+					break;
+				case 'master-data':
+					if (!$config['import']['master-data']['import'])
+						break;
+
+					$list = $this->model->_Travio->request('static-data', [
+						'type' => 'master-data',
+						'filters' => $config['import']['master-data']['filters'] ?? [],
+					]);
+
+					foreach ($list['list'] as $item) {
+						$this->model->updateOrInsert('travio_master_data', [
+							'id' => $item['id'],
+						], [
+							'name' => $item['name'],
+							'surname' => $item['surname'],
+							'business_name' => $item['business-name'],
+							'full_name' => $item['full-name'],
+							'category' => $item['category'],
+							'username' => $item['username'],
+						]);
+
+						$this->model->_TravioAssets->importMasterData($item['id']);
 					}
 					break;
 				default:

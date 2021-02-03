@@ -35,4 +35,8 @@ class TravioAssetsBase extends Module
 	public function importStation(int $station)
 	{
 	}
+
+	public function importMasterData(int $id)
+	{
+	}
 }

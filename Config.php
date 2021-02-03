@@ -20,31 +20,59 @@ $config = [
 		],
 	],
 	\'dev\' => true,
-	\'override-on-import\' => [
+	\'import\' => [
+		\'tags\' => [
+			\'import\' => true,
+		],
 		\'services\' => [
-			\'name\' => true,
-			\'price\' => true,
-			\'classification\' => true,
-			\'classification_level\' => true,
-			\'min_date\' => true,
-			\'max_date\' => true,
-			\'lat\' => true,
-			\'lng\' => true,
+			\'import\' => true,
+			\'override\' => [
+				\'name\' => true,
+				\'price\' => true,
+				\'classification\' => true,
+				\'classification_level\' => true,
+				\'min_date\' => true,
+				\'max_date\' => true,
+				\'lat\' => true,
+				\'lng\' => true,
+			],
 		],
 		\'packages\' => [
-			\'name\' => true,
-			\'price\' => true,
+			\'import\' => true,
+			\'override\' => [
+				\'name\' => true,
+				\'price\' => true,
+			],
+		],
+		\'tags\' => [
+			\'import\' => true,
+		],
+		\'amenities\' => [
+			\'import\' => true,
 		],
 		\'airports\' => [
-			\'name\' => true,
-			\'departure\' => true,
+			\'import\' => true,
+			\'override\' => [
+				\'name\' => true,
+				\'departure\' => true,
+			],
 		],
 		\'ports\' => [
-			\'name\' => true,
-			\'departure\' => true,
+			\'import\' => true,
+			\'override\' => [
+				\'name\' => true,
+				\'departure\' => true,
+			],
 		],
 		\'stations\' => [
-			\'name\' => true,
+			\'import\' => true,
+			\'override\' => [
+				\'name\' => true,
+			],
+		],
+		\'master-data\' => [
+			\'import\' => false,
+			\'filters\' => [],
 		],
 	],
 ];
@@ -219,6 +247,22 @@ class TravioStations extends TravioStationsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioMasterData.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioMasterDataBase;
+
+class TravioMasterData extends TravioMasterDataBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioMasterData.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioMasterDataBase;
+
+class TravioMasterData extends TravioMasterDataBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
 	}
 
@@ -243,35 +287,44 @@ class TravioStations extends TravioStationsBase
 	public function makeCache(): bool
 	{
 		$config = $this->retrieveConfig();
-		if ($config and !isset($config['override-on-import'])) {
-			$config['override-on-import'] = [
+		if ($config and !isset($config['import'])) {
+			$config['import'] = [
+				'geo' => [
+					'import' => true,
+				],
 				'services' => [
-					'name' => true,
-					'price' => true,
-					'classification' => true,
-					'classification_level' => true,
-					'min_date' => true,
-					'max_date' => true,
-					'lat' => true,
-					'lng' => true,
+					'import' => true,
+					'override' => $config['override-on-import']['services'],
 				],
 				'packages' => [
-					'name' => true,
-					'price' => true,
+					'import' => true,
+					'override' => $config['override-on-import']['packages'],
 				],
-				'airports' => [
-					'name' => true,
-					'departure' => true,
+				'tags' => [
+					'import' => true,
+				],
+				'amenities' => [
+					'import' => true,
 				],
 				'ports' => [
-					'name' => true,
-					'departure' => true,
+					'import' => true,
+					'override' => $config['override-on-import']['ports'],
+				],
+				'airports' => [
+					'import' => true,
+					'override' => $config['override-on-import']['airports'],
 				],
 				'stations' => [
-					'name' => true,
+					'import' => true,
+					'override' => $config['override-on-import']['stations'],
+				],
+				'master-data' => [
+					'import' => false,
+					'filters' => [],
 				],
 			];
 
+			unset($config['override-on-import']);
 			$this->saveConfig('config', $config);
 		}
 

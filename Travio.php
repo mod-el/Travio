@@ -76,6 +76,11 @@ class Travio extends Module
 					'page' => 'TravioStations',
 					'rule' => 'travio-stations',
 				],
+				[
+					'name' => 'Anagrafiche',
+					'page' => 'TravioMasterData',
+					'rule' => 'travio-master-data',
+				],
 			],
 		];
 
@@ -88,6 +93,7 @@ class Travio extends Module
 		$this->model->_Db->linkTable('travio_airports');
 		$this->model->_Db->linkTable('travio_ports');
 		$this->model->_Db->linkTable('travio_stations');
+		$this->model->_Db->linkTable('travio_master_data');
 
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 	}

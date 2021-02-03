@@ -63,4 +63,11 @@
 		</div>
 		<div class="col-1" data-import="packages"></div>
 	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
+			Anagrafiche
+		</div>
+		<div class="col-1" data-import="master-data"></div>
+	</div>
 </div>
