@@ -10,7 +10,7 @@ class TravioMasterDataBase extends AdminPage
 			'element' => 'TravioMasterData',
 			'privileges' => [
 				'C' => false,
-				'R' => false,
+				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-master-data.php'),
 				'D' => false,
 			],
 		];
