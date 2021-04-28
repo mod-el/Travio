@@ -21,7 +21,7 @@ $config = [
 	],
 	\'dev\' => true,
 	\'import\' => [
-		\'tags\' => [
+		\'geo\' => [
 			\'import\' => true,
 		],
 		\'services\' => [
