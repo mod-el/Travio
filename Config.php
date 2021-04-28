@@ -79,7 +79,7 @@ $config = [
 ';
 		});
 
-		if ($this->model->isLoaded('Multilang')) {
+		if ($this->model->moduleExists('Multilang')) {
 			$this->model->_Multilang->checkAndInsertTable('travio_geo');
 			$this->model->_Multilang->checkAndInsertTable('travio_services');
 			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
