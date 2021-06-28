@@ -58,7 +58,7 @@ class ImportFromTravioController extends Controller
 					foreach ($this->model->all('TravioGeo') as $geo) {
 						$parents = [];
 						$el = clone $geo;
-						while ($el['parent']) {
+						while ($el and $el['parent']) {
 							$parents[] = $el['parent'];
 							$el = $el->parent;
 						}
