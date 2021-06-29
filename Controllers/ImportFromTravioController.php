@@ -59,7 +59,8 @@ class ImportFromTravioController extends Controller
 						$parents = [];
 						$el = clone $geo;
 						while ($el and $el['parent']) {
-							$parents[] = $el['parent'];
+							if ($el->parent) // Verifico l'effettiva esistenza a db
+								$parents[] = $el['parent'];
 							$el = $el->parent;
 						}
 
