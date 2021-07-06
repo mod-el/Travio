@@ -399,6 +399,7 @@ class Travio extends Module
 		$order = $this->model->_ORM->create('TravioOrder');
 		$order->save([
 			'reference' => $data['reference'],
+			'initial_status' => (int)$data['booking-status'],
 			'amount' => (float)$data['amount'],
 			'date' => date('Y-m-d H:i:s'),
 			'gateway' => $gateway,
