@@ -37,6 +37,9 @@ $config = [
 				\'lng\' => true,
 			],
 		],
+		\'subservices\' => [
+			\'import\' => false,
+		],
 		\'packages\' => [
 			\'import\' => true,
 			\'override\' => [
@@ -83,6 +86,8 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_geo');
 			$this->model->_Multilang->checkAndInsertTable('travio_services');
 			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
+			$this->model->_Multilang->checkAndInsertTable('travio_subservices');
+			$this->model->_Multilang->checkAndInsertTable('travio_subservices_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_stations');
@@ -164,6 +169,14 @@ class TravioService extends TravioServiceBase
 use Model\\Travio\\AdminPages\\TravioServicesBase;
 
 class TravioServices extends TravioServicesBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioSubservice.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioSubserviceBase;
+
+class TravioSubservice extends TravioSubserviceBase
 {
 }
 ');
@@ -296,6 +309,9 @@ class TravioMasterData extends TravioMasterDataBase
 					'import' => true,
 					'override' => $config['override-on-import']['services'],
 				],
+				'subservices' => [
+					'import' => false,
+				],
 				'packages' => [
 					'import' => true,
 					'override' => $config['override-on-import']['packages'],
@@ -325,6 +341,11 @@ class TravioMasterData extends TravioMasterDataBase
 			];
 
 			unset($config['override-on-import']);
+			$this->saveConfig('config', $config);
+		}
+
+		if ($config and !isset($config['import']['subservices'])) {
+			$config['import']['subservices'] = ['import' => false];
 			$this->saveConfig('config', $config);
 		}
 

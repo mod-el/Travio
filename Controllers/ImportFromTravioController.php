@@ -172,6 +172,68 @@ class ImportFromTravioController extends Controller
 
 									/***********************/
 
+									if ($config['import']['subservices']['import']) {
+										foreach ($serviceData['subservices'] as $subservice) {
+											$ss_id = $this->model->_Db->updateOrInsert('travio_subservices', [
+												'id' => $subservice['id'],
+											], [
+												'service' => $id,
+												'code' => $subservice['code'],
+												'type' => $subservice['type'],
+												'name' => $subservice['name'],
+											]);
+
+											foreach ($subservice['tags'] as $tagId => $tag) {
+												$this->model->_Db->insert('travio_subservices_tags', [
+													'subservice' => $ss_id,
+													'tag' => $tagId,
+												], ['defer' => true]);
+											}
+
+											foreach ($subservice['descriptions'] as $description) {
+												$this->model->_Db->insert('travio_subservices_descriptions', [
+													'subservice' => $ss_id,
+													'tag' => $description['keyword'],
+													'title' => $description['title'],
+													'text' => $description['text'],
+												]);
+											}
+
+											foreach ($subservice['photos'] as $photo) {
+												$this->model->_Db->insert('travio_subservices_photos', [
+													'subservice' => $ss_id,
+													'url' => $photo['url'],
+													'thumb' => $photo['thumb'],
+													'description' => $photo['description'],
+												], ['defer' => true]);
+											}
+
+											foreach ($subservice['amenities'] as $amenity_id => $amenity) {
+												$this->model->_Db->insert('travio_subservices_amenities', [
+													'subservice' => $ss_id,
+													'amenity' => $amenity_id,
+													'name' => $amenity['name'],
+													'tag' => $amenity['tag'] ?: null,
+												], ['defer' => true]);
+											}
+
+											foreach ($subservice['files'] as $file) {
+												$this->model->_Db->insert('travio_subservices_files', [
+													'subservice' => $ss_id,
+													'name' => $file['name'],
+													'url' => $file['url'],
+												], ['defer' => true]);
+											}
+										}
+
+										$this->model->_Db->bulkInsert('travio_subservices_tags');
+										$this->model->_Db->bulkInsert('travio_subservices_photos');
+										$this->model->_Db->bulkInsert('travio_subservices_amenities');
+										$this->model->_Db->bulkInsert('travio_subservices_files');
+									}
+
+									/***********************/
+
 									foreach ($serviceData['tags'] as $tagId => $tag) {
 										$this->model->_Db->insert('travio_services_tags', [
 											'service' => $id,

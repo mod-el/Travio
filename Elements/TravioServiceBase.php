@@ -32,6 +32,12 @@ class TravioServiceBase extends Element
 			'type' => 'checkbox',
 		];
 
+		$this->has('subservices', [
+			'element' => 'TravioSubservice',
+			'field' => 'service',
+			'order_by' => 'type, code',
+		]);
+
 		$this->has('tags', [
 			'table' => 'travio_services_tags',
 			'field' => 'service',
