@@ -8,16 +8,16 @@ class TravioTagsBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioTag',
+			'visualizer' => 'Tree',
 			'privileges' => [
 				'C' => false,
 				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-tags.php'),
 				'D' => false,
 			],
 			'fields' => [
-				'type',
 				'name',
 			],
-			'order_by' => 'type, name',
+			'order_by' => 'name',
 		];
 	}
 }

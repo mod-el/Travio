@@ -8,9 +8,14 @@ class TravioTagBase extends Element
 
 	public function init()
 	{
-		$this->has('type', [
-			'type' => 'single',
-			'element' => 'TravioTagType',
+		$this->has('sub', [
+			'element' => 'TravioTag',
+			'field' => 'parent',
+		]);
+
+		$this->belongsTo('TravioTag', [
+			'field' => 'parent',
+			'children' => 'sub',
 		]);
 	}
 }

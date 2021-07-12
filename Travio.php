@@ -57,11 +57,6 @@ class Travio extends Module
 					'rule' => 'travio-tags',
 				],
 				[
-					'name' => 'Tipi Tags',
-					'page' => 'TravioTagsTypes',
-					'rule' => 'travio-tags-types',
-				],
-				[
 					'name' => 'Amenities',
 					'page' => 'TravioAmenities',
 					'rule' => 'travio-amenities',
@@ -88,7 +83,6 @@ class Travio extends Module
 		$this->model->_Db->linkTable('travio_services');
 		$this->model->_Db->linkTable('travio_packages');
 		$this->model->_Db->linkTable('travio_tags');
-		$this->model->_Db->linkTable('travio_tags_types');
 		$this->model->_Db->linkTable('travio_orders');
 		$this->model->_Db->linkTable('travio_airports');
 		$this->model->_Db->linkTable('travio_ports');
@@ -96,6 +90,7 @@ class Travio extends Module
 		$this->model->_Db->linkTable('travio_master_data');
 
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
+		$this->model->addCSS('model/Travio/files/admin.css', ['with' => 'AdminFront']);
 	}
 
 	/**

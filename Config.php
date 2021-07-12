@@ -92,6 +92,7 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_stations');
 			$this->model->_Multilang->checkAndInsertTable('travio_amenities');
+			$this->model->_Multilang->checkAndInsertTable('travio_tags');
 		}
 
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
@@ -138,24 +139,6 @@ class TravioTags extends TravioTagsBase
 {
 }
 ');
-
-		$this->checkFile('app/modules/TravioAssets/Elements/TravioTagType.php', '<?php namespace Model\\TravioAssets\\Elements;
-
-use Model\\Travio\\Elements\\TravioTagTypeBase;
-
-class TravioTagType extends TravioTagTypeBase
-{
-}
-');
-		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioTagsTypes.php', '<?php namespace Model\\TravioAssets\\AdminPages;
-
-use Model\\Travio\\AdminPages\\TravioTagsTypesBase;
-
-class TravioTagsTypes extends TravioTagsTypesBase
-{
-}
-');
-
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioService.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioServiceBase;
@@ -277,6 +260,11 @@ class TravioMasterData extends TravioMasterDataBase
 }
 ');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
+
+		if (file_exists(INCLUDE_PATH . 'app/modules/TravioAssets/Elements/TravioTagType.php'))
+			unlink(INCLUDE_PATH . 'app/modules/TravioAssets/Elements/TravioTagType.php');
+		if (file_exists(INCLUDE_PATH . 'app/modules/TravioAssets/AdminPages/TravioTagsTypes.php'))
+			unlink(INCLUDE_PATH . 'app/modules/TravioAssets/AdminPages/TravioTagsTypes.php');
 	}
 
 	/**
