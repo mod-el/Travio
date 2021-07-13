@@ -148,6 +148,12 @@ class ImportFromTravioController extends Controller
 							}
 
 							if ($config['import']['subservices']['import']) {
+								$this->model->_Db->delete('travio_subservices_tags', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+								$this->model->_Db->delete('travio_subservices_descriptions', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+								$this->model->_Db->delete('travio_subservices_photos', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+								$this->model->_Db->delete('travio_subservices_amenities', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+								$this->model->_Db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+
 								foreach ($serviceData['subservices'] as $subservice) {
 									$ss_id = $this->model->_Db->updateOrInsert('travio_subservices', [
 										'id' => $subservice['id'],
