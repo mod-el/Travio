@@ -323,13 +323,13 @@ class ImportFromTravioController extends Controller
 									'auto_ml' => false,
 									'auto-join-linked-tables' => false,
 								]);
-								if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
-									$items[] = [
-										'id' => $item['id'],
-										'last_update' => $item['last_update'],
-										'existing' => $check ? $check['id'] : null,
-									];
-								}
+
+								$items[] = [
+									'id' => $item['id'],
+									'last_update' => $item['last_update'],
+									'existing' => $check ? $check['id'] : null,
+									'update' => (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))),
+								];
 							}
 						}
 
@@ -507,13 +507,13 @@ class ImportFromTravioController extends Controller
 									'auto_ml' => false,
 									'auto-join-linked-tables' => false,
 								]);
-								if (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))) {
-									$items[] = [
-										'id' => $item['id'],
-										'last_update' => $item['last_update'],
-										'existing' => $check ? $check['id'] : null,
-									];
-								}
+
+								$items[] = [
+									'id' => $item['id'],
+									'last_update' => $item['last_update'],
+									'existing' => $check ? $check['id'] : null,
+									'update' => (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))),
+								];
 							}
 						}
 

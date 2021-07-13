@@ -49,7 +49,8 @@ function setupItemsImport(type, items) {
 }
 
 function importNextItem(type, items, idx) {
-	if (items.length < idx + 1) {
+	let itemsToUpdate = items.filter(item => item.update);
+	if (itemsToUpdate.length < idx + 1) {
 		return ajax(PATH + 'import-from-travio', {'type': type, 'finalize': JSON.stringify(items.map(item => item.id))}).then(r => {
 			if (r === 'ok') {
 				_('travio-importing-' + type).firstElementChild.style.width = '100%';
@@ -60,9 +61,9 @@ function importNextItem(type, items, idx) {
 			}
 		});
 	} else {
-		return ajax(PATH + 'import-from-travio', {'type': type, 'item': JSON.stringify(items[idx])}).then(r => {
+		return ajax(PATH + 'import-from-travio', {'type': type, 'item': JSON.stringify(itemsToUpdate[idx])}).then(r => {
 			if (r === 'ok') {
-				let percentage = (idx + 1) / (items.length + 1) * 100;
+				let percentage = (idx + 1) / (itemsToUpdate.length + 1) * 100;
 				_('travio-importing-' + type).firstElementChild.style.width = percentage + '%';
 				importNextItem(type, items, idx + 1);
 			} else {
