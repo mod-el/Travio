@@ -37,15 +37,18 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 		$this->save(['paid' => date('Y-m-d H:i:s')]);
 
 		if ($this['is_first_payment']) {
-			$this->model->_Travio->request('confirm', [
-				'reference' => $this['reference'],
-				'paid' => (float)$this['amount'],
-			]);
+			$this->confirm($this['amount']);
 		} else {
 			$this->model->_Travio->request('pay', [
 				'reference' => $this['reference'],
 				'amount' => (float)$this['amount'],
 			]);
 		}
+	}
+
+	public function confirm(?float $paid = null)
+	{
+		$response = $this->model->_Travio->confirmOrder($this['reference'], $paid);
+		$this->save(['initial_status' => $response['booking-status']]);
 	}
 }

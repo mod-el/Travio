@@ -404,6 +404,21 @@ class Travio extends Module
 	}
 
 	/**
+	 * @param string $reference
+	 * @return array
+	 */
+	public function confirmOrder(string $reference, ?float $paid = null): array
+	{
+		$payload = [
+			'reference' => $reference,
+		];
+		if ($paid !== null)
+			$payload['paid'] = $paid;
+
+		return $this->request('confirm', $payload);
+	}
+
+	/**
 	 * @param array $request
 	 * @param string $rule
 	 * @return array
