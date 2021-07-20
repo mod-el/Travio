@@ -537,6 +537,7 @@ class ImportFromTravioController extends Controller
 						'all-langs' => true,
 					]);
 
+					$idsList = [];
 					foreach ($list['list'] as $item) {
 						$this->model->updateOrInsert('travio_tags', [
 							'id' => $item['id'],
@@ -547,7 +548,10 @@ class ImportFromTravioController extends Controller
 						]);
 
 						$this->model->_TravioAssets->importTag($item['id']);
+						$idsList[] = $item['id'];
 					}
+
+					$this->model->_Db->delete('travio_tags', ['id' => ['NOT IN', $idsList]]);
 					break;
 				case 'amenities':
 					if (!$config['import']['amenities']['import'])
@@ -558,6 +562,7 @@ class ImportFromTravioController extends Controller
 						'all-langs' => true,
 					]);
 
+					$idsList = [];
 					foreach ($list['list'] as $id => $item) {
 						if ($item['tag']) {
 							$type = $this->model->select('travio_amenities_types', ['name' => trim($item['tag'])], 'id');
@@ -574,8 +579,11 @@ class ImportFromTravioController extends Controller
 							'type' => $type,
 						]);
 
+						$idsList[] = $id;
 						$this->model->_TravioAssets->importAmenity($id);
 					}
+
+					$this->model->_Db->delete('travio_amenities', ['id' => ['NOT IN', $idsList]]);
 					break;
 				case 'ports':
 					if (!$config['import']['ports']['import'])
