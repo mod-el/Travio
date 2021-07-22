@@ -6,6 +6,17 @@ use Model\Payments\PaymentsOrderInterface;
 class TravioOrderBase extends Element implements PaymentsOrderInterface
 {
 	public static $table = 'travio_orders';
+	public ?array $response = null;
+
+	protected function afterLoad(array $options)
+	{
+		$this->response = json_decode($this['response'], true);
+	}
+
+	public function afterSave($previous_data, array $saving)
+	{
+		$this->response = json_decode($this['response'], true);
+	}
 
 	public function getGateway(): ?string
 	{

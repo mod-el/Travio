@@ -398,6 +398,7 @@ class Travio extends Module
 			'amount' => (float)$data['amount'],
 			'date' => date('Y-m-d H:i:s'),
 			'gateway' => $gateway,
+			'response' => json_encode($data),
 		]);
 
 		return $order;
