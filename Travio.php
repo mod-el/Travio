@@ -230,11 +230,10 @@ class Travio extends Module
 	{
 		if (isset($_SESSION) and !array_key_exists('travio-login-cache', $_SESSION)) {
 			$req = $this->request('logged');
-			if ($req and $req['user']) {
+			if ($req and $req['user'])
 				$_SESSION['travio-login-cache'] = $req['user'];
-			} else {
+			else
 				$_SESSION['travio-login-cache'] = null;
-			}
 		}
 
 		return $_SESSION['travio-login-cache'];
@@ -272,11 +271,35 @@ class Travio extends Module
 			'enabled' => false,
 		], $options);
 
+		$this->checkPassword($data);
+
 		$options['data'] = $data;
 		$response = $this->request('reg', $options);
 		$this->clearLoginCache();
 
 		return $response;
+	}
+
+	/**
+	 * @param array $data
+	 */
+	public function editProfile(array $data)
+	{
+		$this->checkPassword($data);
+		$this->request('edit-profile', ['data' => $data]);
+		$this->clearLoginCache();
+	}
+
+	/**
+	 * @param array $data
+	 */
+	private function checkPassword(array &$data)
+	{
+		if (!empty($data['password']) and isset($data['repassword'])) {
+			if ($data['password'] !== $data['repassword'])
+				throw new \Exception('Password don\'t match', 400);
+			unset($data['repassword']);
+		}
 	}
 
 	/**
