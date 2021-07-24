@@ -72,6 +72,11 @@ class Travio extends Module
 					'rule' => 'travio-stations',
 				],
 				[
+					'name' => 'Metodi di pagamento',
+					'page' => 'TravioPaymentMethods',
+					'rule' => 'travio-payment-methods',
+				],
+				[
 					'name' => 'Anagrafiche',
 					'page' => 'TravioMasterData',
 					'rule' => 'travio-master-data',
@@ -88,6 +93,7 @@ class Travio extends Module
 		$this->model->_Db->linkTable('travio_ports');
 		$this->model->_Db->linkTable('travio_stations');
 		$this->model->_Db->linkTable('travio_master_data');
+		$this->model->_Db->linkTable('travio_payment_methods');
 
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 		$this->model->addCSS('model/Travio/files/admin.css', ['with' => 'AdminFront']);

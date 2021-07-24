@@ -39,4 +39,8 @@ class TravioAssetsBase extends Module
 	public function importMasterData(int $id)
 	{
 	}
+
+	public function importPaymentMethod(int $paymentMethod)
+	{
+	}
 }

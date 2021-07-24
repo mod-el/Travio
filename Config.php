@@ -77,6 +77,12 @@ $config = [
 			\'import\' => false,
 			\'filters\' => [],
 		],
+		\'payment-methods\' => [
+			\'import\' => true,
+			\'filters\' => [
+				\'visible_in\' => 1,
+			],
+		],
 	],
 ];
 ';
@@ -259,6 +265,22 @@ class TravioMasterData extends TravioMasterDataBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioPaymentMethod.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioPaymentMethodBase;
+
+class TravioPaymentMethod extends TravioPaymentMethodBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioPaymentMethods.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioPaymentMethodsBase;
+
+class TravioPaymentMethods extends TravioPaymentMethodsBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
 
 		if (file_exists(INCLUDE_PATH . 'app/modules/TravioAssets/Elements/TravioTagType.php'))
@@ -326,6 +348,12 @@ class TravioMasterData extends TravioMasterDataBase
 					'import' => false,
 					'filters' => [],
 				],
+				'payment-methods' => [
+					'import' => true,
+					'filters' => [
+						'visible_in' => 1,
+					],
+				],
 			];
 
 			unset($config['override-on-import']);
@@ -334,6 +362,16 @@ class TravioMasterData extends TravioMasterDataBase
 
 		if ($config and !isset($config['import']['subservices'])) {
 			$config['import']['subservices'] = ['import' => false];
+			$this->saveConfig('config', $config);
+		}
+
+		if ($config and !isset($config['import']['payment-methods'])) {
+			$config['import']['payment-methods'] = [
+				'import' => true,
+				'filters' => [
+					'visible_in' => 1,
+				],
+			];
 			$this->saveConfig('config', $config);
 		}
 

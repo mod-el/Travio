@@ -784,6 +784,30 @@ class ImportFromTravioController extends Controller
 						$this->model->_TravioAssets->importMasterData($item['id']);
 					}
 					break;
+				case 'payment-methods':
+					if (!$config['import']['payment-methods']['import'])
+						break;
+
+					$list = $this->model->_Travio->request('static-data', [
+						'type' => 'payment-methods',
+						'filters' => $config['import']['payment-methods']['filters'],
+						'all-langs' => true,
+					]);
+
+					$idsList = [];
+					foreach ($list['list'] as $item) {
+						$this->model->updateOrInsert('travio_payment_methods', [
+							'id' => $item['id'],
+						], [
+							'name' => $item['name'],
+						]);
+
+						$this->model->_TravioAssets->importPaymentMethod($item['id']);
+						$idsList[] = $item['id'];
+					}
+
+					$this->model->_Db->delete('travio_payment_methods', ['id' => ['NOT IN', $idsList]]);
+					break;
 				default:
 					$this->model->error('Unknown type');
 					break;

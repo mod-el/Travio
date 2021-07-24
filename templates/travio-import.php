@@ -66,6 +66,13 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
+			Metodi di pagamento
+		</div>
+		<div class="col" data-import="payment-methods"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
 			Anagrafiche
 		</div>
 		<div class="col" data-import="master-data"></div>
