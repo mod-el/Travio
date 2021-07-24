@@ -305,10 +305,57 @@ class TravioPaymentMethods extends TravioPaymentMethodsBase
 	}
 
 	/**
+	 * @return array
+	 */
+	private function retrieveDbConfig(): array
+	{
+		$configFile = INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'Db' . DIRECTORY_SEPARATOR . 'config.php';
+
+		require_once($configFile);
+		if (empty($config))
+			throw new \Exception('Db config not found');
+
+		return $config;
+	}
+
+	/**
+	 * @param array $config
+	 * @return array
+	 */
+	private function saveDbConfig(array $config)
+	{
+		$configFile = INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'Db' . DIRECTORY_SEPARATOR . 'config.php';
+		$w = file_put_contents($configFile, '<?php
+$config = ' . var_export($config, true) . ';
+');
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function makeCache(): bool
 	{
+		$dbConfig = $this->retrieveDbConfig();
+		$linkedTables = $dbConfig['databases']['primary']['linked-tables'] ?? [];
+		$tablesToLink = [
+			'travio_geo',
+			'travio_services',
+			'travio_packages',
+			'travio_tags',
+			'travio_orders',
+			'travio_airports',
+			'travio_ports',
+			'travio_stations',
+			'travio_master_data',
+			'travio_payment_methods',
+		];
+		foreach ($tablesToLink as $table) {
+			if (!in_array($table, $linkedTables))
+				$linkedTables[] = $table;
+		}
+		$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
+		$this->saveDbConfig($dbConfig);
+
 		$config = $this->retrieveConfig();
 		if ($config and !isset($config['import'])) {
 			$config['import'] = [

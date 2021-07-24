@@ -84,17 +84,6 @@ class Travio extends Module
 			],
 		];
 
-		$this->model->_Db->linkTable('travio_geo');
-		$this->model->_Db->linkTable('travio_services');
-		$this->model->_Db->linkTable('travio_packages');
-		$this->model->_Db->linkTable('travio_tags');
-		$this->model->_Db->linkTable('travio_orders');
-		$this->model->_Db->linkTable('travio_airports');
-		$this->model->_Db->linkTable('travio_ports');
-		$this->model->_Db->linkTable('travio_stations');
-		$this->model->_Db->linkTable('travio_master_data');
-		$this->model->_Db->linkTable('travio_payment_methods');
-
 		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
 		$this->model->addCSS('model/Travio/files/admin.css', ['with' => 'AdminFront']);
 	}
