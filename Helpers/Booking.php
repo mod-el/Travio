@@ -153,16 +153,15 @@ class Booking extends Base
 			switch ($id[0]) {
 				case 's':
 					return $this->getItem($this->model->one('TravioService', ['travio' => substr($id, 1)]));
-					break;
+
 				case 'p':
 					return $this->getItem($this->model->one('TravioPackage', ['travio' => substr($id, 1)]));
-					break;
+
 				case 'd':
 					return $this->getItem($this->model->one('TravioGeo', substr($id, 1)));
-					break;
+
 				case 't':
 					return $this->getItem($this->model->one('TravioTag', substr($id, 1)));
-					break;
 			}
 		}
 
