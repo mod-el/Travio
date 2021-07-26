@@ -24,6 +24,10 @@ class TravioAssetsBase extends Module
 	{
 	}
 
+	public function importClassification(int $id)
+	{
+	}
+
 	public function importPort(int $port)
 	{
 	}
@@ -36,11 +40,15 @@ class TravioAssetsBase extends Module
 	{
 	}
 
-	public function importMasterData(int $id)
+	public function importPaymentMethod(int $id)
 	{
 	}
 
-	public function importPaymentMethod(int $paymentMethod)
+	public function importLuggageType(int $id)
+	{
+	}
+
+	public function importMasterData(int $id)
 	{
 	}
 }

@@ -83,6 +83,12 @@ $config = [
 				\'visible_in\' => 1,
 			],
 		],
+		\'luggage-types\' => [
+			\'import\' => true,
+		],
+		\'classifications\' => [
+			\'import\' => true,
+		],
 	],
 ];
 ';
@@ -281,6 +287,38 @@ class TravioPaymentMethods extends TravioPaymentMethodsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioLuggageType.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioLuggageTypeBase;
+
+class TravioLuggageType extends TravioLuggageTypeBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioLuggageTypes.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioLuggageTypesBase;
+
+class TravioLuggageTypes extends TravioLuggageTypesBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioClassification.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioClassificationBase;
+
+class TravioClassification extends TravioClassificationBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioClassifications.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioClassificationsBase;
+
+class TravioClassifications extends TravioClassificationsBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
 
 		if (file_exists(INCLUDE_PATH . 'app/modules/TravioAssets/Elements/TravioTagType.php'))
@@ -419,6 +457,12 @@ $config = ' . var_export($config, true) . ';
 					'visible_in' => 1,
 				],
 			];
+			$this->saveConfig('config', $config);
+		}
+
+		if ($config and !isset($config['import']['luggage-types'])) {
+			$config['import']['luggage-types'] = ['import' => true];
+			$config['import']['classifications'] = ['import' => true];
 			$this->saveConfig('config', $config);
 		}
 

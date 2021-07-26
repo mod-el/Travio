@@ -62,9 +62,14 @@ class Travio extends Module
 					'rule' => 'travio-amenities',
 				],
 				[
-					'name' => 'Tipi Amenities',
+					'name' => 'Tipi amenities',
 					'page' => 'TravioAmenitiesTypes',
 					'rule' => 'travio-amenities-types',
+				],
+				[
+					'name' => 'Classificazioni',
+					'page' => 'TravioClassifications',
+					'rule' => 'travio-classifications',
 				],
 				[
 					'name' => 'Stazioni transfer',
@@ -75,6 +80,11 @@ class Travio extends Module
 					'name' => 'Metodi di pagamento',
 					'page' => 'TravioPaymentMethods',
 					'rule' => 'travio-payment-methods',
+				],
+				[
+					'name' => 'Tipi  bagaglio',
+					'page' => 'TravioLuggageTypes',
+					'rule' => 'travio-luggage-types',
 				],
 				[
 					'name' => 'Anagrafiche',

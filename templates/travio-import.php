@@ -45,6 +45,13 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
+			Classificazioni
+		</div>
+		<div class="col" data-import="classifications"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
 			Stazioni transfer
 		</div>
 		<div class="col" data-import="stations"></div>
@@ -69,6 +76,13 @@
 			Metodi di pagamento
 		</div>
 		<div class="col" data-import="payment-methods"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
+			Tipi bagaglio
+		</div>
+		<div class="col" data-import="luggage-types"></div>
 	</div>
 
 	<div class="py-2 row">
