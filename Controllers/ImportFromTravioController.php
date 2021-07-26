@@ -110,6 +110,7 @@ class ImportFromTravioController extends Controller
 								'type' => $serviceData['type'],
 								'typology' => $serviceData['typology'],
 								'geo' => $serviceData['geo'][0]['id'] ?? null,
+								'classification_id' => $serviceData['classification'] ? $serviceData['classification']['id'] : null,
 								'classification' => $serviceData['classification'] ? $serviceData['classification']['code'] : null,
 								'classification_level' => $serviceData['classification'] ? $serviceData['classification']['level'] : null,
 								'lat' => $serviceData['lat'],
