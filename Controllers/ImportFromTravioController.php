@@ -552,7 +552,10 @@ class ImportFromTravioController extends Controller
 						$idsList[] = $item['id'];
 					}
 
-					$this->model->_Db->delete('travio_tags', ['id' => ['NOT IN', $idsList]]);
+					if ($idsList)
+						$this->model->_Db->delete('travio_tags', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_tags', [], ['confirm' => true]);
 					break;
 				case 'amenities':
 					if (!$config['import']['amenities']['import'])
@@ -584,7 +587,10 @@ class ImportFromTravioController extends Controller
 						$this->model->_TravioAssets->importAmenity($id);
 					}
 
-					$this->model->_Db->delete('travio_amenities', ['id' => ['NOT IN', $idsList]]);
+					if ($idsList)
+						$this->model->_Db->delete('travio_amenities', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_amenities', [], ['confirm' => true]);
 					break;
 				case 'classifications':
 					if (!$config['import']['classifications']['import'])
@@ -609,7 +615,10 @@ class ImportFromTravioController extends Controller
 						$idsList[] = $item['id'];
 					}
 
-					$this->model->_Db->delete('travio_classifications', ['id' => ['NOT IN', $idsList]]);
+					if ($idsList)
+						$this->model->_Db->delete('travio_classifications', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_classifications', [], ['confirm' => true]);
 					break;
 				case 'ports':
 					if (!$config['import']['ports']['import'])
@@ -811,7 +820,10 @@ class ImportFromTravioController extends Controller
 						$idsList[] = $item['id'];
 					}
 
-					$this->model->_Db->delete('travio_luggage_types', ['id' => ['NOT IN', $idsList]]);
+					if ($idsList)
+						$this->model->_Db->delete('travio_luggage_types', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_luggage_types', [], ['confirm' => true]);
 					break;
 				case 'master-data':
 					if (!$config['import']['master-data']['import'])
@@ -859,7 +871,10 @@ class ImportFromTravioController extends Controller
 						$idsList[] = $item['id'];
 					}
 
-					$this->model->_Db->delete('travio_payment_methods', ['id' => ['NOT IN', $idsList]]);
+					if ($idsList)
+						$this->model->_Db->delete('travio_payment_methods', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_payment_methods', [], ['confirm' => true]);
 					break;
 				default:
 					$this->model->error('Unknown type');
