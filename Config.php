@@ -349,7 +349,7 @@ class TravioClassifications extends TravioClassificationsBase
 	{
 		$configFile = INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'Db' . DIRECTORY_SEPARATOR . 'config.php';
 
-		require_once($configFile);
+		require($configFile);
 		if (empty($config))
 			throw new \Exception('Db config not found');
 
