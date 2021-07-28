@@ -386,6 +386,7 @@ $config = ' . var_export($config, true) . ';
 			'travio_stations',
 			'travio_master_data',
 			'travio_payment_methods',
+			'travio_classifications',
 		];
 		foreach ($tablesToLink as $table) {
 			if (!in_array($table, $linkedTables))
