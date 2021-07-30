@@ -8,7 +8,7 @@ use Model\TravioAssets\Elements\TravioService;
 class Travio extends Module
 {
 	/** @var array */
-	private $cartCache = null;
+	private array $cartCache = [];
 
 	/**
 	 * @param array $options
@@ -322,7 +322,7 @@ class Travio extends Module
 	 */
 	public function emptyCartCache()
 	{
-		$this->cartCache = null;
+		$this->cartCache = [];
 		if (isset($_SESSION['travio-cart-cache']))
 			unset($_SESSION['travio-cart-cache']);
 	}
@@ -365,25 +365,18 @@ class Travio extends Module
 	/**
 	 * @return array
 	 */
-	public function getCart(): array
+	public function getCart(bool $availability = true): array
 	{
-		return $this->getCartCache();
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getCartCache(): array
-	{
-		if ($this->cartCache === null) {
-			if (isset($_SESSION['travio-cart-cache'])) {
-				$this->cartCache = $_SESSION['travio-cart-cache'];
+		$k = (int)$availability;
+		if (!isset($this->cartCache[$k])) {
+			if (isset($_SESSION['travio-cart-cache'][$k])) {
+				$this->cartCache[$k] = $_SESSION['travio-cart-cache'][$k];
 			} else {
-				$this->cartCache = $this->request('view-cart');
-				$_SESSION['travio-cart-cache'] = $this->cartCache;
+				$this->cartCache[$k] = $this->request('view-cart', ['availability' => $availability]);
+				$_SESSION['travio-cart-cache'][$k] = $this->cartCache[$k];
 			}
 		}
-		return $this->cartCache;
+		return $this->cartCache[$k];
 	}
 
 	/**
