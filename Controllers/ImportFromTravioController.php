@@ -448,6 +448,8 @@ class ImportFromTravioController extends Controller
 							foreach ($packageData['itinerary'] as $destination) {
 								$dId = $this->model->_Db->insert('travio_packages_itinerary', [
 									'package' => $id,
+									'day' => $destination['day'],
+									'geo' => $destination['geo'],
 									'name' => $destination['name'],
 									'description' => $destination['description'],
 								]);
