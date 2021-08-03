@@ -54,6 +54,11 @@ class TravioPackageBase extends Element
 			'field' => 'package',
 		]);
 
+		$this->has('itinerary', [
+			'table' => 'travio_packages_itinerary',
+			'field' => 'package',
+		]);
+
 		$this->has('hotels', [
 			'element' => 'TravioService',
 			'assoc' => [
