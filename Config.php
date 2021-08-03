@@ -102,6 +102,7 @@ $config = [
 			$this->model->_Multilang->checkAndInsertTable('travio_subservices_descriptions');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages');
 			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
+			$this->model->_Multilang->checkAndInsertTable('travio_packages_itinerary');
 			$this->model->_Multilang->checkAndInsertTable('travio_stations');
 			$this->model->_Multilang->checkAndInsertTable('travio_amenities');
 			$this->model->_Multilang->checkAndInsertTable('travio_tags');

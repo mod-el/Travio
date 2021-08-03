@@ -370,6 +370,7 @@ class ImportFromTravioController extends Controller
 								'notes' => $packageData['notes'],
 								'price' => $packageData['price'],
 								'geo' => $packageData['geo'][0]['id'] ?? null,
+								'duration' => $packageData['duration'],
 								'visible' => 1,
 								'last_update' => $item['last_update'],
 							];
@@ -390,6 +391,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_hotels', ['package' => $id]);
+								$this->model->_Db->delete('travio_packages_itinerary', ['package' => $id]);
 							} else {
 								$data['travio'] = $packageData['id'];
 								$id = $this->model->insert('travio_packages', $data);
@@ -442,6 +444,22 @@ class ImportFromTravioController extends Controller
 							}
 
 							$this->model->_Db->bulkInsert('travio_packages_files');
+
+							foreach ($packageData['itinerary'] as $destination) {
+								$dId = $this->model->_Db->insert('travio_packages_itinerary', [
+									'package' => $id,
+									'name' => $destination['name'],
+									'description' => $destination['description'],
+								]);
+
+								foreach ($destination['photos'] as $photo) {
+									$this->model->_Db->insert('travio_packages_itinerary_photos', [
+										'itinerary' => $dId,
+										'thumb' => $photo['thumb'],
+										'url' => $photo['url'],
+									]);
+								}
+							}
 
 							foreach ($packageData['departures'] as $departure) {
 								$this->model->_Db->insert('travio_packages_departures', [
