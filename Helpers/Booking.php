@@ -180,6 +180,8 @@ class Booking extends Base
 		if (count($type) > 2)
 			return [];
 
+		$query = trim($query);
+
 		$elements = [];
 
 		if (in_array($show, ['geo', 'both'])) {
@@ -322,21 +324,26 @@ class Booking extends Base
 			$parentA = mb_strtolower($a['parent_name'] ?? '');
 			$parentB = mb_strtolower($b['parent_name'] ?? '');
 
-			if ($nomeA == $query) $va = 0;
-			elseif ($parentA == $query) $va = 1;
-			elseif (mb_stripos($nomeA, $query) !== false) $va = 2;
-			elseif (mb_stripos($nomeA, $query) === 0) $va = 3;
-			elseif (mb_stripos($parentA, $query) === 0) $va = 4;
-			elseif (mb_stripos($parentA, $query) !== false) $va = 5;
-			else $va = 6;
+			if ($query) {
+				if ($nomeA === $query) $va = 0;
+				elseif ($parentA === $query) $va = 1;
+				elseif (mb_stripos($nomeA, $query) !== false) $va = 2;
+				elseif (mb_stripos($nomeA, $query) === 0) $va = 3;
+				elseif (mb_stripos($parentA, $query) === 0) $va = 4;
+				elseif (mb_stripos($parentA, $query) !== false) $va = 5;
+				else $va = 6;
 
-			if ($nomeB == $query) $vb = 0;
-			elseif ($parentB == $query) $vb = 1;
-			elseif (mb_stripos($nomeB, $query) !== false) $vb = 2;
-			elseif (mb_stripos($nomeB, $query) === 0) $vb = 3;
-			elseif (mb_stripos($parentB, $query) === 0) $vb = 4;
-			elseif (mb_stripos($parentB, $query) !== false) $vb = 5;
-			else $vb = 6;
+				if ($nomeB === $query) $vb = 0;
+				elseif ($parentB === $query) $vb = 1;
+				elseif (mb_stripos($nomeB, $query) !== false) $vb = 2;
+				elseif (mb_stripos($nomeB, $query) === 0) $vb = 3;
+				elseif (mb_stripos($parentB, $query) === 0) $vb = 4;
+				elseif (mb_stripos($parentB, $query) !== false) $vb = 5;
+				else $vb = 6;
+			} else {
+				$va = 0;
+				$vb = 0;
+			}
 
 			return $va <=> $vb ?: mb_strlen($nomeA) <=> mb_strlen($nomeB);
 		});
