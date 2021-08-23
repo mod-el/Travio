@@ -175,7 +175,9 @@ class Booking extends Base
 	{
 		$show = (isset($_POST['show']) and in_array($_POST['show'], ['geo', 'services', 'both'])) ? $_POST['show'] : 'both';
 		$type = isset($_POST['type']) ? explode('-', $_POST['type']) : [null, null];
-		if (count($type) !== 2)
+		if (count($type) === 1)
+			$type[] = null;
+		if (count($type) > 2)
 			return [];
 
 		$elements = [];
