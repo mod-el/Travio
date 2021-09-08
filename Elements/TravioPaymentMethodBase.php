@@ -4,7 +4,7 @@ use Model\ORM\Element;
 
 class TravioPaymentMethodBase extends Element
 {
-	public static $table = 'travio_payment_methods';
+	public static ?string $table = 'travio_payment_methods';
 
 	public function init()
 	{

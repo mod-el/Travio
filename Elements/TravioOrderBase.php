@@ -5,7 +5,7 @@ use Model\Payments\PaymentsOrderInterface;
 
 class TravioOrderBase extends Element implements PaymentsOrderInterface
 {
-	public static $table = 'travio_orders';
+	public static ?string $table = 'travio_orders';
 	public ?array $response = null;
 
 	protected function afterLoad(array $options)

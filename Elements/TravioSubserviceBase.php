@@ -4,7 +4,7 @@ use Model\ORM\Element;
 
 class TravioSubserviceBase extends Element
 {
-	public static $table = 'travio_subservices';
+	public static ?string $table = 'travio_subservices';
 
 	public function init()
 	{

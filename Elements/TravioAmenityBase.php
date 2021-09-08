@@ -4,5 +4,5 @@ use Model\ORM\Element;
 
 class TravioAmenityBase extends Element
 {
-	public static $table = 'travio_amenities';
+	public static ?string $table = 'travio_amenities';
 }

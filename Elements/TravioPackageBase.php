@@ -4,7 +4,7 @@ use Model\ORM\Element;
 
 class TravioPackageBase extends Element
 {
-	public static $table = 'travio_packages';
+	public static ?string $table = 'travio_packages';
 
 	public function init()
 	{
