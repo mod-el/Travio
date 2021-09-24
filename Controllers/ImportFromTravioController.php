@@ -390,7 +390,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_packages_geo', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_hotels', ['package' => $id]);
+								$this->model->_Db->delete('travio_packages_services', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_itinerary', ['package' => $id]);
 							} else {
 								$data['travio'] = $packageData['id'];
@@ -476,14 +476,15 @@ class ImportFromTravioController extends Controller
 
 							$this->model->_Db->bulkInsert('travio_packages_departures');
 
-							foreach ($packageData['hotels'] as $hotel) {
+							foreach ($packageData['services'] as $service) {
 								try {
-									$this->model->_Db->insert('travio_packages_hotels', [
+									$this->model->_Db->insert('travio_packages_services', [
 										'package' => $id,
-										'hotel' => $this->model->select('travio_services', ['code' => $hotel['code']], 'id'),
+										'service' => $this->model->select('travio_services', ['code' => $service['code']], 'id'),
+										'type' => $service['type'],
 									]);
 								} catch (\Exception $e) {
-									$this->model->error('L\'hotel ' . $hotel['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+									$this->model->error('L\'hotel ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
 								}
 							}
 

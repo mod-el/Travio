@@ -47,6 +47,7 @@ class TravioPackageBase extends Element
 		$this->has('departures', [
 			'table' => 'travio_packages_departures',
 			'field' => 'package',
+			'order_by' => 'date',
 		]);
 
 		$this->has('files', [
@@ -59,12 +60,22 @@ class TravioPackageBase extends Element
 			'field' => 'package',
 		]);
 
-		$this->has('hotels', [
+		$this->has('hotels', [ // Retrocompatibilità
 			'element' => 'TravioService',
 			'assoc' => [
-				'table' => 'travio_packages_hotels',
+				'table' => 'travio_packages_services',
 				'parent' => 'package',
-				'field' => 'hotel',
+				'field' => 'service',
+				'where' => ['type' => 2],
+			],
+		]);
+
+		$this->has('services', [
+			'element' => 'TravioService',
+			'assoc' => [
+				'table' => 'travio_packages_services',
+				'parent' => 'package',
+				'field' => 'service',
 			],
 		]);
 	}
