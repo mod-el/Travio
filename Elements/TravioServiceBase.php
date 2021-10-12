@@ -86,6 +86,21 @@ class TravioServiceBase extends Element
 		]);
 	}
 
+	public function getDescriptionsByTag(string $tag): array
+	{
+		$descriptions = $this->descriptions;
+
+		$filtered = [];
+		foreach ($descriptions as $description) {
+			if ($description['tag'] !== $tag)
+				continue;
+
+			$filtered[] = $description;
+		}
+
+		return $filtered;
+	}
+
 	public function getMainImg(): ?string
 	{
 		$photos = $this->photos;
