@@ -13,9 +13,6 @@ class TravioPaymentConditionsBase extends AdminPage
 				'R' => true,
 				'D' => false,
 			],
-			'fields' => [
-				'name',
-			],
 			'order_by' => 'name',
 		];
 	}
