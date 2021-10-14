@@ -897,6 +897,32 @@ class ImportFromTravioController extends Controller
 					else
 						$this->model->_Db->delete('travio_payment_methods', [], ['confirm' => true]);
 					break;
+				case 'payment-conditions':
+					if (!$config['import']['payment-conditions']['import'])
+						break;
+
+					$list = $this->model->_Travio->request('static-data', [
+						'type' => 'payment-conditions',
+						'all-langs' => true,
+					]);
+
+					$idsList = [];
+					foreach ($list['list'] as $item) {
+						$this->model->updateOrInsert('travio_payment_conditions', [
+							'id' => $item['id'],
+						], [
+							'name' => $item['name'],
+						]);
+
+						$this->model->_TravioAssets->importPaymentCondition($item['id']);
+						$idsList[] = $item['id'];
+					}
+
+					if ($idsList)
+						$this->model->_Db->delete('travio_payment_conditions', ['id' => ['NOT IN', $idsList]]);
+					else
+						$this->model->_Db->delete('travio_payment_conditions', [], ['confirm' => true]);
+					break;
 				default:
 					$this->model->error('Unknown type');
 					break;

@@ -83,6 +83,9 @@ $config = [
 				\'visible_in\' => 1,
 			],
 		],
+		\'payment-conditions\' => [
+			\'import\' => true,
+		],
 		\'luggage-types\' => [
 			\'import\' => true,
 		],
@@ -288,6 +291,22 @@ class TravioPaymentMethods extends TravioPaymentMethodsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioPaymentCondition.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioPaymentConditionBase;
+
+class TravioPaymentCondition extends TravioPaymentConditionBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioPaymentConditions.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioPaymentConditionsBase;
+
+class TravioPaymentConditions extends TravioPaymentConditionsBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioLuggageType.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioLuggageTypeBase;
@@ -387,6 +406,7 @@ $config = ' . var_export($config, true) . ';
 			'travio_stations',
 			'travio_master_data',
 			'travio_payment_methods',
+			'travio_payment_conditions',
 			'travio_classifications',
 		];
 		foreach ($tablesToLink as $table) {
@@ -441,6 +461,9 @@ $config = ' . var_export($config, true) . ';
 						'visible_in' => 1,
 					],
 				],
+				'payment-conditions' => [
+					'import' => true,
+				],
 			];
 
 			unset($config['override-on-import']);
@@ -458,6 +481,13 @@ $config = ' . var_export($config, true) . ';
 				'filters' => [
 					'visible_in' => 1,
 				],
+			];
+			$this->saveConfig('config', $config);
+		}
+
+		if ($config and !isset($config['import']['payment-conditions'])) {
+			$config['import']['payment-conditions'] = [
+				'import' => true,
 			];
 			$this->saveConfig('config', $config);
 		}

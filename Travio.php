@@ -82,6 +82,11 @@ class Travio extends Module
 					'rule' => 'travio-payment-methods',
 				],
 				[
+					'name' => 'Condizioni di pagamento',
+					'page' => 'TravioPaymentConditions',
+					'rule' => 'travio-payment-conditions',
+				],
+				[
 					'name' => 'Tipi  bagaglio',
 					'page' => 'TravioLuggageTypes',
 					'rule' => 'travio-luggage-types',

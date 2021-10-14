@@ -44,6 +44,10 @@ class TravioAssetsBase extends Module
 	{
 	}
 
+	public function importPaymentCondition(int $id)
+	{
+	}
+
 	public function importLuggageType(int $id)
 	{
 	}
