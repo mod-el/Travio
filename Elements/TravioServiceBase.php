@@ -39,9 +39,13 @@ class TravioServiceBase extends Element
 		]);
 
 		$this->has('tags', [
-			'table' => 'travio_services_tags',
-			'field' => 'service',
-			'order_by' => 'id',
+			'element' => 'TravioTag',
+			'assoc' => [
+				'table' => 'travio_services_tags',
+				'parent' => 'service',
+				'field' => 'tag',
+				'order_by' => 'id',
+			],
 		]);
 
 		$this->has('descriptions', [

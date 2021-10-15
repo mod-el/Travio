@@ -13,9 +13,13 @@ class TravioPackageBase extends Element
 		];
 
 		$this->has('tags', [
-			'table' => 'travio_packages_tags',
-			'field' => 'package',
-			'order_by' => 'id',
+			'element' => 'TravioTag',
+			'assoc' => [
+				'table' => 'travio_packages_tags',
+				'parent' => 'package',
+				'field' => 'tag',
+				'order_by' => 'id',
+			],
 		]);
 
 		$this->has('descriptions', [
