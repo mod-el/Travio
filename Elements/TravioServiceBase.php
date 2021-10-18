@@ -75,8 +75,13 @@ class TravioServiceBase extends Element
 		]);
 
 		$this->has('amenities', [
-			'table' => 'travio_services_amenities',
-			'field' => 'service',
+			'element' => 'TravioAmenity',
+			'assoc' => [
+				'table' => 'travio_services_amenities',
+				'parent' => 'service',
+				'field' => 'amenity',
+				'order_by' => 'id',
+			],
 		]);
 
 		$this->has('files', [
