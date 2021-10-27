@@ -371,6 +371,7 @@ class ImportFromTravioController extends Controller
 								'price' => $packageData['price'],
 								'geo' => $packageData['geo'][0]['id'] ?? null,
 								'duration' => $packageData['duration'],
+								'min_pax' => $packageData['min_pax'],
 								'visible' => 1,
 								'last_update' => $item['last_update'],
 							];
