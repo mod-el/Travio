@@ -185,15 +185,19 @@ class ImportFromTravioController extends Controller
 											'subservice' => $id,
 											'url' => $photo['url'],
 											'thumb' => $photo['thumb'],
-										], $config['import']['services']['override']['images_descriptions'] ? [
+										], ($config['import']['services']['override']['images_descriptions'] ?? true) ? [
 											'description' => $photo['description'],
 										] : []);
 									}
 
-									$this->model->_Db->delete('travio_subservices_photos', [
-										'subservice' => $id,
-										'id' => ['NOT IN', $present_photos],
-									]);
+									if ($present_photos) {
+										$this->model->_Db->delete('travio_subservices_photos', [
+											'subservice' => $id,
+											'id' => ['NOT IN', $present_photos],
+										]);
+									} else {
+										$this->model->_Db->delete('travio_subservices_photos', ['subservice' => $id]);
+									}
 
 									foreach ($subservice['amenities'] as $amenity_id => $amenity) {
 										$this->model->_Db->insert('travio_subservices_amenities', [
@@ -242,15 +246,19 @@ class ImportFromTravioController extends Controller
 									'service' => $id,
 									'url' => $photo['url'],
 									'thumb' => $photo['thumb'],
-								], $config['import']['services']['override']['images_descriptions'] ? [
+								], ($config['import']['services']['override']['images_descriptions'] ?? true) ? [
 									'description' => $photo['description'],
 								] : []);
 							}
 
-							$this->model->_Db->delete('travio_services_photos', [
-								'service' => $id,
-								'id' => ['NOT IN', $present_photos],
-							]);
+							if ($present_photos) {
+								$this->model->_Db->delete('travio_services_photos', [
+									'service' => $id,
+									'id' => ['NOT IN', $present_photos],
+								]);
+							} else {
+								$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
+							}
 
 							foreach ($serviceData['geo'] as $geo) {
 								if (!$geo['id'])
