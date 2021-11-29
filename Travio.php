@@ -370,14 +370,14 @@ class Travio extends Module
 	/**
 	 * @return array
 	 */
-	public function getCart(bool $availability = true): array
+	public function getCart(bool $availability = true, array $simulate_instalments = []): array
 	{
 		$k = (int)$availability;
-		if (!isset($this->cartCache[$k])) {
-			if (isset($_SESSION['travio-cart-cache'][$k])) {
+		if (!isset($this->cartCache[$k]) or $simulate_instalments) {
+			if (isset($_SESSION['travio-cart-cache'][$k]) and !$simulate_instalments) {
 				$this->cartCache[$k] = $_SESSION['travio-cart-cache'][$k];
 			} else {
-				$this->cartCache[$k] = $this->request('view-cart', ['availability' => $availability]);
+				$this->cartCache[$k] = $this->request('view-cart', ['availability' => $availability, 'simulate_instalments' => $simulate_instalments]);
 				$_SESSION['travio-cart-cache'][$k] = $this->cartCache[$k];
 			}
 		}
