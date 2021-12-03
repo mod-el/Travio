@@ -35,6 +35,7 @@ $config = [
 				\'max_date\' => true,
 				\'lat\' => true,
 				\'lng\' => true,
+				\'descriptions\' => true,
 			],
 		],
 		\'subservices\' => [

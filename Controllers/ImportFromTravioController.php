@@ -137,7 +137,8 @@ class ImportFromTravioController extends Controller
 								$this->model->update('travio_services', $id, $data);
 
 								$this->model->_Db->delete('travio_services_tags', ['service' => $id]);
-								$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
+								if ($config['import']['services']['override']['descriptions'] ?? true)
+									$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_geo', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_files', ['service' => $id]);
@@ -231,13 +232,15 @@ class ImportFromTravioController extends Controller
 
 							$this->model->_Db->bulkInsert('travio_services_tags');
 
-							foreach ($serviceData['descriptions'] as $description) {
-								$this->model->_Db->insert('travio_services_descriptions', [
-									'service' => $id,
-									'tag' => $description['keyword'],
-									'title' => $description['title'],
-									'text' => $description['text'],
-								]);
+							if (($config['import']['services']['override']['descriptions'] ?? true) or !$item['existing']) {
+								foreach ($serviceData['descriptions'] as $description) {
+									$this->model->_Db->insert('travio_services_descriptions', [
+										'service' => $id,
+										'tag' => $description['keyword'],
+										'title' => $description['title'],
+										'text' => $description['text'],
+									]);
+								}
 							}
 
 							$present_photos = [];
