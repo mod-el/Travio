@@ -311,8 +311,8 @@ class ImportFromTravioController extends Controller
 							$this->model->_Db->rollBack();
 							throw $e;
 						}
-					} elseif (isset($_GET['finalize'])) {
-						$presents = json_decode($_GET['finalize'], true) ?: [];
+					} elseif (isset($_POST['finalize'])) {
+						$presents = json_decode($_POST['finalize'], true) ?: [];
 						if ($presents) {
 							$this->model->_Db->update('travio_services', [
 								'travio' => ['NOT IN', $presents],
@@ -516,8 +516,8 @@ class ImportFromTravioController extends Controller
 							$this->model->_Db->rollBack();
 							throw $e;
 						}
-					} elseif (isset($_GET['finalize'])) {
-						$presents = json_decode($_GET['finalize'], true) ?: [];
+					} elseif (isset($_POST['finalize'])) {
+						$presents = json_decode($_POST['finalize'], true) ?: [];
 						if ($presents) {
 							$this->model->_Db->update('travio_packages', [
 								'travio' => ['NOT IN', $presents],

@@ -51,7 +51,7 @@ function setupItemsImport(type, items) {
 function importNextItem(type, items, idx) {
 	let itemsToUpdate = items.filter(item => item.update);
 	if (itemsToUpdate.length < idx + 1) {
-		return ajax(PATH + 'import-from-travio', {'type': type, 'finalize': JSON.stringify(items.map(item => item.id))}).then(r => {
+		return ajax(PATH + 'import-from-travio', {'type': type}, {'finalize': JSON.stringify(items.map(item => item.id))}).then(r => {
 			if (r === 'ok') {
 				_('travio-importing-' + type).firstElementChild.style.width = '100%';
 				document.querySelector('[data-import="' + type + '"]').setAttribute('data-imported', '1');
