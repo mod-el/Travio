@@ -434,13 +434,17 @@ class Travio extends Module
 	 * @param string $reference
 	 * @return array
 	 */
-	public function confirmOrder(string $reference, ?float $paid = null): array
+	public function confirmOrder(string $reference, ?float $paid = null, ?string $payment_reference = null): array
 	{
 		$payload = [
 			'reference' => $reference,
 		];
-		if ($paid !== null)
+		if ($paid !== null) {
 			$payload['paid'] = $paid;
+
+			if ($payment_reference !== null)
+				$payload['payment_reference'] = $payment_reference;
+		}
 
 		return $this->request('confirm', $payload);
 	}

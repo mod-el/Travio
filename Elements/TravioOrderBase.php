@@ -53,13 +53,14 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 			$this->model->_Travio->request('pay', [
 				'reference' => $this['reference'],
 				'amount' => (float)$this['amount'],
+				'payment_reference' => (string)$this['id'],
 			]);
 		}
 	}
 
 	public function confirm(?float $paid = null)
 	{
-		$response = $this->model->_Travio->confirmOrder($this['reference'], $paid);
+		$response = $this->model->_Travio->confirmOrder($this['reference'], $paid, $this['id']);
 		$this->save(['initial_status' => $response['booking-status']]);
 	}
 }
