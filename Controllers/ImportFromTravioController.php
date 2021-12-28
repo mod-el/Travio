@@ -185,7 +185,7 @@ class ImportFromTravioController extends Controller
 										$present_photos[] = $this->model->_Db->updateOrInsert('travio_subservices_photos', [
 											'subservice' => $ss_id,
 											'url' => $photo['url'],
-											'thumb' => $photo['thumb'],
+											'thumb' => $photo['thumb'] ?: $photo['url'],
 										], ($config['import']['services']['override']['images_descriptions'] ?? true) ? [
 											'description' => $photo['description'],
 										] : []);
@@ -248,7 +248,7 @@ class ImportFromTravioController extends Controller
 								$present_photos[] = $this->model->_Db->updateOrInsert('travio_services_photos', [
 									'service' => $id,
 									'url' => $photo['url'],
-									'thumb' => $photo['thumb'],
+									'thumb' => $photo['thumb'] ?: $photo['url'],
 								], ($config['import']['services']['override']['images_descriptions'] ?? true) ? [
 									'description' => $photo['description'],
 								] : []);
@@ -440,7 +440,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->insert('travio_packages_photos', [
 									'package' => $id,
 									'url' => $photo['url'],
-									'thumb' => $photo['thumb'],
+									'thumb' => $photo['thumb'] ?: $photo['url'],
 									'description' => $photo['description'],
 								], ['defer' => true]);
 							}
@@ -478,8 +478,8 @@ class ImportFromTravioController extends Controller
 								foreach ($destination['photos'] as $photo) {
 									$this->model->_Db->insert('travio_packages_itinerary_photos', [
 										'itinerary' => $dId,
-										'thumb' => $photo['thumb'],
 										'url' => $photo['url'],
+										'thumb' => $photo['thumb'] ?: $photo['url'],
 									]);
 								}
 							}
