@@ -45,7 +45,7 @@ class TravioSubserviceBase extends Element
 		$this->has('photos', [
 			'table' => 'travio_subservices_photos',
 			'field' => 'subservice',
-			'order_by' => 'id',
+			'order_by' => '`order`, `id`',
 		]);
 
 		$this->has('amenities', [
@@ -59,3 +59,4 @@ class TravioSubserviceBase extends Element
 		]);
 	}
 }
+

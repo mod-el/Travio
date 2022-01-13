@@ -36,7 +36,7 @@ class TravioPackageBase extends Element
 		$this->has('photos', [
 			'table' => 'travio_packages_photos',
 			'field' => 'package',
-			'order_by' => 'id',
+			'order_by' => '`order`, `id`',
 		]);
 
 		$this->has('geo', [

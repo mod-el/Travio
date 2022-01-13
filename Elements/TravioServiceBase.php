@@ -62,7 +62,7 @@ class TravioServiceBase extends Element
 		$this->has('photos', [
 			'table' => 'travio_services_photos',
 			'field' => 'service',
-			'order_by' => 'id',
+			'order_by' => '`order`, `id`',
 		]);
 
 		$this->has('geo', [
