@@ -59,4 +59,3 @@ class TravioSubserviceBase extends Element
 		]);
 	}
 }
-
