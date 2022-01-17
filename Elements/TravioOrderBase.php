@@ -10,12 +10,12 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 
 	protected function afterLoad(array $options)
 	{
-		$this->response = json_decode($this['response'], true);
+		$this->response = json_decode($this['response'] ?: '', true);
 	}
 
 	public function afterSave($previous_data, array $saving)
 	{
-		$this->response = json_decode($this['response'], true);
+		$this->response = json_decode($this['response'] ?: '', true);
 	}
 
 	public function getGateway(): ?string
