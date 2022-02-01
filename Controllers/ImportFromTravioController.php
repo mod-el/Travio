@@ -921,6 +921,7 @@ class ImportFromTravioController extends Controller
 							'id' => $item['id'],
 						], [
 							'name' => $item['name'],
+							'visible' => 0,
 						]);
 
 						$this->model->_TravioAssets->importPaymentMethod($item['id']);
