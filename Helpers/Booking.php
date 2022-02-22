@@ -257,9 +257,16 @@ class Booking extends Base
 					'alias' => 'main_custom',
 					'on' => 'parent',
 					'join_field' => 'id',
+					'fields' => [],
 				];
 
-				$where = array_merge($where, json_decode($_POST['filters'], true, 512, JSON_THROW_ON_ERROR));
+				$filters = json_decode($_POST['filters'], true, 512, JSON_THROW_ON_ERROR);
+				foreach ($filters as $k => $v) {
+					if (is_numeric($k) or is_array($v))
+						throw new \Exception('Invalid filters');
+					$where[$k] = $v;
+					$joins['travio_geo_custom']['fields'][] = $k;
+				}
 			}
 
 			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
