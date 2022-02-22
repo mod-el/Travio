@@ -501,4 +501,9 @@ $config = ' . var_export($config, true) . ';
 
 		return true;
 	}
+
+	public function getConfigData(): ?array
+	{
+		return [];
+	}
 }
