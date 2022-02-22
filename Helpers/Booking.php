@@ -252,6 +252,16 @@ class Booking extends Base
 				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR t.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
 			}
 
+			if (!empty($_POST['filters'])) {
+				$joins['travio_geo_custom'] = [
+					'alias' => 'main_custom',
+					'on' => 'parent',
+					'join_field' => 'id',
+				];
+
+				$where = array_merge($where, json_decode($_POST['filters'], true, 512, JSON_THROW_ON_ERROR));
+			}
+
 			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
 				'order_by' => 'parent, lang!=' . $this->model->_Db->quote($this->model->_Multilang->lang),
 				'joins' => $joins,
