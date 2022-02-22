@@ -8,6 +8,7 @@ class TravioGeoBase extends AdminPage
 	{
 		return [
 			'element' => 'TravioGeo',
+			'order_by' => 'name',
 			'visualizer' => 'Tree',
 			'privileges' => [
 				'C' => false,
