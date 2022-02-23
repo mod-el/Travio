@@ -410,12 +410,19 @@ $config = ' . var_export($config, true) . ';
 			'travio_payment_conditions',
 			'travio_classifications',
 		];
+
+		$edited = false;
 		foreach ($tablesToLink as $table) {
-			if (!in_array($table, $linkedTables))
+			if (!in_array($table, $linkedTables)) {
+				$edited = true;
 				$linkedTables[] = $table;
+			}
 		}
-		$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
-		$this->saveDbConfig($dbConfig);
+
+		if($edited) {
+			$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
+			$this->saveDbConfig($dbConfig);
+		}
 
 		$config = $this->retrieveConfig();
 		if ($config and !isset($config['import'])) {
