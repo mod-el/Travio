@@ -917,12 +917,18 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_payment_methods', [
-							'id' => $item['id'],
-						], [
-							'name' => $item['name'],
-							'visible' => 0,
-						]);
+						$check = $this->model->select('travio_payment_methods', $item['id']);
+						if ($check) {
+							$this->model->update('travio_payment_methods', $item['id'], [
+								'name' => $item['name'],
+							]);
+						} else {
+							$this->model->insert('travio_payment_methods', [
+								'id' => $item['id'],
+								'name' => $item['name'],
+								'visible' => 0,
+							]);
+						}
 
 						$this->model->_TravioAssets->importPaymentMethod($item['id']);
 						$idsList[] = $item['id'];
