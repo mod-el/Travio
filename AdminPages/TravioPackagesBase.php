@@ -10,7 +10,6 @@ class TravioPackagesBase extends AdminPage
 			'element' => 'TravioPackage',
 			'privileges' => [
 				'C' => false,
-				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-packages.php'),
 				'D' => DEBUG_MODE,
 			],
 			'order_by' => 'code',
@@ -23,5 +22,13 @@ class TravioPackagesBase extends AdminPage
 				'last_update',
 			],
 		];
+	}
+
+	public function customize()
+	{
+		if (!file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-packages.php')) {
+			$this->model->viewOptions['template-module'] = 'Travio';
+			$this->model->viewOptions['template'] = 'travio-packages-base';
+		}
 	}
 }

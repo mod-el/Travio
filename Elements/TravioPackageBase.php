@@ -125,4 +125,13 @@ class TravioPackageBase extends Element
 
 		return null;
 	}
+
+	public function getMeta(): array
+	{
+		return [
+			'title' => $this['title'] ?? $this['name'],
+			'description' => $this['description'],
+			'keywords' => $this['keywords'],
+		];
+	}
 }
