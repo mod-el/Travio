@@ -79,6 +79,16 @@ class Booking extends Base
 							$dates['max'] = $maxDate->format('Y-m-d');
 					}
 				}
+
+				if (count($el->dates) > 0) {
+					$dates['list'] = [];
+					foreach ($el->dates as $date) {
+						$dates['list'][] = [
+							$date['date'],
+							$date['min_out'],
+						];
+					}
+				}
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
@@ -133,7 +143,6 @@ class Booking extends Base
 				break;
 			default:
 				die('Unknown type');
-				break;
 		}
 
 		if ($dates)
