@@ -93,6 +93,11 @@ class TravioServiceBase extends Element
 			'table' => 'travio_services_videos',
 			'field' => 'service',
 		]);
+
+		$this->has('dates', [
+			'table' => 'travio_services_dates',
+			'field' => 'service',
+		]);
 	}
 
 	public function getDescriptionsByTag(string $tag): array

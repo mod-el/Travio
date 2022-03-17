@@ -99,6 +99,7 @@ class ImportFromTravioController extends Controller
 							'type' => 'service',
 							'id' => $item['id'],
 							'all-langs' => true,
+							'list-dates' => $config['import']['services']['dates'] ?? false,
 						])['data'];
 
 						try {
@@ -143,6 +144,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_files', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_videos', ['service' => $id]);
+								$this->model->_Db->delete('travio_services_dates', ['service' => $id]);
 							} else {
 								$data['travio'] = $serviceData['id'];
 								$id = $this->model->insert('travio_services', $data);
@@ -307,6 +309,16 @@ class ImportFromTravioController extends Controller
 							}
 
 							$this->model->_Db->bulkInsert('travio_services_videos');
+
+							foreach ($serviceData['dates'] as $date) {
+								$this->model->_Db->insert('travio_services_dates', [
+									'service' => $id,
+									'date' => $date['date'],
+									'min_out' => $date['min_out'],
+								], ['defer' => true]);
+							}
+
+							$this->model->_Db->bulkInsert('travio_services_dates');
 
 							$this->model->_TravioAssets->importService($id, $serviceData['id']);
 
