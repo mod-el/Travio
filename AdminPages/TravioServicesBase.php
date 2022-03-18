@@ -27,7 +27,8 @@ class TravioServicesBase extends AdminPage
 
 	public function customize()
 	{
-		if (!file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-services.php')) {
+		$adminPath = $this->model->_Admin->getPath() ? DIRECTORY_SEPARATOR . $this->model->_Admin->getPath() : '';
+		if (!file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . $adminPath . DIRECTORY_SEPARATOR . 'travio-services.php')) {
 			$this->model->viewOptions['template-module'] = 'Travio';
 			$this->model->viewOptions['template'] = 'travio-services-base';
 		}
