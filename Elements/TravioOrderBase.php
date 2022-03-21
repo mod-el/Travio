@@ -38,6 +38,11 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 		return 'Pratica #' . $this['reference'] . ' - ' . APP_NAME;
 	}
 
+	public function getInvoiceId(): ?string
+	{
+		return $this['reference'];
+	}
+
 	public function isPaid(): bool
 	{
 		return (bool)$this['paid'];
