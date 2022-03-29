@@ -80,15 +80,11 @@ class Booking extends Base
 					}
 				}
 
-				if (count($el->dates) > 0) {
-					$dates['list'] = [];
-					foreach ($el->dates as $date) {
-						$dates['list'][] = [
-							$date['date'],
-							$date['min_out'],
-						];
-					}
-				}
+				$checkin_dates = $el->getCheckinDates();
+				if (count($checkin_dates) > 0)
+					$dates['list'] = $checkin_dates;
+
+				$fill['travioWebsiteServiceId'] = $el['id'];
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];

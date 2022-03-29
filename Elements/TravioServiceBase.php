@@ -94,9 +94,10 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 		]);
 
-		$this->has('dates', [
-			'table' => 'travio_services_dates',
+		$this->has('availability', [
+			'table' => 'travio_services_availability',
 			'field' => 'service',
+			'order_by' => '`from`',
 		]);
 	}
 
@@ -113,6 +114,100 @@ class TravioServiceBase extends Element
 		}
 
 		return $filtered;
+	}
+
+	public function getCheckinDates(): array
+	{
+		$today = date_create(date('Y-m-d'));
+
+		$weekdays = [
+			'sunday',
+			'monday',
+			'tuesday',
+			'wednesday',
+			'thursday',
+			'friday',
+			'saturday',
+		];
+
+		$dates = [];
+		foreach ($this->availability as $availability) {
+			if (date_create($availability['to']) < $today)
+				continue;
+
+			$day = date_create($availability['from']);
+			$to = date_create($availability['to']);
+
+			for (; $day <= $to; $day->modify('+1 day')) {
+				if ($day < $today)
+					continue;
+
+				$weekday = $weekdays[$day->format('w')];
+				if (!$availability['in_' . $weekday])
+					continue;
+
+				$dates[] = $day->format('Y-m-d');
+			}
+		}
+		return $dates;
+	}
+
+	public function getCheckoutDates(\DateTime $in): array
+	{
+		$inAvailability = null;
+		foreach ($this->availability as $availability) {
+			if ($in >= date_create($availability['from']) and $in <= date_create($availability['to'])) {
+				$inAvailability = $availability;
+				break;
+			}
+		}
+
+		if (!$inAvailability) {
+			return [
+				'list' => [],
+			];
+		}
+
+		$weekdays = [
+			'sunday',
+			'monday',
+			'tuesday',
+			'wednesday',
+			'thursday',
+			'friday',
+			'saturday',
+		];
+
+		$list = [];
+
+		foreach ($this->availability as $availability) {
+			$from = date_create($availability['from']);
+			if ($from < $in)
+				continue;
+
+			$day = clone $from;
+			$to = date_create($availability['to']);
+
+			for (; $day <= $to; $day->modify('+1 day')) {
+				$duration = date_diff($day, $in, true)->days;
+				if ($day < $in or $duration > 60)
+					continue;
+
+				$weekday = $weekdays[$day->format('w')];
+				if (!$inAvailability['out_' . $weekday])
+					continue;
+
+				if ($inAvailability['min_stay'] and $duration < $inAvailability['min_stay'])
+					continue;
+
+				if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
+					continue;
+
+				$list[] = $day->format('Y-m-d');
+			}
+		}
+
+		return $list;
 	}
 
 	public function getMainImg(): ?string

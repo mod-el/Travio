@@ -99,7 +99,7 @@ class ImportFromTravioController extends Controller
 							'type' => 'service',
 							'id' => $item['id'],
 							'all-langs' => true,
-							'list-dates' => $config['import']['services']['dates'] ?? false,
+							'get-availability' => $config['import']['services']['availability'] ?? false,
 						])['data'];
 
 						try {
@@ -144,7 +144,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_files', ['service' => $id]);
 								$this->model->_Db->delete('travio_services_videos', ['service' => $id]);
-								$this->model->_Db->delete('travio_services_dates', ['service' => $id]);
+								$this->model->_Db->delete('travio_services_availability', ['service' => $id]);
 							} else {
 								$data['travio'] = $serviceData['id'];
 								$id = $this->model->insert('travio_services', $data);
@@ -310,15 +310,32 @@ class ImportFromTravioController extends Controller
 
 							$this->model->_Db->bulkInsert('travio_services_videos');
 
-							foreach ($serviceData['dates'] as $date) {
-								$this->model->_Db->insert('travio_services_dates', [
+							foreach ($serviceData['availability'] as $availability) {
+								$this->model->_Db->insert('travio_services_availability', [
 									'service' => $id,
-									'date' => $date['date'],
-									'min_out' => $date['min_out'],
+									'from' => $availability['from'],
+									'to' => $availability['to'],
+									'in_monday' => (int)$availability['in_monday'],
+									'in_tuesday' => (int)$availability['in_tuesday'],
+									'in_wednesday' => (int)$availability['in_wednesday'],
+									'in_thursday' => (int)$availability['in_thursday'],
+									'in_friday' => (int)$availability['in_friday'],
+									'in_saturday' => (int)$availability['in_saturday'],
+									'in_sunday' => (int)$availability['in_sunday'],
+									'out_monday' => (int)$availability['out_monday'],
+									'out_tuesday' => (int)$availability['out_tuesday'],
+									'out_wednesday' => (int)$availability['out_wednesday'],
+									'out_thursday' => (int)$availability['out_thursday'],
+									'out_friday' => (int)$availability['out_friday'],
+									'out_saturday' => (int)$availability['out_saturday'],
+									'out_sunday' => (int)$availability['out_sunday'],
+									'min_stay' => $availability['min_stay'],
+									'only_multiples_of' => $availability['only_multiples_of'],
+									'fixed_duration' => $availability['fixed_duration'],
 								], ['defer' => true]);
 							}
 
-							$this->model->_Db->bulkInsert('travio_services_dates');
+							$this->model->_Db->bulkInsert('travio_services_availability');
 
 							$this->model->_TravioAssets->importService($id, $serviceData['id']);
 
