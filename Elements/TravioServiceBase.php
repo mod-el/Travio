@@ -155,11 +155,12 @@ class TravioServiceBase extends Element
 	public function getCheckoutDates(\DateTime $in): array
 	{
 		$inAvailability = null;
+		$lastAvailability = null;
 		foreach ($this->availability as $availability) {
-			if ($in >= date_create($availability['from']) and $in <= date_create($availability['to'])) {
+			if ($in >= date_create($availability['from']) and $in <= date_create($availability['to']))
 				$inAvailability = $availability;
-				break;
-			}
+
+			$lastAvailability = $availability['to'];
 		}
 
 		if (!$inAvailability) {
@@ -180,31 +181,30 @@ class TravioServiceBase extends Element
 
 		$list = [];
 
-		foreach ($this->availability as $availability) {
-			$from = date_create($availability['from']);
-			if ($from < $in)
+		$lastAvailability = date_create($lastAvailability);
+		$lastAvailability->modify('+1 day');
+
+		$day = clone $in;
+
+		for (; $day <= $lastAvailability; $day->modify('+1 day')) {
+			$duration = date_diff($day, $in, true)->days;
+			if ($day < $in or $duration > 60)
 				continue;
 
-			$day = clone $from;
-			$to = date_create($availability['to']);
+			$weekday = $weekdays[$day->format('w')];
+			if (!$inAvailability['out_' . $weekday])
+				continue;
 
-			for (; $day <= $to; $day->modify('+1 day')) {
-				$duration = date_diff($day, $in, true)->days;
-				if ($day < $in or $duration > 60)
-					continue;
+			if ($inAvailability['min_stay'] and $duration < $inAvailability['min_stay'])
+				continue;
 
-				$weekday = $weekdays[$day->format('w')];
-				if (!$inAvailability['out_' . $weekday])
-					continue;
+			if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
+				continue;
 
-				if ($inAvailability['min_stay'] and $duration < $inAvailability['min_stay'])
-					continue;
+			if ($inAvailability['fixed_duration'] and $duration !== $inAvailability['fixed_duration'])
+				continue;
 
-				if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
-					continue;
-
-				$list[] = $day->format('Y-m-d');
-			}
+			$list[] = $day->format('Y-m-d');
 		}
 
 		return $list;
