@@ -841,8 +841,10 @@ class ImportFromTravioController extends Controller
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
+						$this->model->_Db->delete('travio_stations_services', [], ['confirm' => true]);
+
 						foreach ($list['list'] as $id => $item) {
-							$check = $this->model->select('travio_stations', $id, [
+							$check = $this->model->_Db->select('travio_stations', $id, [
 								'auto_ml' => false,
 								'auto-join-linked-tables' => false,
 							]);
@@ -860,13 +862,32 @@ class ImportFromTravioController extends Controller
 										unset($data[$k]);
 								}
 
-								$this->model->update('travio_stations', $id, $data);
+								$this->model->_Db->update('travio_stations', $id, $data);
 							} else {
-								$this->model->insert('travio_stations', [
+								$this->model->_Db->insert('travio_stations', [
 									'id' => $id,
 									'code' => $item['code'],
 									'name' => $item['name'],
 								]);
+							}
+
+							$cacheServices = [];
+							foreach ([
+								         'departs' => 'departure',
+								         'arrives' => 'arrival',
+							         ] as $k => $link_type) {
+								foreach ($item[$k] as $service) {
+									if (!array_key_exists($service, $cacheServices))
+										$cacheServices[$service] = $this->model->_Db->select('travio_services', ['travio' => $service], 'id');
+									if (!$cacheServices[$service])
+										continue;
+
+									$this->model->_Db->insert('travio_stations_services', [
+										'type' => $link_type,
+										'station' => $id,
+										'service' => $cacheServices[$service],
+									]);
+								}
 							}
 
 							$this->model->_TravioAssets->importStation($id);

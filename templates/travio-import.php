@@ -52,13 +52,6 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
-			Stazioni transfer
-		</div>
-		<div class="col" data-import="stations"></div>
-	</div>
-
-	<div class="py-2 row">
-		<div class="col-4">
 			Servizi
 		</div>
 		<div class="col" data-import="services"></div>
@@ -69,6 +62,13 @@
 			Pacchetti
 		</div>
 		<div class="col" data-import="packages"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
+			Stazioni transfer
+		</div>
+		<div class="col" data-import="stations"></div>
 	</div>
 
 	<div class="py-2 row">

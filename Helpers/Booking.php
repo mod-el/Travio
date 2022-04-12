@@ -12,11 +12,11 @@ class Booking extends Base
 		switch (get_class($el)) {
 			case 'Model\TravioAssets\Elements\TravioGeo':
 				$id = 'd' . $el['id'];
-				if (!empty($el['parent_name'])) {
+				if (!empty($el['parent_name']))
 					$plainText = ucwords(mb_strtolower($el['name'])) . ' | ' . ucwords(mb_strtolower($el['parent_name']));
-				} else {
+				else
 					$plainText = ucwords(mb_strtolower($el['name']));
-				}
+
 				$text = '<i class="fas fa-map-marker-alt"></i> ' . entities($plainText);
 
 				$services = $this->model->select_all('travio_services', ['join_geo' => $el['id']], [
