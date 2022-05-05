@@ -1,9 +1,12 @@
 <?php namespace Model\Travio\Controllers;
 
 use Model\Core\Controller;
+use Model\Travio\TravioCacheTrait;
 
 class ImportFromTravioController extends Controller
 {
+	use TravioCacheTrait;
+
 	public function init()
 	{
 		$this->model->switchEvents(false);
@@ -188,6 +191,11 @@ class ImportFromTravioController extends Controller
 										if ($config['import']['services']['override']['images_descriptions'] ?? true)
 											$dataToUpdate['description'] = $photo['description'];
 
+										if ($photo['url'])
+											$this->invalidatePhotoCache($photo['url']);
+										if ($photo['thumb'])
+											$this->invalidatePhotoCache($photo['thumb']);
+
 										$present_photos[] = $this->model->_Db->updateOrInsert('travio_subservices_photos', [
 											'subservice' => $ss_id,
 											'url' => $photo['url'],
@@ -252,6 +260,11 @@ class ImportFromTravioController extends Controller
 								$dataToUpdate = ['order' => $photoIdx + 1];
 								if ($config['import']['services']['override']['images_descriptions'] ?? true)
 									$dataToUpdate['description'] = $photo['description'];
+
+								if ($photo['url'])
+									$this->invalidatePhotoCache($photo['url']);
+								if ($photo['thumb'])
+									$this->invalidatePhotoCache($photo['thumb']);
 
 								$present_photos[] = $this->model->_Db->updateOrInsert('travio_services_photos', [
 									'service' => $id,
@@ -473,6 +486,11 @@ class ImportFromTravioController extends Controller
 								$dataToUpdate = ['order' => $photoIdx + 1];
 								if ($config['import']['packages']['override']['images_descriptions'] ?? true)
 									$dataToUpdate['description'] = $photo['description'];
+
+								if ($photo['url'])
+									$this->invalidatePhotoCache($photo['url']);
+								if ($photo['thumb'])
+									$this->invalidatePhotoCache($photo['thumb']);
 
 								$present_photos[] = $this->model->_Db->updateOrInsert('travio_packages_photos', [
 									'package' => $id,
