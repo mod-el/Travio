@@ -2,7 +2,7 @@
 
 trait TravioCacheTrait
 {
-	private function checkTravioPhotoCache(string $url): string
+	public function checkTravioPhotoCache(string $url): string
 	{
 		if (str_starts_with($url, 'https://storage.travio.it/'))
 			return $this->getPhotoFromCache($url);
@@ -25,7 +25,7 @@ trait TravioCacheTrait
 		return PATH . $path;
 	}
 
-	private function invalidatePhotoCache(string $url)
+	protected function invalidatePhotoCache(string $url)
 	{
 		if (str_starts_with($url, 'https://storage.travio.it/')) {
 			$path = $this->convertUrlToCachePath($url);
