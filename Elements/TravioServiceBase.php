@@ -1,12 +1,9 @@
 <?php namespace Model\Travio\Elements;
 
 use Model\ORM\Element;
-use Model\Travio\TravioCacheTrait;
 
 class TravioServiceBase extends Element
 {
-	use TravioCacheTrait;
-
 	public static ?string $table = 'travio_services';
 
 	public function init()
@@ -69,9 +66,9 @@ class TravioServiceBase extends Element
 			'afterGet' => function (array $photos) {
 				foreach ($photos as &$photo) {
 					if ($photo['url'])
-						$photo['url'] = $this->checkTravioPhotoCache($photo['url']);
+						$photo['url'] = $this->model->_Travio->checkTravioPhotoCache($photo['url']);
 					if ($photo['thumb'])
-						$photo['thumb'] = $this->checkTravioPhotoCache($photo['thumb']);
+						$photo['thumb'] = $this->model->_Travio->checkTravioPhotoCache($photo['thumb']);
 				}
 
 				return $photos;
