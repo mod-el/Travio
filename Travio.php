@@ -463,7 +463,7 @@ class Travio extends Module
 
 	/* Photo caching methods */
 
-	public function checkTravioPhotoCache(string $url): string
+	public function checkPhotoCache(string $url): string
 	{
 		if (str_starts_with($url, 'https://storage.travio.it/'))
 			return $this->getPhotoFromCache($url);

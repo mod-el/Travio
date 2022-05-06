@@ -40,9 +40,9 @@ class TravioPackageBase extends Element
 			'afterGet' => function (array $photos) {
 				foreach ($photos as &$photo) {
 					if ($photo['url'])
-						$photo['url'] = $this->model->_Travio->checkTravioPhotoCache($photo['url']);
+						$photo['url'] = $this->model->_Travio->checkPhotoCache($photo['url']);
 					if ($photo['thumb'])
-						$photo['thumb'] = $this->model->_Travio->checkTravioPhotoCache($photo['thumb']);
+						$photo['thumb'] = $this->model->_Travio->checkPhotoCache($photo['thumb']);
 				}
 
 				return $photos;
