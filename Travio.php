@@ -480,7 +480,7 @@ class Travio extends Module
 			if (!is_dir($dir))
 				mkdir($dir, 0777, true);
 
-			file_put_contents($path, file_get_contents($url));
+			file_put_contents($path, @file_get_contents($url));
 		}
 
 		return PATH . $path;
