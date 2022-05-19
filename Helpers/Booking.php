@@ -54,6 +54,14 @@ class Booking extends Base
 					$dates['min'] = $totalMinDate->format('Y-m-d');
 					$dates['max'] = $totalMaxDate->format('Y-m-d');
 				}
+
+				if (isset($_POST['departures'])) {
+					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_ports a ON a.id = d.departure_port WHERE g.geo = ' . $el['id'] . ' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+
+					$fill['travioAirports'] = json_encode($airports);
+					$fill['travioPorts'] = json_encode($ports);
+				}
 				break;
 			case 'Model\TravioAssets\Elements\TravioService':
 				$id = 's' . $el['travio'];
@@ -85,6 +93,14 @@ class Booking extends Base
 					$dates['list'] = $checkin_dates;
 
 				$fill['travioWebsiteServiceId'] = $el['id'];
+
+				if (isset($_POST['departures'])) {
+					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_ports a ON a.id = d.departure_port WHERE s.service = ' . $el['id'] . ' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+
+					$fill['travioAirports'] = json_encode($airports);
+					$fill['travioPorts'] = json_encode($ports);
+				}
 				break;
 			case 'Model\TravioAssets\Elements\TravioPackage':
 				$id = 'p' . $el['travio'];
