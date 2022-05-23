@@ -197,6 +197,7 @@ class ImportFromTravioController extends Controller
 											'subservice' => $ss_id,
 											'url' => $photo['url'],
 											'thumb' => $photo['thumb'] ?: $photo['url'],
+											'tag' => $photo['tag'],
 										], $dataToUpdate);
 									}
 
@@ -267,6 +268,7 @@ class ImportFromTravioController extends Controller
 									'service' => $id,
 									'url' => $photo['url'],
 									'thumb' => $photo['thumb'] ?: $photo['url'],
+									'tag' => $photo['tag'],
 								], $dataToUpdate);
 							}
 
@@ -493,6 +495,7 @@ class ImportFromTravioController extends Controller
 									'package' => $id,
 									'url' => $photo['url'],
 									'thumb' => $photo['thumb'] ?: $photo['url'],
+									'tag' => $photo['tag'],
 								], $dataToUpdate);
 							}
 
