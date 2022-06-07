@@ -22,7 +22,7 @@ class ImportFromTravioController extends Controller
 
 					$presents = [];
 
-					foreach ($config['target-types'] as $target) {
+					foreach ($config['target_types'] as $target) {
 						$payload = [
 							'type' => 'geo',
 							'search-type' => $target['search'],
@@ -372,7 +372,7 @@ class ImportFromTravioController extends Controller
 					} else {
 						$items = [];
 
-						foreach ($config['target-types'] as $target) {
+						foreach ($config['target_types'] as $target) {
 							if ($target['search'] !== 'service')
 								continue;
 
@@ -593,7 +593,7 @@ class ImportFromTravioController extends Controller
 					} else {
 						$items = [];
 
-						foreach ($config['target-types'] as $target) {
+						foreach ($config['target_types'] as $target) {
 							if ($target['search'] !== 'package')
 								continue;
 
@@ -729,7 +729,7 @@ class ImportFromTravioController extends Controller
 
 					$presents = [];
 
-					foreach ($config['target-types'] as $target) {
+					foreach ($config['target_types'] as $target) {
 						$payload = [
 							'type' => 'ports',
 							'search-type' => $target['search'],
@@ -787,7 +787,7 @@ class ImportFromTravioController extends Controller
 
 					$presents = [];
 
-					foreach ($config['target-types'] as $target) {
+					foreach ($config['target_types'] as $target) {
 						$payload = [
 							'type' => 'airports',
 							'search-type' => $target['search'],
@@ -845,7 +845,7 @@ class ImportFromTravioController extends Controller
 
 					$presents = [];
 
-					foreach ($config['target-types'] as $target) {
+					foreach ($config['target_types'] as $target) {
 						if ($target['search'] !== 'service')
 							continue;
 
@@ -920,7 +920,7 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'luggage-types':
-					if (!$config['import']['luggage-types']['import'])
+					if (!$config['import']['luggage_types']['import'])
 						break;
 
 					$list = $this->model->_Travio->request('static-data', [
@@ -950,12 +950,12 @@ class ImportFromTravioController extends Controller
 						$this->model->_Db->delete('travio_luggage_types', [], ['confirm' => true]);
 					break;
 				case 'master-data':
-					if (!$config['import']['master-data']['import'])
+					if (!$config['import']['master_data']['import'])
 						break;
 
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'master-data',
-						'filters' => $config['import']['master-data']['filters'] ?? [],
+						'filters' => $config['import']['master_data']['filters'] ?? [],
 					]);
 
 					foreach ($list['list'] as $item) {
@@ -974,12 +974,12 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 				case 'payment-methods':
-					if (!$config['import']['payment-methods']['import'])
+					if (!$config['import']['payment_methods']['import'])
 						break;
 
 					$list = $this->model->_Travio->request('static-data', [
 						'type' => 'payment-methods',
-						'filters' => $config['import']['payment-methods']['filters'],
+						'filters' => $config['import']['payment_methods']['filters'],
 						'all-langs' => true,
 					]);
 
@@ -1008,7 +1008,7 @@ class ImportFromTravioController extends Controller
 						$this->model->_Db->delete('travio_payment_methods', [], ['confirm' => true]);
 					break;
 				case 'payment-conditions':
-					if (!$config['import']['payment-conditions']['import'])
+					if (!$config['import']['payment_conditions']['import'])
 						break;
 
 					$list = $this->model->_Travio->request('static-data', [
@@ -1034,8 +1034,7 @@ class ImportFromTravioController extends Controller
 						$this->model->_Db->delete('travio_payment_conditions', [], ['confirm' => true]);
 					break;
 				default:
-					$this->model->error('Unknown type');
-					break;
+					throw new \Exception('Unknown type');
 			}
 		} catch (\Exception $e) {
 			echo getErr($e);

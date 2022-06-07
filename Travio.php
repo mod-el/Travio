@@ -157,6 +157,11 @@ class Travio extends Module
 		return $decoded;
 	}
 
+	public function retrieveConfig(): array
+	{
+		return TravioClient::getConfig();
+	}
+
 	/**
 	 * @param string $request
 	 * @param array $get
@@ -171,9 +176,9 @@ class Travio extends Module
 		else
 			$url = 'https://bo.travio.it';
 
-		$url .= '/api-' . $config['license'] . '/' . $request;
+		$url .= '/api-' . $config['auth']['id'] . '/' . $request;
 
-		$get['Key'] = $config['key'];
+		$get['Key'] = $config['auth']['key'];
 		$get = http_build_query($get);
 		if ($get)
 			$url .= '?' . $get;

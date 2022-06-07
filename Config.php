@@ -8,96 +8,6 @@ class Config extends Module_Config
 	 */
 	protected function assetsList()
 	{
-		$this->addAsset('config', 'config.php', function () {
-			return '<?php
-$config = [
-	\'license\' => null,
-	\'key\' => null,
-	\'target-types\' => [
-		[
-			\'search\' => \'service\',
-			\'type\' => 2,
-		],
-	],
-	\'dev\' => true,
-	\'import\' => [
-		\'geo\' => [
-			\'import\' => true,
-		],
-		\'services\' => [
-			\'import\' => true,
-			\'override\' => [
-				\'name\' => true,
-				\'price\' => true,
-				\'classification\' => true,
-				\'classification_level\' => true,
-				\'min_date\' => true,
-				\'max_date\' => true,
-				\'lat\' => true,
-				\'lng\' => true,
-				\'descriptions\' => true,
-			],
-		],
-		\'subservices\' => [
-			\'import\' => false,
-		],
-		\'packages\' => [
-			\'import\' => true,
-			\'override\' => [
-				\'name\' => true,
-				\'price\' => true,
-			],
-		],
-		\'tags\' => [
-			\'import\' => true,
-		],
-		\'amenities\' => [
-			\'import\' => true,
-		],
-		\'airports\' => [
-			\'import\' => true,
-			\'override\' => [
-				\'name\' => true,
-				\'departure\' => true,
-			],
-		],
-		\'ports\' => [
-			\'import\' => true,
-			\'override\' => [
-				\'name\' => true,
-				\'departure\' => true,
-			],
-		],
-		\'stations\' => [
-			\'import\' => true,
-			\'override\' => [
-				\'name\' => true,
-			],
-		],
-		\'master-data\' => [
-			\'import\' => false,
-			\'filters\' => [],
-		],
-		\'payment-methods\' => [
-			\'import\' => true,
-			\'filters\' => [
-				\'visible_in\' => 1,
-			],
-		],
-		\'payment-conditions\' => [
-			\'import\' => true,
-		],
-		\'luggage-types\' => [
-			\'import\' => true,
-		],
-		\'classifications\' => [
-			\'import\' => true,
-		],
-	],
-];
-';
-		});
-
 		if ($this->model->moduleExists('Multilang')) {
 			$this->model->_Multilang->checkAndInsertTable('travio_geo');
 			$this->model->_Multilang->checkAndInsertTable('travio_services');
@@ -363,6 +273,11 @@ class TravioClassifications extends TravioClassificationsBase
 		];
 	}
 
+	public function retrieveConfig(): array
+	{
+		return TravioClient::getConfig();
+	}
+
 	/**
 	 * @return array
 	 */
@@ -419,7 +334,7 @@ $config = ' . var_export($config, true) . ';
 			}
 		}
 
-		if($edited) {
+		if ($edited) {
 			$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
 			$this->saveDbConfig($dbConfig);
 		}
