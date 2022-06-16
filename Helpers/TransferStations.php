@@ -59,9 +59,32 @@ class TransferStations extends Base
 		$q = $this->model->_ORM->all('TravioStation', $where, [
 			'joins' => $joins,
 			'order_by' => 'name',
+			'group_by' => 'id',
 		]);
-		foreach ($q as $row)
-			$stations[$row['id']] = $row;
+		foreach ($q as $station) {
+			if (!empty($_POST['subservices_tags'])) {
+				$tags = explode(',', $_POST['subservices_tags']);
+
+				$found = false;
+				foreach ($station->links as $link) {
+					if (!$link['subservice'])
+						continue;
+
+					$subservice = $this->model->one('TravioSubservice', $link['subservice']);
+					foreach ($subservice->tags as $tag) {
+						if (in_array($tag['id'], $tags)) {
+							$found = true;
+							break;
+						}
+					}
+				}
+
+				if (!$found)
+					continue;
+			}
+
+			$stations[$station['id']] = $station;
+		}
 
 		return array_values($stations);
 	}

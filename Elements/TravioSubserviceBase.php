@@ -26,9 +26,13 @@ class TravioSubserviceBase extends Element
 		]);
 
 		$this->has('tags', [
-			'table' => 'travio_subservices_tags',
-			'field' => 'subservice',
-			'order_by' => 'id',
+			'element' => 'TravioTag',
+			'assoc' => [
+				'table' => 'travio_subservices_tags',
+				'parent' => 'subservice',
+				'field' => 'tag',
+				'order_by' => 'id',
+			],
 		]);
 
 		$this->has('descriptions', [
@@ -59,8 +63,13 @@ class TravioSubserviceBase extends Element
 		]);
 
 		$this->has('amenities', [
-			'table' => 'travio_subservices_amenities',
-			'field' => 'subservice',
+			'element' => 'TravioAmenity',
+			'assoc' => [
+				'table' => 'travio_subservices_amenities',
+				'parent' => 'subservice',
+				'field' => 'amenity',
+				'order_by' => 'id',
+			],
 		]);
 
 		$this->has('files', [
