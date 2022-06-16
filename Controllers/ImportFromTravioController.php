@@ -859,7 +859,7 @@ class ImportFromTravioController extends Controller
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
-						$this->model->_Db->delete('travio_stations_services', [], ['confirm' => true]);
+						$this->model->_Db->delete('travio_stations_links', [], ['confirm' => true]);
 
 						foreach ($list['list'] as $id => $item) {
 							$check = $this->model->_Db->select('travio_stations', $id, [
@@ -894,16 +894,30 @@ class ImportFromTravioController extends Controller
 								         'departs' => 'departure',
 								         'arrives' => 'arrival',
 							         ] as $k => $link_type) {
-								foreach ($item[$k] as $service) {
-									if (!array_key_exists($service, $cacheServices))
-										$cacheServices[$service] = $this->model->_Db->select('travio_services', ['travio' => $service], 'id');
-									if (!$cacheServices[$service])
+								foreach ($item[$k] as $link) {
+									if (!array_key_exists($link, $cacheServices)) {
+										if (substr($link, 0, 2) === 'ss') {
+											$cacheServices[$link] = [
+												'type' => 'subservice',
+												'id' => $this->model->_Db->select('travio_subservices', substr($link, 2), 'id'),
+											];
+										} elseif (substr($link, 0, 1) === 's') {
+											$cacheServices[$link] = [
+												'type' => 'service',
+												'id' => $this->model->_Db->select('travio_services', ['travio' => substr($link, 1)], 'id'),
+											];
+										} else {
+											continue;
+										}
+									}
+
+									if (!$cacheServices[$link]['id'])
 										continue;
 
-									$this->model->_Db->insert('travio_stations_services', [
+									$this->model->_Db->insert('travio_stations_links', [
 										'type' => $link_type,
 										'station' => $id,
-										'service' => $cacheServices[$service],
+										$cacheServices[$link]['type'] => $cacheServices[$link]['id'],
 									]);
 								}
 							}

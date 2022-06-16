@@ -31,7 +31,7 @@ class TransferStations extends Base
 
 		if (!empty($_POST['type']) or !empty($_POST['service_type'])) {
 			$joins[] = [
-				'table' => 'travio_stations_services',
+				'table' => 'travio_stations_links',
 				'alias' => 'links',
 				'fields' => [
 					'type' => 'link_type',
