@@ -324,6 +324,7 @@ $config = ' . var_export($config, true) . ';
 			'travio_payment_methods',
 			'travio_payment_conditions',
 			'travio_classifications',
+			'travio_packages_departures',
 		];
 
 		$edited = false;

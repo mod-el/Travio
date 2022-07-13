@@ -553,10 +553,8 @@ class ImportFromTravioController extends Controller
 									'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']], 'id') ?: null) : null,
 									'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']], 'id') ?: null) : null,
 									'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']], 'id') ?: null) : null,
-								], ['defer' => true]);
+								]);
 							}
-
-							$this->model->_Db->bulkInsert('travio_packages_departures');
 
 							foreach ($packageData['services'] as $service) {
 								try {
