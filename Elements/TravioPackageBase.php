@@ -58,6 +58,11 @@ class TravioPackageBase extends Element
 			],
 		]);
 
+		$this->has('departs_from', [
+			'type' => 'single',
+			'element' => 'TravioGeo',
+		]);
+
 		$this->has('departures', [
 			'table' => 'travio_packages_departures',
 			'field' => 'package',

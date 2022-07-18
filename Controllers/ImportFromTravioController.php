@@ -121,6 +121,7 @@ class ImportFromTravioController extends Controller
 								'tel' => $serviceData['tel'],
 								'email' => $serviceData['email'],
 								'notes' => $serviceData['notes'],
+								'departs_from' => $serviceData['departs_from'],
 								'price' => $serviceData['price'],
 								'min_date' => $serviceData['min_date'],
 								'max_date' => $serviceData['max_date'],
@@ -435,6 +436,7 @@ class ImportFromTravioController extends Controller
 								'notes' => $packageData['notes'],
 								'price' => $packageData['price'],
 								'geo' => $packageData['geo'][0]['id'] ?? null,
+								'departs_from' => $packageData['departs_from'],
 								'duration' => $packageData['duration'],
 								'min_pax' => $packageData['min_pax'],
 								'visible' => 1,
@@ -564,7 +566,7 @@ class ImportFromTravioController extends Controller
 										'type' => $service['type'],
 									]);
 								} catch (\Exception $e) {
-									$this->model->error('L\'hotel ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+									$this->model->error('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
 								}
 							}
 

@@ -18,6 +18,7 @@ class TravioPackagesBase extends AdminPage
 				'code',
 				'name',
 				'geo',
+				'departs_from',
 				'visible' => ['editable' => true],
 				'last_update',
 			],
