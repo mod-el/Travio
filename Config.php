@@ -279,37 +279,11 @@ class TravioClassifications extends TravioClassificationsBase
 	}
 
 	/**
-	 * @return array
-	 */
-	private function retrieveDbConfig(): array
-	{
-		$configFile = INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'Db' . DIRECTORY_SEPARATOR . 'config.php';
-
-		require($configFile);
-		if (empty($config))
-			throw new \Exception('Db config not found');
-
-		return $config;
-	}
-
-	/**
-	 * @param array $config
-	 * @return array
-	 */
-	private function saveDbConfig(array $config)
-	{
-		$configFile = INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'Db' . DIRECTORY_SEPARATOR . 'config.php';
-		$w = file_put_contents($configFile, '<?php
-$config = ' . var_export($config, true) . ';
-');
-	}
-
-	/**
 	 * @return bool
 	 */
 	public function makeCache(): bool
 	{
-		$dbConfig = $this->retrieveDbConfig();
+		$dbConfig = \Model\Db\Db::getConfig();
 		$linkedTables = $dbConfig['databases']['primary']['linked-tables'] ?? [];
 		$tablesToLink = [
 			'travio_geo',
@@ -337,7 +311,7 @@ $config = ' . var_export($config, true) . ';
 
 		if ($edited) {
 			$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
-			$this->saveDbConfig($dbConfig);
+			\Model\Config\Config::set('db', $dbConfig);
 		}
 
 		return true;
