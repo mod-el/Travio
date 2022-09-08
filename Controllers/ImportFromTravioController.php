@@ -458,6 +458,7 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_services', ['package' => $id]);
+								$this->model->_Db->delete('travio_packages_guides', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_itinerary', ['package' => $id]);
 							} else {
 								$data['travio'] = $packageData['id'];
@@ -567,6 +568,17 @@ class ImportFromTravioController extends Controller
 									]);
 								} catch (\Exception $e) {
 									$this->model->error('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+								}
+							}
+
+							foreach ($packageData['guides'] as $guide) {
+								try {
+									$this->model->_Db->insert('travio_packages_guides', [
+										'package' => $id,
+										'guide' => $guide['master_data'],
+									]);
+								} catch (\Exception $e) {
+									$this->model->error('La guida #' . $guide['master_data'] . ' del pacchetto ' . $packageData['code'] . ' non sembra essere stata importata');
 								}
 							}
 

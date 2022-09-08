@@ -52,6 +52,13 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
+			Anagrafiche
+		</div>
+		<div class="col" data-import="master-data"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
 			Servizi
 		</div>
 		<div class="col" data-import="services"></div>
@@ -90,12 +97,5 @@
 			Tipi bagaglio
 		</div>
 		<div class="col" data-import="luggage-types"></div>
-	</div>
-
-	<div class="py-2 row">
-		<div class="col-4">
-			Anagrafiche
-		</div>
-		<div class="col" data-import="master-data"></div>
 	</div>
 </div>

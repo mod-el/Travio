@@ -74,6 +74,15 @@ class TravioPackageBase extends Element
 			'field' => 'package',
 		]);
 
+		$this->has('guides', [
+			'element' => 'TravioMasterData',
+			'assoc' => [
+				'table' => 'travio_packages_guides',
+				'parent' => 'package',
+				'field' => 'guide',
+			],
+		]);
+
 		$this->has('itinerary', [
 			'table' => 'travio_packages_itinerary',
 			'field' => 'package',
