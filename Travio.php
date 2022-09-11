@@ -1,5 +1,6 @@
 <?php namespace Model\Travio;
 
+use Model\Assets\Assets;
 use Model\Core\Globals;
 use Model\Core\Module;
 use Model\TravioAssets\Elements\TravioOrder;
@@ -99,8 +100,8 @@ class Travio extends Module
 			],
 		];
 
-		$this->model->addJS('model/Travio/files/admin.js', ['with' => 'AdminFront']);
-		$this->model->addCSS('model/Travio/files/admin.css', ['with' => 'AdminFront']);
+		Assets::add('model/Travio/files/admin.js', ['withTags' => 'AdminFront']);
+		Assets::add('model/Travio/files/admin.css', ['withTags' => 'AdminFront']);
 	}
 
 	/**
