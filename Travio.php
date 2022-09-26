@@ -100,8 +100,8 @@ class Travio extends Module
 			],
 		];
 
-		Assets::add('model/Travio/files/admin.js', ['withTags' => 'AdminFront']);
-		Assets::add('model/Travio/files/admin.css', ['withTags' => 'AdminFront']);
+		Assets::add('model/Travio/files/admin.js', ['withTags' => 'module-AdminFront']);
+		Assets::add('model/Travio/files/admin.css', ['withTags' => 'module-AdminFront']);
 	}
 
 	/**
