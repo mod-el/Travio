@@ -8,20 +8,6 @@ class Config extends Module_Config
 	 */
 	protected function assetsList()
 	{
-		if ($this->model->moduleExists('Multilang')) {
-			$this->model->_Multilang->checkAndInsertTable('travio_geo');
-			$this->model->_Multilang->checkAndInsertTable('travio_services');
-			$this->model->_Multilang->checkAndInsertTable('travio_services_descriptions');
-			$this->model->_Multilang->checkAndInsertTable('travio_subservices');
-			$this->model->_Multilang->checkAndInsertTable('travio_subservices_descriptions');
-			$this->model->_Multilang->checkAndInsertTable('travio_packages');
-			$this->model->_Multilang->checkAndInsertTable('travio_packages_descriptions');
-			$this->model->_Multilang->checkAndInsertTable('travio_packages_itinerary');
-			$this->model->_Multilang->checkAndInsertTable('travio_stations');
-			$this->model->_Multilang->checkAndInsertTable('travio_amenities');
-			$this->model->_Multilang->checkAndInsertTable('travio_tags');
-		}
-
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
 			mkdir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities', 0777, true);
 
