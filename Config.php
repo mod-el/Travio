@@ -264,45 +264,6 @@ class TravioClassifications extends TravioClassificationsBase
 		return TravioClient::getConfig();
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function makeCache(): bool
-	{
-		$dbConfig = \Model\Db\Db::getConfig();
-		$linkedTables = $dbConfig['databases']['primary']['linked-tables'] ?? [];
-		$tablesToLink = [
-			'travio_geo',
-			'travio_services',
-			'travio_packages',
-			'travio_tags',
-			'travio_orders',
-			'travio_airports',
-			'travio_ports',
-			'travio_stations',
-			'travio_master_data',
-			'travio_payment_methods',
-			'travio_payment_conditions',
-			'travio_classifications',
-			'travio_packages_departures',
-		];
-
-		$edited = false;
-		foreach ($tablesToLink as $table) {
-			if (!in_array($table, $linkedTables)) {
-				$edited = true;
-				$linkedTables[] = $table;
-			}
-		}
-
-		if ($edited) {
-			$dbConfig['databases']['primary']['linked-tables'] = $linkedTables;
-			\Model\Config\Config::set('db', $dbConfig);
-		}
-
-		return true;
-	}
-
 	public function getConfigData(): ?array
 	{
 		return [];
