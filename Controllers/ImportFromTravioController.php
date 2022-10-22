@@ -394,7 +394,6 @@ class ImportFromTravioController extends Controller
 
 								$check = $this->model->select('travio_services', ['travio' => $item['id']], [
 									'auto_ml' => false,
-									'auto-join-linked-tables' => false,
 								]);
 
 								$items[] = [
@@ -623,11 +622,8 @@ class ImportFromTravioController extends Controller
 								if (!$item['id'])
 									continue;
 
-								$presents[] = $item['id'];
-
 								$check = $this->model->select('travio_packages', ['travio' => $item['id']], [
 									'auto_ml' => false,
-									'auto-join-linked-tables' => false,
 								]);
 
 								$items[] = [
@@ -755,7 +751,6 @@ class ImportFromTravioController extends Controller
 						foreach ($list['list'] as $item) {
 							$check = $this->model->select('travio_ports', $item['id'], [
 								'auto_ml' => false,
-								'auto-join-linked-tables' => false,
 							]);
 
 							$presents[] = $item['id'];
@@ -813,7 +808,6 @@ class ImportFromTravioController extends Controller
 						foreach ($list['list'] as $item) {
 							$check = $this->model->select('travio_airports', $item['id'], [
 								'auto_ml' => false,
-								'auto-join-linked-tables' => false,
 							]);
 
 							$presents[] = $item['id'];
@@ -876,7 +870,6 @@ class ImportFromTravioController extends Controller
 						foreach ($list['list'] as $id => $item) {
 							$check = $this->model->_Db->select('travio_stations', $id, [
 								'auto_ml' => false,
-								'auto-join-linked-tables' => false,
 							]);
 
 							$presents[] = $id;
