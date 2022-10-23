@@ -1,10 +1,11 @@
 <?php namespace Model\Travio;
 
+use Model\Db\DbConnection;
 use Model\Multilang\AbstractMultilangProvider;
 
 class MultilangProvider extends AbstractMultilangProvider
 {
-	public static function tables(): array
+	public static function tables(DbConnection $db): array
 	{
 		return [
 			'travio_geo',
