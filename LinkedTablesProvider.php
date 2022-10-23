@@ -1,10 +1,10 @@
 <?php namespace Model\Travio;
 
-use Model\Db\AbstractDbProvider;
+use Model\LinkedTables\AbstractLinkedTablesProvider;
 
-class DbProvider extends AbstractDbProvider
+class LinkedTablesProvider extends AbstractLinkedTablesProvider
 {
-	public static function linkedTables(): array
+	public static function tables(): array
 	{
 		return [
 			'primary' => [

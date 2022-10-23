@@ -9,6 +9,7 @@
 		"Multilang": ">=2.3.0"
 	},
 	"requires": [
-		"model/travio"
+		"model/travio",
+		"model/linked-tables"
 	]
 }
