@@ -3,6 +3,7 @@
 use Model\Assets\Assets;
 use Model\Core\Globals;
 use Model\Core\Module;
+use Model\Multilang\Ml;
 use Model\TravioAssets\Elements\TravioOrder;
 use Model\TravioAssets\Elements\TravioService;
 
@@ -126,7 +127,7 @@ class Travio extends Module
 		}
 
 		if (!isset($payload['lang']))
-			$payload['lang'] = $this->model->_Multilang->lang;
+			$payload['lang'] = Ml::getLang();
 
 		$url = $this->makeUrl($request, $get);
 

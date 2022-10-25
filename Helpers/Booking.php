@@ -1,6 +1,7 @@
 <?php namespace Model\Travio\Helpers;
 
 use Model\InstantSearch\Base;
+use Model\Multilang\Ml;
 
 class Booking extends Base
 {
@@ -291,7 +292,7 @@ class Booking extends Base
 			}
 
 			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
-				'order_by' => 'parent, lang!=' . $this->model->_Db->quote($this->model->_Multilang->lang),
+				'order_by' => 'parent, lang!=' . $this->model->_Db->quote(Ml::getLang()),
 				'joins' => $joins,
 			]);
 
