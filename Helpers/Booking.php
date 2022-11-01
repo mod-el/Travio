@@ -23,8 +23,7 @@ class Booking extends Base
 				$services = $this->model->select_all('travio_services', ['join_geo' => $el['id']], [
 					'joins' => [
 						'travio_services_geo' => [
-							'on' => 'id',
-							'join_field' => 'service',
+							'on' => ['id' => 'service'],
 							'fields' => ['geo' => 'join_geo'],
 						],
 					],
@@ -121,8 +120,7 @@ class Booking extends Base
 				$services = $this->model->select_all('travio_services', ['tag' => ['LIKE', $el['name']]], [
 					'joins' => [
 						'travio_services_tags' => [
-							'on' => 'id',
-							'join_field' => 'service',
+							'on' => ['id' => 'service'],
 							'fields' => ['tag'],
 						],
 					],
@@ -230,8 +228,7 @@ class Booking extends Base
 				case 'services':
 					$joins['travio_services_geo'] = [
 						'alias' => 'tsg',
-						'on' => 'parent',
-						'join_field' => 'geo',
+						'on' => ['parent' => 'geo'],
 						'fields' => [],
 					];
 
@@ -247,8 +244,7 @@ class Booking extends Base
 				case 'packages':
 					$joins['travio_packages_geo'] = [
 						'alias' => 'tpg',
-						'on' => 'parent',
-						'join_field' => 'geo',
+						'on' => ['parent' => 'geo'],
 						'fields' => [],
 					];
 
@@ -267,8 +263,7 @@ class Booking extends Base
 				$joins['travio_geo_parents'] = [
 					'type' => 'LEFT',
 					'alias' => 'tgp',
-					'on' => 'parent',
-					'join_field' => 'geo',
+					'on' => ['parent' => 'geo'],
 					'fields' => [],
 				];
 				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR t.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
@@ -277,8 +272,7 @@ class Booking extends Base
 			if (!empty($_POST['filters'])) {
 				$joins['travio_geo_custom'] = [
 					'alias' => 'main_custom',
-					'on' => 'parent',
-					'join_field' => 'id',
+					'on' => ['parent' => 'id'],
 					'fields' => [],
 				];
 
@@ -323,8 +317,7 @@ class Booking extends Base
 					case 'packages':
 						$joins['travio_packages_geo'] = [
 							'alias' => 'tpg',
-							'on' => 'id',
-							'join_field' => 'package',
+							'on' => ['id' => 'package'],
 							'fields' => [],
 						];
 
@@ -333,8 +326,7 @@ class Booking extends Base
 					default:
 						$joins['travio_services_geo'] = [
 							'alias' => 'tsg',
-							'on' => 'id',
-							'join_field' => 'service',
+							'on' => ['id' => 'service'],
 							'fields' => [],
 						];
 

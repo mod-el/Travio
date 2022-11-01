@@ -1,10 +1,10 @@
 {
 	"name": "Travio",
 	"description": "Integration with Travio API v1",
-	"version": "0.12.0",
+	"version": "0.13.0",
 	"dependencies": {
 		"Core": ">=3.0.0",
-		"Db": ">=3.0.0",
+		"Db": ">=5.0.0",
 		"ORM": ">=3.0.0",
 		"Multilang": ">=2.3.0"
 	},

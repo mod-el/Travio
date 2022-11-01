@@ -559,15 +559,15 @@ class ImportFromTravioController extends Controller
 							}
 
 							foreach ($packageData['services'] as $service) {
-								try {
-									$this->model->_Db->insert('travio_packages_services', [
-										'package' => $id,
-										'service' => $this->model->select('travio_services', ['code' => $service['code']], 'id'),
-										'type' => $service['type'],
-									]);
-								} catch (\Exception $e) {
-									$this->model->error('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
-								}
+								$existing = $this->model->select('travio_services', ['code' => $service['code']]);
+								if (!$existing)
+									throw new \Exception('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+
+								$this->model->_Db->insert('travio_packages_services', [
+									'package' => $id,
+									'service' => $existing['id'],
+									'type' => $service['type'],
+								]);
 							}
 
 							foreach ($packageData['guides'] as $guide) {
@@ -901,15 +901,19 @@ class ImportFromTravioController extends Controller
 							         ] as $k => $link_type) {
 								foreach ($item[$k] as $link) {
 									if (!array_key_exists($link, $cacheServices)) {
-										if (substr($link, 0, 2) === 'ss') {
+										if (str_starts_with($link, 'ss')) {
+											$existing = $this->model->_Db->select('travio_subservices', substr($link, 2));
+
 											$cacheServices[$link] = [
 												'type' => 'subservice',
-												'id' => $this->model->_Db->select('travio_subservices', substr($link, 2), 'id'),
+												'id' => $existing['id'],
 											];
-										} elseif (substr($link, 0, 1) === 's') {
+										} elseif (str_starts_with($link, 's')) {
+											$existing = $this->model->_Db->select('travio_services', ['travio' => substr($link, 1)]);
+
 											$cacheServices[$link] = [
 												'type' => 'service',
-												'id' => $this->model->_Db->select('travio_services', ['travio' => substr($link, 1)], 'id'),
+												'id' => $existing['id'],
 											];
 										} else {
 											continue;

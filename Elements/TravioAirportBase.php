@@ -21,13 +21,11 @@ class TravioAirportBase extends Element
 		], [
 			'joins' => [
 				'travio_packages_geo' => [
-					'on' => 'package',
-					'join_field' => 'package',
+					'on' => ['package' => 'package'],
 					'fields' => ['geo'],
 				],
 				'travio_packages' => [
 					'on' => 'package',
-					'join_field' => 'id',
 					'fields' => ['visible'],
 				],
 			],
