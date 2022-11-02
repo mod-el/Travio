@@ -45,7 +45,12 @@ class TransferStations extends Base
 				$joins[] = [
 					'table' => 'travio_services',
 					'alias' => 'services',
-					'full_on' => 'services.id = links.service AND services.visible = 1',
+					'on' => [
+						'links.service' => 'id',
+					],
+					'where' => [
+						'visible' => 1,
+					],
 					'fields' => [
 						'type' => 'service_type',
 					],
