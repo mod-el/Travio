@@ -235,7 +235,8 @@ class Booking extends Base
 					if ($type[1]) {
 						$joins['travio_services'] = [
 							'alias' => 'ts',
-							'full_on' => 'tsg.service = ts.id AND ts.visible = 1',
+							'on' => ['tsg.service' => 'id'],
+							'where' => ['visible' => 1],
 							'fields' => ['type'],
 						];
 						$where['type'] = $type[1];
@@ -251,7 +252,8 @@ class Booking extends Base
 					if ($type[1]) {
 						$joins['travio_packages'] = [
 							'alias' => 'tp',
-							'full_on' => 'tpg.package = tp.id AND tp.visible = 1',
+							'on' => ['tpg.package' => 'id'],
+							'where' => ['visible' => 1],
 							'fields' => ['type'],
 						];
 						$where['type'] = $type[1];
@@ -286,7 +288,7 @@ class Booking extends Base
 			}
 
 			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
-				'order_by' => 'parent, lang!=' . $this->model->_Db->quote(Ml::getLang()),
+				'order_by' => 'travio_geo_texts.parent, travio_geo_texts.lang!=' . $this->model->_Db->quote(Ml::getLang()),
 				'joins' => $joins,
 			]);
 
