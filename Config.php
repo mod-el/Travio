@@ -261,7 +261,7 @@ class TravioClassifications extends TravioClassificationsBase
 
 	public function retrieveConfig(): array
 	{
-		return TravioClient::getConfig();
+		return \Model\Config\Config::get('travio');
 	}
 
 	public function getConfigData(): ?array

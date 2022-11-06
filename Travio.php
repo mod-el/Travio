@@ -161,7 +161,7 @@ class Travio extends Module
 
 	public function retrieveConfig(): array
 	{
-		return TravioClient::getConfig();
+		return \Model\Config\Config::get('travio');
 	}
 
 	/**
