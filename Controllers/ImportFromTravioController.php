@@ -551,10 +551,10 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->insert('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
-									'departure_airport' => $departure['departure-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['departure-airport']], 'id') ?: null) : null,
-									'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']], 'id') ?: null) : null,
-									'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']], 'id') ?: null) : null,
-									'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']], 'id') ?: null) : null,
+									'departure_airport' => $departure['departure-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['departure-airport']])['id'] ?: null) : null,
+									'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']])['id'] ?: null) : null,
+									'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']])['id'] ?: null) : null,
+									'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']])['id'] ?: null) : null,
 								]);
 							}
 
@@ -680,8 +680,10 @@ class ImportFromTravioController extends Controller
 					$idsList = [];
 					foreach ($list['list'] as $id => $item) {
 						if ($item['tag']) {
-							$type = $this->model->select('travio_amenities_types', ['name' => trim($item['tag'])], 'id');
-							if (!$type)
+							$type = $this->model->select('travio_amenities_types', ['name' => trim($item['tag'])]);
+							if ($type)
+								$type = $type['id'];
+							else
 								$type = $this->model->insert('travio_amenities_types', ['name' => trim($item['tag'])]);
 						} else {
 							$type = null;
