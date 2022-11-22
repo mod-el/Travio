@@ -268,7 +268,7 @@ class Booking extends Base
 					'on' => ['parent' => 'geo'],
 					'fields' => [],
 				];
-				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR t.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
+				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR travio_geo_texts.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
 			}
 
 			if (!empty($_POST['filters'])) {
