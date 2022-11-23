@@ -211,7 +211,7 @@ class TravioServiceBase extends Element
 			if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
 				continue;
 
-			if ($inAvailability['fixed_duration'] and $duration !== $inAvailability['fixed_duration'])
+			if ($inAvailability['fixed_duration'] and $duration !== ($inAvailability['fixed_duration'] - 1))
 				continue;
 
 			$list[] = $day->format('Y-m-d');
