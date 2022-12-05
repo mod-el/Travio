@@ -117,7 +117,7 @@ class Booking extends Base
 				$plainText = ucwords(mb_strtolower($el['name']));
 				$text = '<i class="fas fa-tag"></i> ' . entities($plainText);
 
-				$services = $this->model->select_all('travio_services', ['tag' => ['LIKE', $el['name']]], [
+				$services = $this->model->select_all('travio_services', ['tag' => $el['id']], [
 					'joins' => [
 						'travio_services_tags' => [
 							'on' => ['id' => 'service'],
@@ -178,10 +178,10 @@ class Booking extends Base
 					return $this->getItem($this->model->one('TravioPackage', ['travio' => substr($id, 1)]));
 
 				case 'd':
-					return $this->getItem($this->model->one('TravioGeo', substr($id, 1)));
+					return $this->getItem($this->model->one('TravioGeo', (int)substr($id, 1)));
 
 				case 't':
-					return $this->getItem($this->model->one('TravioTag', substr($id, 1)));
+					return $this->getItem($this->model->one('TravioTag', (int)substr($id, 1)));
 			}
 		}
 
