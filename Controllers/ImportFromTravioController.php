@@ -193,7 +193,6 @@ class ImportFromTravioController extends Controller
 								$this->model->_Db->delete('travio_packages_descriptions', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_geo', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_services', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_guides', ['package' => $id]);
 								$this->model->_Db->delete('travio_packages_itinerary', ['package' => $id]);
@@ -285,15 +284,26 @@ class ImportFromTravioController extends Controller
 								}
 							}
 
+							$present_departures = [];
 							foreach ($packageData['departures'] as $departure) {
-								$this->model->_Db->insert('travio_packages_departures', [
+								$present_departures[] = $this->model->_Db->updateOrInsert('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
+								], [
 									'departure_airport' => $departure['departure-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['departure-airport']])['id'] ?: null) : null,
 									'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']])['id'] ?: null) : null,
 									'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']])['id'] ?: null) : null,
 									'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']])['id'] ?: null) : null,
 								]);
+							}
+
+							if ($present_departures) {
+								$this->model->_Db->delete('travio_packages_departures', [
+									'package' => $id,
+									'id' => ['NOT IN', $present_departures],
+								]);
+							} else {
+								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
 							}
 
 							foreach ($packageData['services'] as $service) {
