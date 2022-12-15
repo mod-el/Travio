@@ -86,6 +86,7 @@ class TravioPackageBase extends Element
 		$this->has('itinerary', [
 			'table' => 'travio_packages_itinerary',
 			'field' => 'package',
+			'order_by' => 'day, id',
 		]);
 
 		$this->has('hotels', [ // Retrocompatibilità
