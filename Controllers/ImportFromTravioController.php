@@ -1,18 +1,20 @@
 <?php namespace Model\Travio\Controllers;
 
 use Model\Core\Controller;
+use Model\Db\Db;
 
 class ImportFromTravioController extends Controller
 {
 	public function init()
 	{
 		$this->model->switchEvents(false);
-		$this->model->_Db->setQueryLimit('table', 0);
+		Db::getConnection()->setQueryLimit('table', 0);
 	}
 
 	public function index()
 	{
 		$config = $this->model->_Travio->retrieveConfig();
+		$db = Db::getConnection();
 
 		try {
 			switch ($this->model->getInput('type')) {
@@ -40,7 +42,7 @@ class ImportFromTravioController extends Controller
 
 							$presents[] = $item['id'];
 
-							$this->model->updateOrInsert('travio_geo', [
+							$db->updateOrInsert('travio_geo', [
 								'id' => $item['id'],
 							], [
 								'name' => $item['name'],
@@ -53,7 +55,7 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					$this->model->delete('travio_geo_parents', [], ['confirm' => true]);
+					$db->delete('travio_geo_parents', [], ['confirm' => true]);
 
 					foreach ($this->model->all('TravioGeo') as $geo) {
 						$parents = [];
@@ -65,7 +67,7 @@ class ImportFromTravioController extends Controller
 						}
 
 						foreach ($parents as $parent) {
-							$this->model->insert('travio_geo_parents', [
+							$db->insert('travio_geo_parents', [
 								'geo' => $geo['id'],
 								'parent' => $parent,
 							], [
@@ -75,15 +77,15 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($presents) {
-						$this->model->_Db->update('travio_geo', [
+						$db->update('travio_geo', [
 							'id' => ['NOT IN', $presents],
 						], ['visible' => 0]);
 
-						$this->model->_Db->update('travio_geo', [
+						$db->update('travio_geo', [
 							'id' => ['IN', $presents],
 						], ['visible' => 1]);
 					} else {
-						$this->model->_Db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
+						$db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
 					}
 					break;
 				case 'services':
@@ -99,15 +101,15 @@ class ImportFromTravioController extends Controller
 					} elseif (isset($_POST['finalize'])) {
 						$presents = json_decode($_POST['finalize'], true) ?: [];
 						if ($presents) {
-							$this->model->_Db->update('travio_services', [
+							$db->update('travio_services', [
 								'travio' => ['NOT IN', $presents],
 							], ['visible' => 0]);
 
-							$this->model->_Db->update('travio_services', [
+							$db->update('travio_services', [
 								'travio' => ['IN', $presents],
 							], ['visible' => 1]);
 						} else {
-							$this->model->_Db->update('travio_services', [], ['visible' => 0], ['confirm' => true]);
+							$db->update('travio_services', [], ['visible' => 0], ['confirm' => true]);
 						}
 					} else {
 						$items = [];
@@ -130,9 +132,7 @@ class ImportFromTravioController extends Controller
 								if (!$item['id'])
 									continue;
 
-								$check = $this->model->select('travio_services', ['travio' => $item['id']], [
-									'auto_ml' => false,
-								]);
+								$check = $db->select('travio_services', ['travio' => $item['id']]);
 
 								$items[] = [
 									'id' => $item['id'],
@@ -164,7 +164,7 @@ class ImportFromTravioController extends Controller
 						])['data'];
 
 						try {
-							$this->model->_Db->beginTransaction();
+							$db->beginTransaction();
 
 							$data = [
 								'code' => $packageData['code'],
@@ -187,31 +187,31 @@ class ImportFromTravioController extends Controller
 								}
 
 								$id = $item['existing'];
-								$this->model->update('travio_packages', $id, $data);
+								$db->update('travio_packages', $id, $data);
 
-								$this->model->_Db->delete('travio_packages_tags', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_descriptions', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_geo', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_files', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_services', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_guides', ['package' => $id]);
-								$this->model->_Db->delete('travio_packages_itinerary', ['package' => $id]);
+								$db->delete('travio_packages_tags', ['package' => $id]);
+								$db->delete('travio_packages_descriptions', ['package' => $id]);
+								$db->delete('travio_packages_geo', ['package' => $id]);
+								$db->delete('travio_packages_files', ['package' => $id]);
+								$db->delete('travio_packages_services', ['package' => $id]);
+								$db->delete('travio_packages_guides', ['package' => $id]);
+								$db->delete('travio_packages_itinerary', ['package' => $id]);
 							} else {
 								$data['travio'] = $packageData['id'];
-								$id = $this->model->insert('travio_packages', $data);
+								$id = $db->insert('travio_packages', $data);
 							}
 
 							foreach ($packageData['tags'] as $tagId => $tag) {
-								$this->model->_Db->insert('travio_packages_tags', [
+								$db->insert('travio_packages_tags', [
 									'package' => $id,
 									'tag' => $tagId,
 								], ['defer' => true]);
 							}
 
-							$this->model->_Db->bulkInsert('travio_packages_tags');
+							$db->bulkInsert('travio_packages_tags');
 
 							foreach ($packageData['descriptions'] as $description) {
-								$this->model->_Db->insert('travio_packages_descriptions', [
+								$db->insert('travio_packages_descriptions', [
 									'package' => $id,
 									'tag' => $description['keyword'],
 									'title' => $description['title'],
@@ -230,7 +230,7 @@ class ImportFromTravioController extends Controller
 								if ($photo['thumb'])
 									$this->model->_Travio->invalidatePhotoCache($photo['thumb']);
 
-								$present_photos[] = $this->model->_Db->updateOrInsert('travio_packages_photos', [
+								$present_photos[] = $db->updateOrInsert('travio_packages_photos', [
 									'package' => $id,
 									'url' => $photo['url'],
 									'thumb' => $photo['thumb'] ?: $photo['url'],
@@ -239,35 +239,35 @@ class ImportFromTravioController extends Controller
 							}
 
 							if ($present_photos) {
-								$this->model->_Db->delete('travio_packages_photos', [
+								$db->delete('travio_packages_photos', [
 									'package' => $id,
 									'id' => ['NOT IN', $present_photos],
 								]);
 							} else {
-								$this->model->_Db->delete('travio_packages_photos', ['package' => $id]);
+								$db->delete('travio_packages_photos', ['package' => $id]);
 							}
 
 							foreach ($packageData['geo'] as $geo) {
-								$this->model->_Db->insert('travio_packages_geo', [
+								$db->insert('travio_packages_geo', [
 									'package' => $id,
 									'geo' => $geo['id'],
 								], ['defer' => true]);
 							}
 
-							$this->model->_Db->bulkInsert('travio_packages_geo');
+							$db->bulkInsert('travio_packages_geo');
 
 							foreach ($packageData['files'] as $file) {
-								$this->model->_Db->insert('travio_packages_files', [
+								$db->insert('travio_packages_files', [
 									'package' => $id,
 									'name' => $file['name'],
 									'url' => $file['url'],
 								], ['defer' => true]);
 							}
 
-							$this->model->_Db->bulkInsert('travio_packages_files');
+							$db->bulkInsert('travio_packages_files');
 
 							foreach ($packageData['itinerary'] as $destination) {
-								$dId = $this->model->_Db->insert('travio_packages_itinerary', [
+								$dId = $db->insert('travio_packages_itinerary', [
 									'package' => $id,
 									'day' => $destination['day'],
 									'geo' => $destination['geo'],
@@ -276,7 +276,7 @@ class ImportFromTravioController extends Controller
 								]);
 
 								foreach ($destination['photos'] as $photo) {
-									$this->model->_Db->insert('travio_packages_itinerary_photos', [
+									$db->insert('travio_packages_itinerary_photos', [
 										'itinerary' => $dId,
 										'url' => $photo['url'],
 										'thumb' => $photo['thumb'] ?: $photo['url'],
@@ -286,32 +286,32 @@ class ImportFromTravioController extends Controller
 
 							$present_departures = [];
 							foreach ($packageData['departures'] as $departure) {
-								$present_departures[] = $this->model->_Db->updateOrInsert('travio_packages_departures', [
+								$present_departures[] = $db->updateOrInsert('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
 								], [
-									'departure_airport' => $departure['departure-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['departure-airport']])['id'] ?: null) : null,
-									'arrival_airport' => $departure['arrival-airport'] ? ($this->model->select('travio_airports', ['code' => $departure['arrival-airport']])['id'] ?: null) : null,
-									'departure_port' => $departure['departure-port'] ? ($this->model->select('travio_ports', ['code' => $departure['departure-port']])['id'] ?: null) : null,
-									'arrival_port' => $departure['arrival-port'] ? ($this->model->select('travio_ports', ['code' => $departure['arrival-port']])['id'] ?: null) : null,
+									'departure_airport' => $departure['departure-airport'] ? ($db->select('travio_airports', ['code' => $departure['departure-airport']])['id'] ?: null) : null,
+									'arrival_airport' => $departure['arrival-airport'] ? ($db->select('travio_airports', ['code' => $departure['arrival-airport']])['id'] ?: null) : null,
+									'departure_port' => $departure['departure-port'] ? ($db->select('travio_ports', ['code' => $departure['departure-port']])['id'] ?: null) : null,
+									'arrival_port' => $departure['arrival-port'] ? ($db->select('travio_ports', ['code' => $departure['arrival-port']])['id'] ?: null) : null,
 								]);
 							}
 
 							if ($present_departures) {
-								$this->model->_Db->delete('travio_packages_departures', [
+								$db->delete('travio_packages_departures', [
 									'package' => $id,
 									'id' => ['NOT IN', $present_departures],
 								]);
 							} else {
-								$this->model->_Db->delete('travio_packages_departures', ['package' => $id]);
+								$db->delete('travio_packages_departures', ['package' => $id]);
 							}
 
 							foreach ($packageData['services'] as $service) {
-								$existing = $this->model->select('travio_services', ['code' => $service['code']]);
+								$existing = $db->select('travio_services', ['code' => $service['code']]);
 								if (!$existing)
 									throw new \Exception('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
 
-								$this->model->_Db->insert('travio_packages_services', [
+								$db->insert('travio_packages_services', [
 									'package' => $id,
 									'service' => $existing['id'],
 									'type' => $service['type'],
@@ -320,7 +320,7 @@ class ImportFromTravioController extends Controller
 
 							foreach ($packageData['guides'] as $guide) {
 								try {
-									$this->model->_Db->insert('travio_packages_guides', [
+									$db->insert('travio_packages_guides', [
 										'package' => $id,
 										'guide' => $guide['master_data'],
 									]);
@@ -331,23 +331,23 @@ class ImportFromTravioController extends Controller
 
 							$this->model->_TravioAssets->importPackage($id, $packageData['id']);
 
-							$this->model->_Db->commit();
+							$db->commit();
 						} catch (\Exception $e) {
-							$this->model->_Db->rollBack();
+							$db->rollBack();
 							throw $e;
 						}
 					} elseif (isset($_POST['finalize'])) {
 						$presents = json_decode($_POST['finalize'], true) ?: [];
 						if ($presents) {
-							$this->model->_Db->update('travio_packages', [
+							$db->update('travio_packages', [
 								'travio' => ['NOT IN', $presents],
 							], ['visible' => 0]);
 
-							$this->model->_Db->update('travio_packages', [
+							$db->update('travio_packages', [
 								'travio' => ['IN', $presents],
 							], ['visible' => 1]);
 						} else {
-							$this->model->_Db->update('travio_packages', [], ['visible' => 0], ['confirm' => true]);
+							$db->update('travio_packages', [], ['visible' => 0], ['confirm' => true]);
 						}
 					} else {
 						$items = [];
@@ -370,9 +370,7 @@ class ImportFromTravioController extends Controller
 								if (!$item['id'])
 									continue;
 
-								$check = $this->model->select('travio_packages', ['travio' => $item['id']], [
-									'auto_ml' => false,
-								]);
+								$check = $db->select('travio_packages', ['travio' => $item['id']]);
 
 								$items[] = [
 									'id' => $item['id'],
@@ -399,7 +397,7 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_tags', [
+						$db->updateOrInsert('travio_tags', [
 							'id' => $item['id'],
 						], [
 							'parent' => $item['parent'],
@@ -412,9 +410,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_tags', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_tags', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_tags', [], ['confirm' => true]);
+						$db->delete('travio_tags', [], ['confirm' => true]);
 					break;
 				case 'amenities':
 					if (!$config['import']['amenities']['import'])
@@ -428,16 +426,16 @@ class ImportFromTravioController extends Controller
 					$idsList = [];
 					foreach ($list['list'] as $id => $item) {
 						if ($item['tag']) {
-							$type = $this->model->select('travio_amenities_types', ['name' => trim($item['tag'])]);
+							$type = $db->select('travio_amenities_types', ['name' => trim($item['tag'])]);
 							if ($type)
 								$type = $type['id'];
 							else
-								$type = $this->model->insert('travio_amenities_types', ['name' => trim($item['tag'])]);
+								$type = $db->insert('travio_amenities_types', ['name' => trim($item['tag'])]);
 						} else {
 							$type = null;
 						}
 
-						$this->model->updateOrInsert('travio_amenities', [
+						$db->updateOrInsert('travio_amenities', [
 							'id' => $id,
 						], [
 							'name' => $item['name'],
@@ -449,9 +447,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_amenities', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_amenities', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_amenities', [], ['confirm' => true]);
+						$db->delete('travio_amenities', [], ['confirm' => true]);
 					break;
 				case 'classifications':
 					if (!$config['import']['classifications']['import'])
@@ -464,7 +462,7 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_classifications', [
+						$db->updateOrInsert('travio_classifications', [
 							'id' => $item['id'],
 						], [
 							'code' => $item['code'],
@@ -477,9 +475,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_classifications', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_classifications', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_classifications', [], ['confirm' => true]);
+						$db->delete('travio_classifications', [], ['confirm' => true]);
 					break;
 				case 'ports':
 					if (!$config['import']['ports']['import'])
@@ -499,9 +497,7 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							$check = $this->model->select('travio_ports', $item['id'], [
-								'auto_ml' => false,
-							]);
+							$check = $db->select('travio_ports', $item['id']);
 
 							$presents[] = $item['id'];
 
@@ -517,9 +513,9 @@ class ImportFromTravioController extends Controller
 										unset($data[$k]);
 								}
 
-								$this->model->update('travio_ports', $item['id'], $data);
+								$db->update('travio_ports', $item['id'], $data);
 							} else {
-								$this->model->insert('travio_ports', [
+								$db->insert('travio_ports', [
 									'id' => $item['id'],
 									'code' => $item['code'],
 									'name' => $item['name'],
@@ -531,9 +527,9 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					foreach ($this->model->select_all('travio_ports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $port) {
+					foreach ($db->selectAll('travio_ports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $port) {
 						try {
-							$this->model->delete('travio_ports', $port['id']);
+							$db->delete('travio_ports', $port['id']);
 						} catch (\Exception $e) {
 						}
 					}
@@ -556,9 +552,7 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							$check = $this->model->select('travio_airports', $item['id'], [
-								'auto_ml' => false,
-							]);
+							$check = $db->select('travio_airports', $item['id']);
 
 							$presents[] = $item['id'];
 
@@ -574,9 +568,9 @@ class ImportFromTravioController extends Controller
 										unset($data[$k]);
 								}
 
-								$this->model->update('travio_airports', $item['id'], $data);
+								$db->update('travio_airports', $item['id'], $data);
 							} else {
-								$this->model->insert('travio_airports', [
+								$db->insert('travio_airports', [
 									'id' => $item['id'],
 									'code' => $item['code'],
 									'name' => $item['name'],
@@ -588,9 +582,9 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					foreach ($this->model->select_all('travio_airports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $airport) {
+					foreach ($db->selectAll('travio_airports', $presents ? ['id' => ['NOT IN', $presents]] : []) as $airport) {
 						try {
-							$this->model->delete('travio_airports', $airport['id']);
+							$db->delete('travio_airports', $airport['id']);
 						} catch (\Exception $e) {
 						}
 					}
@@ -615,12 +609,10 @@ class ImportFromTravioController extends Controller
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
-						$this->model->_Db->delete('travio_stations_links', [], ['confirm' => true]);
+						$db->delete('travio_stations_links', [], ['confirm' => true]);
 
 						foreach ($list['list'] as $id => $item) {
-							$check = $this->model->_Db->select('travio_stations', $id, [
-								'auto_ml' => false,
-							]);
+							$check = $db->select('travio_stations', $id);
 
 							$presents[] = $id;
 
@@ -635,9 +627,9 @@ class ImportFromTravioController extends Controller
 										unset($data[$k]);
 								}
 
-								$this->model->_Db->update('travio_stations', $id, $data);
+								$db->update('travio_stations', $id, $data);
 							} else {
-								$this->model->_Db->insert('travio_stations', [
+								$db->insert('travio_stations', [
 									'id' => $id,
 									'code' => $item['code'],
 									'name' => $item['name'],
@@ -652,14 +644,14 @@ class ImportFromTravioController extends Controller
 								foreach ($item[$k] as $link) {
 									if (!array_key_exists($link, $cacheServices)) {
 										if (str_starts_with($link, 'ss')) {
-											$existing = $this->model->_Db->select('travio_subservices', substr($link, 2));
+											$existing = $db->select('travio_subservices', substr($link, 2));
 
 											$cacheServices[$link] = [
 												'type' => 'subservice',
 												'id' => $existing ? $existing['id'] : null,
 											];
 										} elseif (str_starts_with($link, 's')) {
-											$existing = $this->model->_Db->select('travio_services', ['travio' => substr($link, 1)]);
+											$existing = $db->select('travio_services', ['travio' => substr($link, 1)]);
 
 											$cacheServices[$link] = [
 												'type' => 'service',
@@ -673,7 +665,7 @@ class ImportFromTravioController extends Controller
 									if (!$cacheServices[$link]['id'])
 										continue;
 
-									$this->model->_Db->insert('travio_stations_links', [
+									$db->insert('travio_stations_links', [
 										'type' => $link_type,
 										'station' => $id,
 										$cacheServices[$link]['type'] => $cacheServices[$link]['id'],
@@ -684,9 +676,9 @@ class ImportFromTravioController extends Controller
 							$this->model->_TravioAssets->importStation($id);
 						}
 
-						foreach ($this->model->select_all('travio_stations', $presents ? ['id' => ['NOT IN', $presents]] : []) as $station) {
+						foreach ($db->selectAll('travio_stations', $presents ? ['id' => ['NOT IN', $presents]] : []) as $station) {
 							try {
-								$this->model->delete('travio_stations', $station['id']);
+								$db->delete('travio_stations', $station['id']);
 							} catch (\Exception $e) {
 							}
 						}
@@ -703,7 +695,7 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_luggage_types', [
+						$db->updateOrInsert('travio_luggage_types', [
 							'id' => $item['id'],
 						], [
 							'name' => $item['name'],
@@ -718,9 +710,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_luggage_types', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_luggage_types', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_luggage_types', [], ['confirm' => true]);
+						$db->delete('travio_luggage_types', [], ['confirm' => true]);
 					break;
 				case 'master-data':
 					if (!$config['import']['master_data']['import'])
@@ -732,7 +724,7 @@ class ImportFromTravioController extends Controller
 					]);
 
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_master_data', [
+						$db->updateOrInsert('travio_master_data', [
 							'id' => $item['id'],
 						], [
 							'name' => $item['name'],
@@ -758,13 +750,13 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$check = $this->model->select('travio_payment_methods', $item['id']);
+						$check = $db->select('travio_payment_methods', $item['id']);
 						if ($check) {
-							$this->model->update('travio_payment_methods', $item['id'], [
+							$db->update('travio_payment_methods', $item['id'], [
 								'name' => $item['name'],
 							]);
 						} else {
-							$this->model->insert('travio_payment_methods', [
+							$db->insert('travio_payment_methods', [
 								'id' => $item['id'],
 								'name' => $item['name'],
 								'visible' => 0,
@@ -776,9 +768,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_payment_methods', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_payment_methods', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_payment_methods', [], ['confirm' => true]);
+						$db->delete('travio_payment_methods', [], ['confirm' => true]);
 					break;
 				case 'payment-conditions':
 					if (!$config['import']['payment_conditions']['import'])
@@ -791,7 +783,7 @@ class ImportFromTravioController extends Controller
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
-						$this->model->updateOrInsert('travio_payment_conditions', [
+						$db->updateOrInsert('travio_payment_conditions', [
 							'id' => $item['id'],
 						], [
 							'name' => $item['name'],
@@ -802,9 +794,9 @@ class ImportFromTravioController extends Controller
 					}
 
 					if ($idsList)
-						$this->model->_Db->delete('travio_payment_conditions', ['id' => ['NOT IN', $idsList]]);
+						$db->delete('travio_payment_conditions', ['id' => ['NOT IN', $idsList]]);
 					else
-						$this->model->_Db->delete('travio_payment_conditions', [], ['confirm' => true]);
+						$db->delete('travio_payment_conditions', [], ['confirm' => true]);
 					break;
 				default:
 					throw new \Exception('Unknown type');
