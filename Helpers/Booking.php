@@ -301,7 +301,6 @@ class Booking extends Base
 
 		if (in_array($show, ['services', 'both'])) {
 			$where = [
-				'visible' => 1,
 				[
 					'sub' => [
 						['name', 'LIKE', $query . '%'],
@@ -309,11 +308,30 @@ class Booking extends Base
 					],
 					'operator' => 'OR',
 				],
+				'visible' => 1,
 			];
 			if ($type[1])
 				$where['type'] = $type[1];
 
 			$joins = [];
+			if ($show === 'both') {
+				$joins['travio_geo_texts'] = [
+					'type' => 'left',
+					'on' => ['geo' => 'parent'],
+					'fields' => [
+						'name' => 'geo_name',
+						'parent_name' => 'geo_parent_name',
+					],
+					'where' => [
+						'lang' => Ml::getLang(),
+					],
+				];
+
+				$where[0]['sub'][] = ['geo_name', 'LIKE', $query . '%'];
+				$where[0]['sub'][] = ['geo_name', 'LIKE', '% ' . $query . '%'];
+				$where[0]['sub'][] = ['geo_parent_name', 'LIKE', $query . '%'];
+				$where[0]['sub'][] = ['geo_parent_name', 'LIKE', '% ' . $query . '%'];
+			}
 			if (isset($_POST['geo-parent'])) {
 				switch ($type[0]) {
 					case 'packages':
