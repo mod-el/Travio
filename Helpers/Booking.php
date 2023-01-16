@@ -5,7 +5,7 @@ use Model\Multilang\Ml;
 
 class Booking extends Base
 {
-	public function getItem($el): array
+	public function getItem(array|object|null $el): array
 	{
 		$fill = [];
 		$dates = [];
@@ -167,7 +167,7 @@ class Booking extends Base
 		];
 	}
 
-	public function getItemFromId($id): array
+	public function getItemFromId(?int $id): array
 	{
 		if ($id !== null) {
 			switch ($id[0]) {

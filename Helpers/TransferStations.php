@@ -4,7 +4,7 @@ use Model\InstantSearch\Base;
 
 class TransferStations extends Base
 {
-	public function getItem($el): array
+	public function getItem(array|object|null $el): array
 	{
 		if ($el !== null) {
 			return [
@@ -19,7 +19,7 @@ class TransferStations extends Base
 		}
 	}
 
-	public function getItemFromId($id): array
+	public function getItemFromId(?int $id): array
 	{
 		return $this->getItem($id !== null ? $this->model->one('TravioStation', $id) : null);
 	}
