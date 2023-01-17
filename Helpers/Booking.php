@@ -167,7 +167,7 @@ class Booking extends Base
 		];
 	}
 
-	public function getItemFromId(?int $id): array
+	public function getItemFromId(?string $id): array
 	{
 		if ($id !== null) {
 			switch ($id[0]) {

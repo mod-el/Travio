@@ -19,7 +19,7 @@ class TransferStations extends Base
 		}
 	}
 
-	public function getItemFromId(?int $id): array
+	public function getItemFromId(?string $id): array
 	{
 		return $this->getItem($id !== null ? $this->model->one('TravioStation', $id) : null);
 	}
