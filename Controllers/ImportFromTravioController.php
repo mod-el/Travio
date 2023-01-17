@@ -286,14 +286,19 @@ class ImportFromTravioController extends Controller
 
 							$present_departures = [];
 							foreach ($packageData['departures'] as $departure) {
+								$departure_airport = $departure['departure-airport'] ? $db->select('travio_airports', ['code' => $departure['departure-airport']]) : null;
+								$arrival_airport = $departure['arrival-airport'] ? $db->select('travio_airports', ['code' => $departure['arrival-airport']]) : null;
+								$departure_port = $departure['departure-port'] ? $db->select('travio_ports', ['code' => $departure['departure-port']]) : null;
+								$arrival_port = $departure['arrival-port'] ? $db->select('travio_ports', ['code' => $departure['arrival-port']]) : null;
+
 								$present_departures[] = $db->updateOrInsert('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
 								], [
-									'departure_airport' => $departure['departure-airport'] ? ($db->select('travio_airports', ['code' => $departure['departure-airport']])['id'] ?: null) : null,
-									'arrival_airport' => $departure['arrival-airport'] ? ($db->select('travio_airports', ['code' => $departure['arrival-airport']])['id'] ?: null) : null,
-									'departure_port' => $departure['departure-port'] ? ($db->select('travio_ports', ['code' => $departure['departure-port']])['id'] ?: null) : null,
-									'arrival_port' => $departure['arrival-port'] ? ($db->select('travio_ports', ['code' => $departure['arrival-port']])['id'] ?: null) : null,
+									'departure_airport' => $departure_airport ? $departure_airport['id'] : null,
+									'arrival_airport' => $arrival_airport ? $arrival_airport['id'] : null,
+									'departure_port' => $departure_port ? $departure_port['id'] : null,
+									'arrival_port' => $arrival_port ? $arrival_port['id'] : null,
 								]);
 							}
 
