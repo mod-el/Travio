@@ -7,7 +7,8 @@ class ImportFromTravioController extends Controller
 {
 	public function init()
 	{
-		$this->model->switchEvents(false);
+		if (class_exists('\\Model\\Logger\\Logger'))
+			\Model\Logger\Logger::disable();
 		Db::getConnection()->setQueryLimit('table', 0);
 	}
 
