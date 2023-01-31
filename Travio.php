@@ -492,7 +492,7 @@ class Travio extends Module
 
 	public function checkPhotoCache(string $url): string
 	{
-		if (\Model\Config\Config::getEnv() !== 'development' and str_starts_with($url, 'https://storage.travio.it/'))
+		if (in_array(\Model\Config\Config::getEnv(), ['staging', 'production']) and str_starts_with($url, 'https://storage.travio.it/'))
 			return $this->getPhotoFromCache($url);
 		else
 			return $url;
