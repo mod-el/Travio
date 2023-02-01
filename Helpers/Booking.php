@@ -312,6 +312,8 @@ class Booking extends Base
 			];
 			if ($type[1])
 				$where['type'] = $type[1];
+			elseif ($type[0] === 'package')
+				$where['type'] = 2;
 
 			$joins = [];
 			if ($show === 'both') {
