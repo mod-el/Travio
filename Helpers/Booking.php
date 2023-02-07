@@ -56,8 +56,8 @@ class Booking extends Base
 				}
 
 				if (isset($_POST['departures'])) {
-					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
-					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE g.geo = ' . $el['id'] . ' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
 
 					$fill['travioAirports'] = json_encode($airports);
 					$fill['travioPorts'] = json_encode($ports);
@@ -95,8 +95,8 @@ class Booking extends Base
 				$fill['travioWebsiteServiceId'] = $el['id'];
 
 				if (isset($_POST['departures'])) {
-					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
-					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE s.service = ' . $el['id'] . ' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
 
 					$fill['travioAirports'] = json_encode($airports);
 					$fill['travioPorts'] = json_encode($ports);
