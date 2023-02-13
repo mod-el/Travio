@@ -3,6 +3,7 @@
 use Model\Assets\Assets;
 use Model\Core\Globals;
 use Model\Core\Module;
+use Model\Db\Db;
 use Model\Multilang\Ml;
 use Model\TravioAssets\Elements\TravioOrder;
 use Model\TravioAssets\Elements\TravioService;
@@ -227,12 +228,14 @@ class Travio extends Module
 
 	public function getServiceFromId(string $id): ?TravioService
 	{
-		$check = $this->model->_Db->select('travio_services', ['travio' => $id]);
+		$db = Db::getConnection();
+
+		$check = $db->select('travio_services', ['travio' => $id]);
 		if (!$check or !$check['visible']) {
 			try {
 				$this->importService($id);
 
-				$check = $this->model->_Db->select('travio_services', ['travio' => $id]);
+				$check = $db->select('travio_services', ['travio' => $id]);
 			} catch (\Throwable) {
 				return null;
 			}
@@ -529,6 +532,8 @@ class Travio extends Module
 
 	public function importService(string $travioId)
 	{
+		$db = Db::getConnection();
+
 		$config = $this->retrieveConfig();
 
 		$serviceData = $this->request('static-data', [
@@ -539,7 +544,7 @@ class Travio extends Module
 		])['data'];
 
 		try {
-			$this->model->_Db->beginTransaction();
+			$db->beginTransaction();
 
 			$data = [
 				'code' => $serviceData['code'],
@@ -565,7 +570,7 @@ class Travio extends Module
 				'last_update' => $serviceData['last_update'],
 			];
 
-			$check = $this->model->_Db->select('travio_services', ['travio' => $travioId]);
+			$check = $db->select('travio_services', ['travio' => $travioId]);
 			if ($check) {
 				foreach (($config['import']['services']['override'] ?? []) as $k => $override) {
 					if (!$override)
@@ -573,29 +578,29 @@ class Travio extends Module
 				}
 
 				$id = $check['id'];
-				$this->model->update('travio_services', $id, $data);
+				$db->update('travio_services', $id, $data);
 
-				$this->model->_Db->delete('travio_services_tags', ['service' => $id]);
+				$db->delete('travio_services_tags', ['service' => $id]);
 				if ($config['import']['services']['override']['descriptions'] ?? true)
-					$this->model->_Db->delete('travio_services_descriptions', ['service' => $id]);
-				$this->model->_Db->delete('travio_services_geo', ['service' => $id]);
-				$this->model->_Db->delete('travio_services_amenities', ['service' => $id]);
-				$this->model->_Db->delete('travio_services_files', ['service' => $id]);
-				$this->model->_Db->delete('travio_services_videos', ['service' => $id]);
-				$this->model->_Db->delete('travio_services_availability', ['service' => $id]);
+					$db->delete('travio_services_descriptions', ['service' => $id]);
+				$db->delete('travio_services_geo', ['service' => $id]);
+				$db->delete('travio_services_amenities', ['service' => $id]);
+				$db->delete('travio_services_files', ['service' => $id]);
+				$db->delete('travio_services_videos', ['service' => $id]);
+				$db->delete('travio_services_availability', ['service' => $id]);
 			} else {
 				$data['travio'] = $serviceData['id'];
-				$id = $this->model->insert('travio_services', $data);
+				$id = $db->insert('travio_services', $data);
 			}
 
 			if ($config['import']['subservices']['import']) {
-				$this->model->_Db->delete('travio_subservices_tags', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
-				$this->model->_Db->delete('travio_subservices_descriptions', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
-				$this->model->_Db->delete('travio_subservices_amenities', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
-				$this->model->_Db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+				$db->delete('travio_subservices_tags', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+				$db->delete('travio_subservices_descriptions', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+				$db->delete('travio_subservices_amenities', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
+				$db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 
 				foreach ($serviceData['subservices'] as $subservice) {
-					$ss_id = $this->model->_Db->updateOrInsert('travio_subservices', [
+					$ss_id = $db->updateOrInsert('travio_subservices', [
 						'id' => $subservice['id'],
 					], [
 						'service' => $id,
@@ -605,14 +610,14 @@ class Travio extends Module
 					]);
 
 					foreach ($subservice['tags'] as $tagId => $tag) {
-						$this->model->_Db->insert('travio_subservices_tags', [
+						$db->insert('travio_subservices_tags', [
 							'subservice' => $ss_id,
 							'tag' => $tagId,
 						], ['defer' => true]);
 					}
 
 					foreach ($subservice['descriptions'] as $description) {
-						$this->model->_Db->insert('travio_subservices_descriptions', [
+						$db->insert('travio_subservices_descriptions', [
 							'subservice' => $ss_id,
 							'tag' => $description['keyword'],
 							'title' => $description['title'],
@@ -631,7 +636,7 @@ class Travio extends Module
 						if ($photo['thumb'])
 							$this->invalidatePhotoCache($photo['thumb']);
 
-						$present_photos[] = $this->model->_Db->updateOrInsert('travio_subservices_photos', [
+						$present_photos[] = $db->updateOrInsert('travio_subservices_photos', [
 							'subservice' => $ss_id,
 							'url' => $photo['url'],
 							'thumb' => $photo['thumb'] ?: $photo['url'],
@@ -640,16 +645,16 @@ class Travio extends Module
 					}
 
 					if ($present_photos) {
-						$this->model->_Db->delete('travio_subservices_photos', [
+						$db->delete('travio_subservices_photos', [
 							'subservice' => $ss_id,
 							'id' => ['NOT IN', $present_photos],
 						]);
 					} else {
-						$this->model->_Db->delete('travio_subservices_photos', ['subservice' => $ss_id]);
+						$db->delete('travio_subservices_photos', ['subservice' => $ss_id]);
 					}
 
 					foreach ($subservice['amenities'] as $amenity_id => $amenity) {
-						$this->model->_Db->insert('travio_subservices_amenities', [
+						$db->insert('travio_subservices_amenities', [
 							'subservice' => $ss_id,
 							'amenity' => $amenity_id,
 							'name' => $amenity['name'],
@@ -658,7 +663,7 @@ class Travio extends Module
 					}
 
 					foreach ($subservice['files'] as $file) {
-						$this->model->_Db->insert('travio_subservices_files', [
+						$db->insert('travio_subservices_files', [
 							'subservice' => $ss_id,
 							'name' => $file['name'],
 							'url' => $file['url'],
@@ -666,23 +671,23 @@ class Travio extends Module
 					}
 				}
 
-				$this->model->_Db->bulkInsert('travio_subservices_tags');
-				$this->model->_Db->bulkInsert('travio_subservices_amenities');
-				$this->model->_Db->bulkInsert('travio_subservices_files');
+				$db->bulkInsert('travio_subservices_tags');
+				$db->bulkInsert('travio_subservices_amenities');
+				$db->bulkInsert('travio_subservices_files');
 			}
 
 			foreach ($serviceData['tags'] as $tagId => $tag) {
-				$this->model->_Db->insert('travio_services_tags', [
+				$db->insert('travio_services_tags', [
 					'service' => $id,
 					'tag' => $tagId,
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_tags');
+			$db->bulkInsert('travio_services_tags');
 
 			if (($config['import']['services']['override']['descriptions'] ?? true) or !$item['existing']) {
 				foreach ($serviceData['descriptions'] as $description) {
-					$this->model->_Db->insert('travio_services_descriptions', [
+					$db->insert('travio_services_descriptions', [
 						'service' => $id,
 						'tag' => $description['keyword'],
 						'title' => $description['title'],
@@ -702,7 +707,7 @@ class Travio extends Module
 				if ($photo['thumb'])
 					$this->invalidatePhotoCache($photo['thumb']);
 
-				$present_photos[] = $this->model->_Db->updateOrInsert('travio_services_photos', [
+				$present_photos[] = $db->updateOrInsert('travio_services_photos', [
 					'service' => $id,
 					'url' => $photo['url'],
 					'thumb' => $photo['thumb'] ?: $photo['url'],
@@ -711,27 +716,27 @@ class Travio extends Module
 			}
 
 			if ($present_photos) {
-				$this->model->_Db->delete('travio_services_photos', [
+				$db->delete('travio_services_photos', [
 					'service' => $id,
 					'id' => ['NOT IN', $present_photos],
 				]);
 			} else {
-				$this->model->_Db->delete('travio_services_photos', ['service' => $id]);
+				$db->delete('travio_services_photos', ['service' => $id]);
 			}
 
 			foreach ($serviceData['geo'] as $geo) {
 				if (!$geo['id'])
 					continue;
-				$this->model->_Db->insert('travio_services_geo', [
+				$db->insert('travio_services_geo', [
 					'service' => $id,
 					'geo' => $geo['id'],
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_geo');
+			$db->bulkInsert('travio_services_geo');
 
 			foreach ($serviceData['amenities'] as $amenity_id => $amenity) {
-				$this->model->_Db->insert('travio_services_amenities', [
+				$db->insert('travio_services_amenities', [
 					'service' => $id,
 					'amenity' => $amenity_id,
 					'name' => $amenity['name'],
@@ -739,29 +744,29 @@ class Travio extends Module
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_amenities');
+			$db->bulkInsert('travio_services_amenities');
 
 			foreach ($serviceData['files'] as $file) {
-				$this->model->_Db->insert('travio_services_files', [
+				$db->insert('travio_services_files', [
 					'service' => $id,
 					'name' => $file['name'],
 					'url' => $file['url'],
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_files');
+			$db->bulkInsert('travio_services_files');
 
 			foreach ($serviceData['videos'] as $video) {
-				$this->model->_Db->insert('travio_services_videos', [
+				$db->insert('travio_services_videos', [
 					'service' => $id,
 					'video' => $video,
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_videos');
+			$db->bulkInsert('travio_services_videos');
 
 			foreach ($serviceData['availability'] as $availability) {
-				$this->model->_Db->insert('travio_services_availability', [
+				$db->insert('travio_services_availability', [
 					'service' => $id,
 					'from' => $availability['from'],
 					'to' => $availability['to'],
@@ -785,13 +790,13 @@ class Travio extends Module
 				], ['defer' => true]);
 			}
 
-			$this->model->_Db->bulkInsert('travio_services_availability');
+			$db->bulkInsert('travio_services_availability');
 
 			$this->model->_TravioAssets->importService($id, $serviceData['id']);
 
-			$this->model->_Db->commit();
+			$db->commit();
 		} catch (\Exception $e) {
-			$this->model->_Db->rollBack();
+			$db->rollBack();
 			throw $e;
 		}
 	}

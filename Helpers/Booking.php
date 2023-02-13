@@ -1,5 +1,6 @@
 <?php namespace Model\Travio\Helpers;
 
+use Model\Db\Db;
 use Model\InstantSearch\Base;
 use Model\Multilang\Ml;
 
@@ -7,6 +8,8 @@ class Booking extends Base
 {
 	public function getItem(array|object|null $el): array
 	{
+		$db = Db::getConnection();
+
 		$fill = [];
 		$dates = [];
 
@@ -20,7 +23,7 @@ class Booking extends Base
 
 				$text = '<i class="fas fa-map-marker-alt"></i> ' . entities($plainText);
 
-				$services = $this->model->select_all('travio_services', ['join_geo' => $el['id']], [
+				$services = $db->selectAll('travio_services', ['join_geo' => $el['id']], [
 					'joins' => [
 						'travio_services_geo' => [
 							'on' => ['id' => 'service'],
@@ -56,8 +59,8 @@ class Booking extends Base
 				}
 
 				if (isset($_POST['departures'])) {
-					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
-					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+					$airports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
 
 					$fill['travioAirports'] = json_encode($airports);
 					$fill['travioPorts'] = json_encode($ports);
@@ -95,8 +98,8 @@ class Booking extends Base
 				$fill['travioWebsiteServiceId'] = $el['id'];
 
 				if (isset($_POST['departures'])) {
-					$airports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
-					$ports = $this->model->_Db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
+					$airports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
+					$ports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_ports a ON a.id = d.departure_port WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_port ORDER BY a.code')->fetchAll();
 
 					$fill['travioAirports'] = json_encode($airports);
 					$fill['travioPorts'] = json_encode($ports);
@@ -117,7 +120,7 @@ class Booking extends Base
 				$plainText = ucwords(mb_strtolower($el['name']));
 				$text = '<i class="fas fa-tag"></i> ' . entities($plainText);
 
-				$services = $this->model->select_all('travio_services', ['tag' => $el['id']], [
+				$services = $db->selectAll('travio_services', ['tag' => $el['id']], [
 					'joins' => [
 						'travio_services_tags' => [
 							'on' => ['id' => 'service'],
@@ -193,6 +196,8 @@ class Booking extends Base
 
 	public function getList(string $query, bool $is_popup = false): iterable
 	{
+		$db = Db::getConnection();
+
 		$show = (isset($_POST['show']) and in_array($_POST['show'], ['geo', 'services', 'both'])) ? $_POST['show'] : 'both';
 		$type = isset($_POST['type']) ? explode('-', $_POST['type']) : [null, null];
 		if (count($type) === 1)
@@ -268,7 +273,7 @@ class Booking extends Base
 					'on' => ['parent' => 'geo'],
 					'fields' => [],
 				];
-				$where[] = '(tgp.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ' OR travio_geo_texts.parent = ' . $this->model->_Db->quote($_POST['geo-parent']) . ')';
+				$where[] = '(tgp.parent = ' . $db->parseValue($_POST['geo-parent']) . ' OR travio_geo_texts.parent = ' . $db->parseValue($_POST['geo-parent']) . ')';
 			}
 
 			if (!empty($_POST['filters'])) {
@@ -287,8 +292,8 @@ class Booking extends Base
 				}
 			}
 
-			$destinazioni = $this->model->_Db->select_all('travio_geo_texts', $where, [
-				'order_by' => 'travio_geo_texts.parent, travio_geo_texts.lang!=' . $this->model->_Db->quote(Ml::getLang()),
+			$destinazioni = $db->selectAll('travio_geo_texts', $where, [
+				'order_by' => 'travio_geo_texts.parent, travio_geo_texts.lang!=' . $db->parseValue(Ml::getLang()),
 				'joins' => $joins,
 			]);
 
@@ -343,7 +348,7 @@ class Booking extends Base
 							'fields' => [],
 						];
 
-						$where[] = 'tpg.geo = ' . $this->model->_Db->quote($_POST['geo-parent']);
+						$where[] = 'tpg.geo = ' . $db->parseValue($_POST['geo-parent']);
 						break;
 					default:
 						$joins['travio_services_geo'] = [
@@ -352,7 +357,7 @@ class Booking extends Base
 							'fields' => [],
 						];
 
-						$where[] = 'tsg.geo = ' . $this->model->_Db->quote($_POST['geo-parent']);
+						$where[] = 'tsg.geo = ' . $db->parseValue($_POST['geo-parent']);
 						break;
 				}
 			}

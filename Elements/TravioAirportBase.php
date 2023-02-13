@@ -1,5 +1,6 @@
 <?php namespace Model\Travio\Elements;
 
+use Model\Db\Db;
 use Model\ORM\Element;
 
 class TravioAirportBase extends Element
@@ -15,7 +16,7 @@ class TravioAirportBase extends Element
 
 	public function getDestinations(): array
 	{
-		$select = $this->model->_Db->select_all('travio_packages_departures', [
+		$select = Db::getConnection()->selectAll('travio_packages_departures', [
 			'departure_airport' => $this['id'],
 			'visible' => 1,
 		], [
@@ -40,7 +41,7 @@ class TravioAirportBase extends Element
 		return $ids ? $this->model->all('TravioGeo', [
 			'id' => ['IN', $ids],
 		], [
-			'order_by' => 'name',
+			'order_by' => ['name'],
 			'stream' => false,
 		]) : [];
 	}
