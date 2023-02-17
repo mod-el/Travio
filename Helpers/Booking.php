@@ -205,6 +205,15 @@ class Booking extends Base
 		if (count($type) > 2)
 			return [];
 
+		// Per compatibilità con nuove API
+		if ($type[0] === 'hotels') {
+			$type[0] = 'service';
+			$type[1] = 2;
+		}
+		if ($type[0] === 'packages')
+			$type[0] = 'package';
+		/***************************/
+
 		$query = trim($query);
 
 		$elements = [];
