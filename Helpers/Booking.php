@@ -23,7 +23,10 @@ class Booking extends Base
 
 				$text = '<i class="fas fa-map-marker-alt"></i> ' . entities($plainText);
 
-				$services = $db->selectAll('travio_services', ['join_geo' => $el['id']], [
+				$services = $db->selectAll('travio_services', [
+					'join_geo' => $el['id'],
+					'max_date' => ['>=', date('Y-m-d')],
+				], [
 					'joins' => [
 						'travio_services_geo' => [
 							'on' => ['id' => 'service'],
