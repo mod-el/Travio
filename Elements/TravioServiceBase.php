@@ -173,11 +173,8 @@ class TravioServiceBase extends Element
 			$lastAvailability = $availability['to'];
 		}
 
-		if (!$inAvailability) {
-			return [
-				'list' => [],
-			];
-		}
+		if (!$inAvailability)
+			return [];
 
 		$weekdays = [
 			'sunday',
