@@ -234,14 +234,13 @@ class Travio extends Module
 		if (!$check or !$check['visible']) {
 			try {
 				$this->importService($id);
-
 				$check = $db->select('travio_services', ['travio' => $id]);
-			} catch (\Throwable) {
+			} catch (\Throwable $e) {
 				return null;
 			}
 		}
 
-		if (!$check['visible'])
+		if (!$check or !$check['visible'])
 			return null;
 
 		return $this->model->one('TravioService', $check['id']);
@@ -711,7 +710,7 @@ class Travio extends Module
 					'service' => $id,
 					'url' => $photo['url'],
 					'thumb' => $photo['thumb'] ?: $photo['url'],
-					'tag' => $photo['tag'],
+					'tag' => $photo['tag'] ?? null,
 				], $dataToUpdate);
 			}
 
