@@ -504,12 +504,12 @@ class Travio extends Module
 	{
 		$path = $this->convertUrlToCachePath($url);
 
-		if (!file_exists(INCLUDE_PATH . $path)) {
+		if (!file_exists(INCLUDE_PATH . $path) or filesize(INCLUDE_PATH . $path) === 0) {
 			$dir = pathinfo(INCLUDE_PATH . $path, PATHINFO_DIRNAME);
 			if (!is_dir($dir))
 				mkdir($dir, 0777, true);
 
-			file_put_contents($path, @file_get_contents($url));
+			file_put_contents($path, file_get_contents(str_replace(' ', '%20', $url)));
 		}
 
 		return PATH . $path;
