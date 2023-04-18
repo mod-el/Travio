@@ -529,7 +529,7 @@ class Travio extends Module
 		return 'app-data/travio/cache/' . substr($url, 26);
 	}
 
-	public function importService(string $travioId)
+	public function importService(string $travioId): void
 	{
 		$db = Db::getConnection();
 
@@ -566,6 +566,7 @@ class Travio extends Module
 				'min_date' => $serviceData['min_date'],
 				'max_date' => $serviceData['max_date'],
 				'visible' => 1,
+				'has_suppliers' => $serviceData['travio_service'] ? 1 : 0,
 				'last_update' => $serviceData['last_update'],
 			];
 

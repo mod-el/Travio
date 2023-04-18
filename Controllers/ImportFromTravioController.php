@@ -49,6 +49,7 @@ class ImportFromTravioController extends Controller
 								'name' => $item['name'],
 								'parent' => $item['parent'],
 								'parent_name' => $item['parent-name'],
+								'has_suppliers' => (int)$item['has_suppliers'],
 								'visible' => 1,
 							]);
 
