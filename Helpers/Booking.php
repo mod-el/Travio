@@ -40,34 +40,38 @@ class Booking extends Base
 				$totalMaxDate = null;
 				$list = [];
 
-				foreach ($services as $service) {
-					if ($service['min_date']) {
-						$minDate = date_create($service['min_date']);
-						if ($minDate < $today)
-							$minDate = $today;
+				if (!$el['has_suppliers']) {
+					foreach ($services as $service) {
+						if ($service['min_date']) {
+							$minDate = date_create($service['min_date']);
+							if ($minDate < $today)
+								$minDate = $today;
 
-						if ($totalMinDate === null or $minDate < $totalMinDate)
-							$totalMinDate = $minDate;
+							if ($totalMinDate === null or $minDate < $totalMinDate)
+								$totalMinDate = $minDate;
 
-						if ($service['max_date']) {
-							$maxDate = date_create($service['max_date']);
-							if ($totalMaxDate === null or $maxDate > $totalMaxDate)
-								$totalMaxDate = $maxDate;
+							if ($service['max_date']) {
+								$maxDate = date_create($service['max_date']);
+								if ($totalMaxDate === null or $maxDate > $totalMaxDate)
+									$totalMaxDate = $maxDate;
+							}
 						}
+
+						$checkin_dates = $service->getCheckinDates();
+						if (count($checkin_dates) > 0)
+							$list = array_merge($list, $checkin_dates);
 					}
 
-					$checkin_dates = $service->getCheckinDates();
-					if (count($checkin_dates) > 0)
-						$list = array_merge($list, $checkin_dates);
-				}
+					if ($totalMinDate and $totalMaxDate) {
+						$dates['min'] = $totalMinDate->format('Y-m-d');
+						$dates['max'] = $totalMaxDate->format('Y-m-d');
+					}
 
-				if ($totalMinDate and $totalMaxDate) {
-					$dates['min'] = $totalMinDate->format('Y-m-d');
-					$dates['max'] = $totalMaxDate->format('Y-m-d');
+					if ($list)
+						$dates['list'] = array_values(array_unique($list));
+				} else {
+					$dates['min'] = date('Y-m-d');
 				}
-
-				if ($list)
-					$dates['list'] = array_values(array_unique($list));
 
 				if (isset($_POST['departures'])) {
 					$airports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE g.geo = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
@@ -87,24 +91,28 @@ class Booking extends Base
 				}
 				$text = '<i class="fas fa-hotel"></i> ' . entities($plainText);
 
-				if ($el['min_date']) {
-					$today = date_create();
-					$minDate = date_create($el['min_date']);
-					if ($minDate < $today)
-						$minDate = $today;
+				if (!$el['has_suppliers']) {
+					if ($el['min_date']) {
+						$today = date_create();
+						$minDate = date_create($el['min_date']);
+						if ($minDate < $today)
+							$minDate = $today;
 
-					$dates['min'] = $minDate->format('Y-m-d');
+						$dates['min'] = $minDate->format('Y-m-d');
 
-					if ($el['max_date']) {
-						$maxDate = date_create($el['max_date']);
-						if ($maxDate >= $minDate)
-							$dates['max'] = $maxDate->format('Y-m-d');
+						if ($el['max_date']) {
+							$maxDate = date_create($el['max_date']);
+							if ($maxDate >= $minDate)
+								$dates['max'] = $maxDate->format('Y-m-d');
+						}
 					}
-				}
 
-				$checkin_dates = $el->getCheckinDates();
-				if (count($checkin_dates) > 0)
-					$dates['list'] = $checkin_dates;
+					$checkin_dates = $el->getCheckinDates();
+					if (count($checkin_dates) > 0)
+						$dates['list'] = $checkin_dates;
+				} else {
+					$dates['min'] = date('Y-m-d');
+				}
 
 				if (isset($_POST['departures'])) {
 					$airports = $db->query('SELECT a.id, a.code FROM travio_packages_departures d INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = d.departure_airport WHERE s.service = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY d.departure_airport ORDER BY a.code')->fetchAll();
