@@ -566,7 +566,7 @@ class Travio extends Module
 				'min_date' => $serviceData['min_date'],
 				'max_date' => $serviceData['max_date'],
 				'visible' => 1,
-				'has_suppliers' => $serviceData['travio_service'] ? 1 : 0,
+				'has_suppliers' => isset($serviceData['travio_service']) ? ($serviceData['travio_service'] ? 1 : 0) : (int)(!is_numeric($travioId)),
 				'last_update' => $serviceData['last_update'],
 			];
 
