@@ -13,6 +13,15 @@ class Booking extends Base
 		$fill = [];
 		$dates = [];
 
+		$fillFields = [];
+		if (isset($_POST['fill']))
+			$fillFields = explode(',', $_POST['fill']) ?: [];
+
+		foreach ($fillFields as $fillField) {
+			if (in_array($fillField, $el->getDataKeys()))
+				$fill[$fillField] = $el[$fillField];
+		}
+
 		switch (get_class($el)) {
 			case 'Model\TravioAssets\Elements\TravioGeo':
 				$id = 'd' . $el['id'];
