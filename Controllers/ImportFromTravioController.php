@@ -47,6 +47,9 @@ class ImportFromTravioController extends Controller
 
 							$already_checked[] = $item['id'];
 
+							if (!isset($item['meta']['last_update']))
+								$item['meta']['last_update'] = null;
+
 							if (array_key_exists($item['id'], $currents)) {
 								if ($currents[$item['id']] === null and $item['meta']['last_update'] === null)
 									continue;
