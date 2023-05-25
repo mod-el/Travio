@@ -27,7 +27,7 @@ class ImportFromTravioController extends Controller
 					foreach ($db->selectAll('travio_geo') as $g)
 						$currents[$g['id']] = $g['last_update'];
 
-					$already_checked = [];
+					$seen_ids = [];
 
 					foreach ($config['target_types'] as $target) {
 						$payload = [
@@ -42,10 +42,10 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							if (in_array($item['id'], $already_checked))
+							if (in_array($item['id'], $seen_ids))
 								continue;
 
-							$already_checked[] = $item['id'];
+							$seen_ids[] = $item['id'];
 
 							if (!isset($item['meta']['last_update']))
 								$item['meta']['last_update'] = null;
@@ -93,13 +93,13 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					if ($currents) {
+					if ($seen_ids) {
 						$db->update('travio_geo', [
-							'id' => ['NOT IN', $currents],
+							'id' => ['NOT IN', $seen_ids],
 						], ['visible' => 0]);
 
 						$db->update('travio_geo', [
-							'id' => ['IN', $currents],
+							'id' => ['IN', $seen_ids],
 						], ['visible' => 1]);
 					} else {
 						$db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
