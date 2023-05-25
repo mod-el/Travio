@@ -24,6 +24,10 @@ class ImportFromTravioController extends Controller
 						break;
 
 					$currents = [];
+					foreach ($db->selectAll('travio_geo') as $g)
+						$currents[$g['id']] = $g['last_update'];
+
+					$already_checked = [];
 
 					foreach ($config['target_types'] as $target) {
 						$payload = [
@@ -38,10 +42,17 @@ class ImportFromTravioController extends Controller
 						$list = $this->model->_Travio->request('static-data', $payload);
 
 						foreach ($list['list'] as $item) {
-							if (in_array($item['id'], $currents))
+							if (in_array($item['id'], $already_checked))
 								continue;
 
-							$currents[] = $item['id'];
+							$already_checked[] = $item['id'];
+
+							if (array_key_exists($item['id'], $currents)) {
+								if ($currents[$item['id']] === null and $item['meta']['last_update'] === null)
+									continue;
+								if ($currents[$item['id']] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]))
+									continue;
+							}
 
 							$db->updateOrInsert('travio_geo', [
 								'id' => $item['id'],
@@ -51,6 +62,7 @@ class ImportFromTravioController extends Controller
 								'parent_name' => $item['parent-name'],
 								'has_suppliers' => (int)$item['has_suppliers'],
 								'visible' => 1,
+								'last_update' => $item['meta']['last_update'],
 							]);
 
 							$this->model->_TravioAssets->importGeo($item['id']);
