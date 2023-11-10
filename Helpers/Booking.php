@@ -9,6 +9,7 @@ class Booking extends Base
 	public function getItem(array|object|null $el): array
 	{
 		$config = \Model\Config\Config::get('travio');
+		$detailedAvailability = $config['import']['services']['availability'] ?? false;
 
 		$db = Db::getConnection();
 
@@ -78,7 +79,7 @@ class Booking extends Base
 						$dates['max'] = $totalMaxDate->format('Y-m-d');
 					}
 
-					if ($list)
+					if ($list or $detailedAvailability)
 						$dates['list'] = array_values(array_unique($list));
 				} else {
 					$dates['min'] = date('Y-m-d');
@@ -119,7 +120,7 @@ class Booking extends Base
 					}
 
 					$checkin_dates = $el->getCheckinDates();
-					if (count($checkin_dates) > 0)
+					if (count($checkin_dates) > 0 or $detailedAvailability)
 						$dates['list'] = $checkin_dates;
 				} else {
 					$dates['min'] = date('Y-m-d');
@@ -187,7 +188,7 @@ class Booking extends Base
 				die('Unknown type');
 		}
 
-		if ($dates or ($config['import']['services']['availability'] ?? false)) // Se l'import disponibilità dettagliato è attivo, ritorno le date anche se vuote
+		if ($dates or $detailedAvailability)
 			$fill['travioDates'] = json_encode($dates);
 
 		return [
