@@ -8,6 +8,8 @@ class Booking extends Base
 {
 	public function getItem(array|object|null $el): array
 	{
+		$config = \Model\Config\Config::get('travio');
+
 		$db = Db::getConnection();
 
 		$fill = [];
@@ -185,7 +187,7 @@ class Booking extends Base
 				die('Unknown type');
 		}
 
-		if ($dates)
+		if ($dates or ($config['import']['services']['availability'] ?? false)) // Se l'import disponibilità dettagliato è attivo, ritorno le date anche se vuote
 			$fill['travioDates'] = json_encode($dates);
 
 		return [
