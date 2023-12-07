@@ -205,7 +205,7 @@ class Travio extends Module
 	/**
 	 * @param string $code
 	 */
-	public function setSessionId(string $code)
+	public function setSessionId(string $code): void
 	{
 		$_SESSION['sessionId'] = $code;
 	}
@@ -251,7 +251,7 @@ class Travio extends Module
 	 * @param string $password
 	 * @return array
 	 */
-	public function login(string $username, string $password)
+	public function login(string $username, string $password): array
 	{
 		$this->clearLoginCache();
 		$this->emptyCartCache();
@@ -292,7 +292,7 @@ class Travio extends Module
 	/**
 	 *
 	 */
-	public function clearLoginCache()
+	public function clearLoginCache(): void
 	{
 		if (array_key_exists('travio-login-cache', $_SESSION))
 			unset($_SESSION['travio-login-cache']);
@@ -322,7 +322,7 @@ class Travio extends Module
 	/**
 	 * @param array $data
 	 */
-	public function editProfile(array $data)
+	public function editProfile(array $data): void
 	{
 		$this->checkPassword($data);
 		$this->request('edit-profile', ['data' => $data]);
@@ -332,7 +332,7 @@ class Travio extends Module
 	/**
 	 * @param array $data
 	 */
-	private function checkPassword(array &$data)
+	private function checkPassword(array &$data): void
 	{
 		if (!empty($data['password']) and isset($data['repassword'])) {
 			if ($data['password'] !== $data['repassword'])
@@ -354,7 +354,7 @@ class Travio extends Module
 	/**
 	 *
 	 */
-	public function emptyCartCache()
+	public function emptyCartCache(): void
 	{
 		$this->cartCache = [];
 		if (isset($_SESSION['travio-cart-cache']))
