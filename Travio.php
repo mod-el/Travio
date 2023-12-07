@@ -509,13 +509,18 @@ class Travio extends Module
 			if (!is_dir($dir))
 				mkdir($dir, 0777, true);
 
-			file_put_contents($path, file_get_contents(str_replace(' ', '%20', $url)));
+			$url = explode('/', $url);
+			$filename = rawurlencode(array_pop($url));
+			$url[] = $filename;
+			$url = implode('/', $url);
+
+			file_put_contents($path, file_get_contents($url));
 		}
 
 		return PATH . $path;
 	}
 
-	public function invalidatePhotoCache(string $url)
+	public function invalidatePhotoCache(string $url): void
 	{
 		if (str_starts_with($url, 'https://storage.travio.it/')) {
 			$path = $this->convertUrlToCachePath($url);
