@@ -6,7 +6,7 @@ class TravioAmenityBase extends Element
 {
 	public static ?string $table = 'travio_amenities';
 
-	public function init()
+	public function init(): void
 	{
 		$this->has('type', [
 			'type' => 'single',

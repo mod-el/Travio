@@ -7,7 +7,7 @@ class TravioAirportBase extends Element
 {
 	public static ?string $table = 'travio_airports';
 
-	public function init()
+	public function init(): void
 	{
 		$this->settings['fields']['departure'] = [
 			'type' => 'checkbox',

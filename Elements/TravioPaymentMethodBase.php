@@ -6,7 +6,7 @@ class TravioPaymentMethodBase extends Element
 {
 	public static ?string $table = 'travio_payment_methods';
 
-	public function init()
+	public function init(): void
 	{
 		$this->settings['fields']['visible'] = [
 			'type' => 'checkbox',

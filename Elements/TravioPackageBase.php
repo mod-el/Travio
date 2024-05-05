@@ -6,7 +6,7 @@ class TravioPackageBase extends Element
 {
 	public static ?string $table = 'travio_packages';
 
-	public function init()
+	public function init(): void
 	{
 		$this->settings['fields']['visible'] = [
 			'type' => 'checkbox',

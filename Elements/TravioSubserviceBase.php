@@ -6,7 +6,7 @@ class TravioSubserviceBase extends Element
 {
 	public static ?string $table = 'travio_subservices';
 
-	public function init()
+	public function init(): void
 	{
 		$this->settings['fields']['type'] = [
 			'type' => 'select',

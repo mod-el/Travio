@@ -8,12 +8,12 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 	public static ?string $table = 'travio_orders';
 	public ?array $response = null;
 
-	protected function afterLoad(array $options)
+	protected function afterLoad(array $options): void
 	{
 		$this->response = json_decode($this['response'] ?: '', true);
 	}
 
-	public function afterSave($previous_data, array $saving)
+	public function afterSave(null|array $previous_data, array $saving): void
 	{
 		$this->response = json_decode($this['response'] ?: '', true);
 	}
@@ -48,7 +48,7 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 		return (bool)$this['paid'];
 	}
 
-	public function markAsPaid()
+	public function markAsPaid(): void
 	{
 		$this->save(['paid' => date('Y-m-d H:i:s')]);
 
@@ -63,7 +63,7 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 		}
 	}
 
-	public function confirm(?float $paid = null)
+	public function confirm(?float $paid = null): void
 	{
 		$response = $this->model->_Travio->confirmOrder($this['reference'], $paid, $this['id']);
 		$this->save(['initial_status' => $response['booking-status']]);

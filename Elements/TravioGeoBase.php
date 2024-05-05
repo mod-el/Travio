@@ -7,7 +7,7 @@ class TravioGeoBase extends Element
 {
 	public static ?string $table = 'travio_geo';
 
-	public function init()
+	public function init(): void
 	{
 		$this->has('sub', [
 			'element' => 'TravioGeo',

@@ -6,7 +6,7 @@ class TravioTagBase extends Element
 {
 	public static ?string $table = 'travio_tags';
 
-	public function init()
+	public function init(): void
 	{
 		$this->has('sub', [
 			'element' => 'TravioTag',
