@@ -534,7 +534,7 @@ class Travio extends Module
 		return 'app-data/travio/cache/' . substr($url, 26);
 	}
 
-	public function importService(string $travioId): void
+	public function importService(string $travioId): int
 	{
 		$db = Db::getConnection();
 
@@ -797,9 +797,9 @@ class Travio extends Module
 
 			$db->bulkInsert('travio_services_availability');
 
-			$this->model->_TravioAssets->importService($id, $serviceData['id']);
-
 			$db->commit();
+
+			return $id;
 		} catch (\Exception $e) {
 			$db->rollBack();
 			throw $e;

@@ -4,55 +4,55 @@ use Model\Core\Module;
 
 class TravioAssetsBase extends Module
 {
-	public function importGeo(int $geo)
+	public function importGeo(array $geo): void
 	{
 	}
 
-	public function importService(int $service, string $travio)
+	public function importService(int $id, array $service): void
 	{
 	}
 
-	public function importPackage(int $package, int $travio)
+	public function importPackage(int $id, array $package): void
 	{
 	}
 
-	public function importTag(int $tag)
+	public function importTag(array $tag): void
 	{
 	}
 
-	public function importAmenity(int $amenity)
+	public function importAmenity(array $amenity): void
 	{
 	}
 
-	public function importClassification(int $id)
+	public function importClassification(array $id): void
 	{
 	}
 
-	public function importPort(int $port)
+	public function importPort(array $port): void
 	{
 	}
 
-	public function importAirport(int $airport)
+	public function importAirport(array $airport): void
 	{
 	}
 
-	public function importStation(int $station)
+	public function importStation(array $station): void
 	{
 	}
 
-	public function importPaymentMethod(int $id)
+	public function importPaymentMethod(array $id): void
 	{
 	}
 
-	public function importPaymentCondition(int $id)
+	public function importPaymentCondition(array $id): void
 	{
 	}
 
-	public function importLuggageType(int $id)
+	public function importLuggageType(array $id): void
 	{
 	}
 
-	public function importMasterData(int $id)
+	public function importMasterData(array $id): void
 	{
 	}
 }

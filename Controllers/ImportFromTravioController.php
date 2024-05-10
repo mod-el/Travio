@@ -68,7 +68,7 @@ class ImportFromTravioController extends Controller
 								'last_update' => $item['meta']['last_update'],
 							]);
 
-							$this->model->_TravioAssets->importGeo($item['id']);
+							$this->model->_TravioAssets->importGeo($item);
 						}
 					}
 
@@ -114,7 +114,8 @@ class ImportFromTravioController extends Controller
 						if (!$item or !array_key_exists('id', $item) or !array_key_exists('existing', $item))
 							die('Wrong item format');
 
-						$this->model->_Travio->importService($item['id']);
+						$id = $this->model->_Travio->importService($item['id']);
+						$this->model->_TravioAssets->importService($id, $item);
 					} elseif (isset($_POST['finalize'])) {
 						$currents = json_decode($_POST['finalize'], true) ?: [];
 						if ($currents) {
@@ -351,7 +352,7 @@ class ImportFromTravioController extends Controller
 								}
 							}
 
-							$this->model->_TravioAssets->importPackage($id, $packageData['id']);
+							$this->model->_TravioAssets->importPackage($id, $packageData);
 
 							$db->commit();
 						} catch (\Exception $e) {
@@ -427,7 +428,7 @@ class ImportFromTravioController extends Controller
 							'full_name' => $item['full_name'],
 						]);
 
-						$this->model->_TravioAssets->importTag($item['id']);
+						$this->model->_TravioAssets->importTag($item);
 						$idsList[] = $item['id'];
 					}
 
@@ -465,7 +466,7 @@ class ImportFromTravioController extends Controller
 						]);
 
 						$idsList[] = $id;
-						$this->model->_TravioAssets->importAmenity($id);
+						$this->model->_TravioAssets->importAmenity($item);
 					}
 
 					if ($idsList)
@@ -492,7 +493,7 @@ class ImportFromTravioController extends Controller
 							'level' => $item['level'],
 						]);
 
-						$this->model->_TravioAssets->importClassification($item['id']);
+						$this->model->_TravioAssets->importClassification($item);
 						$idsList[] = $item['id'];
 					}
 
@@ -545,7 +546,7 @@ class ImportFromTravioController extends Controller
 								]);
 							}
 
-							$this->model->_TravioAssets->importPort($item['id']);
+							$this->model->_TravioAssets->importPort($item);
 						}
 					}
 
@@ -600,7 +601,7 @@ class ImportFromTravioController extends Controller
 								]);
 							}
 
-							$this->model->_TravioAssets->importAirport($item['id']);
+							$this->model->_TravioAssets->importAirport($item);
 						}
 					}
 
@@ -695,7 +696,7 @@ class ImportFromTravioController extends Controller
 								}
 							}
 
-							$this->model->_TravioAssets->importStation($id);
+							$this->model->_TravioAssets->importStation($item);
 						}
 
 						foreach ($db->selectAll('travio_stations', $currents ? ['id' => ['NOT IN', $currents]] : []) as $station) {
@@ -727,7 +728,7 @@ class ImportFromTravioController extends Controller
 							'height' => $item['height'],
 						]);
 
-						$this->model->_TravioAssets->importLuggageType($item['id']);
+						$this->model->_TravioAssets->importLuggageType($item);
 						$idsList[] = $item['id'];
 					}
 
@@ -757,7 +758,7 @@ class ImportFromTravioController extends Controller
 							'username' => $item['username'],
 						]);
 
-						$this->model->_TravioAssets->importMasterData($item['id']);
+						$this->model->_TravioAssets->importMasterData($item);
 					}
 					break;
 				case 'payment-methods':
@@ -785,7 +786,7 @@ class ImportFromTravioController extends Controller
 							]);
 						}
 
-						$this->model->_TravioAssets->importPaymentMethod($item['id']);
+						$this->model->_TravioAssets->importPaymentMethod($item);
 						$idsList[] = $item['id'];
 					}
 
@@ -811,7 +812,7 @@ class ImportFromTravioController extends Controller
 							'name' => $item['name'],
 						]);
 
-						$this->model->_TravioAssets->importPaymentCondition($item['id']);
+						$this->model->_TravioAssets->importPaymentCondition($item);
 						$idsList[] = $item['id'];
 					}
 
