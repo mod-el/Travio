@@ -175,9 +175,9 @@ class Travio extends Module
 		$config = $this->retrieveConfig();
 
 		if (DEBUG_MODE and $config['dev'])
-			$url = 'https://dev.travio.it';
+			$url = 'https://old.dev.travio.it';
 		else
-			$url = 'https://bo.travio.it';
+			$url = 'https://old.travio.it';
 
 		$url .= '/api-' . $config['auth']['id'] . '/' . $request;
 
