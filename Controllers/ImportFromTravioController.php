@@ -2,6 +2,7 @@
 
 use Model\Core\Controller;
 use Model\Db\Db;
+use Model\Travio\TravioClient;
 
 class ImportFromTravioController extends Controller
 {
@@ -175,11 +176,7 @@ class ImportFromTravioController extends Controller
 						if (!$item or !array_key_exists('id', $item) or !array_key_exists('existing', $item) or !array_key_exists('last_update', $item))
 							die('Wrong item format');
 
-						$packageData = $this->model->_Travio->request('static-data', [
-							'type' => 'package',
-							'id' => $item['id'],
-							'all-langs' => true,
-						])['data'];
+						$packageData = TravioClient::restGet('packages', $item['id']);
 
 						try {
 							$db->beginTransaction();
@@ -188,14 +185,12 @@ class ImportFromTravioController extends Controller
 								'code' => $packageData['code'],
 								'name' => $packageData['name'],
 								'type' => $packageData['type'],
-								'notes' => $packageData['notes'],
-								'price' => $packageData['price'],
-								'geo' => $packageData['geo'][0]['id'] ?? null,
-								'departs_from' => $packageData['departs_from'],
+								'price' => $packageData['shown_price'],
+								'geo' => $packageData['geo'][0][count($packageData['geo'][0]) - 1]['id'] ?? null,
 								'duration' => $packageData['duration'],
 								'min_pax' => $packageData['min_pax'],
 								'visible' => 1,
-								'last_update' => $item['last_update'],
+								'last_update' => $packageData['_meta']['last_update'],
 							];
 
 							if ($item['existing']) {
@@ -219,7 +214,7 @@ class ImportFromTravioController extends Controller
 								$id = $db->insert('travio_packages', $data);
 							}
 
-							foreach ($packageData['tags'] as $tagId => $tag) {
+							foreach ($packageData['_tags'] as $tagId) {
 								$db->insert('travio_packages_tags', [
 									'package' => $id,
 									'tag' => $tagId,
@@ -228,17 +223,31 @@ class ImportFromTravioController extends Controller
 
 							$db->bulkInsert('travio_packages_tags');
 
-							foreach ($packageData['descriptions'] as $description) {
+							$descriptions = [];
+							foreach ($packageData['descriptions'] as $lang => $description) {
+								foreach ($description['paragraphs'] as $idx => $paragraph) {
+									if (!isset($descriptions[$idx])) {
+										$descriptions[$idx] = [
+											'tag' => $paragraph['tag'],
+											'title' => [],
+											'text' => [],
+										];
+									}
+
+									$descriptions[$idx]['title'][$lang] = $paragraph['title'];
+									$descriptions[$idx]['text'][$lang] = $paragraph['text'];
+								}
+							}
+
+							foreach($descriptions as $description){
 								$db->insert('travio_packages_descriptions', [
 									'package' => $id,
-									'tag' => $description['keyword'],
-									'title' => $description['title'],
-									'text' => $description['text'],
+									...$description,
 								]);
 							}
 
 							$present_photos = [];
-							foreach ($packageData['photos'] as $photoIdx => $photo) {
+							foreach ($packageData['images'] as $photoIdx => $photo) {
 								$dataToUpdate = ['order' => $photoIdx + 1];
 								if ($config['import']['packages']['override']['images_descriptions'] ?? true)
 									$dataToUpdate['description'] = $photo['description'];
@@ -265,7 +274,7 @@ class ImportFromTravioController extends Controller
 								$db->delete('travio_packages_photos', ['package' => $id]);
 							}
 
-							foreach ($packageData['geo'] as $geo) {
+							foreach ($packageData['geo'][0] as $geo) {
 								$db->insert('travio_packages_geo', [
 									'package' => $id,
 									'geo' => $geo['id'],
@@ -274,7 +283,7 @@ class ImportFromTravioController extends Controller
 
 							$db->bulkInsert('travio_packages_geo');
 
-							foreach ($packageData['files'] as $file) {
+							foreach ($packageData['_attachments'] as $file) {
 								$db->insert('travio_packages_files', [
 									'package' => $id,
 									'name' => $file['name'],
@@ -284,7 +293,7 @@ class ImportFromTravioController extends Controller
 
 							$db->bulkInsert('travio_packages_files');
 
-							foreach ($packageData['itinerary'] as $destination) {
+							foreach ($packageData['schedule'] as $destination) {
 								$dId = $db->insert('travio_packages_itinerary', [
 									'package' => $id,
 									'day' => $destination['day'],
@@ -293,7 +302,7 @@ class ImportFromTravioController extends Controller
 									'description' => $destination['description'],
 								]);
 
-								foreach ($destination['photos'] as $photo) {
+								foreach ($destination['images'] as $photo) {
 									$db->insert('travio_packages_itinerary_photos', [
 										'itinerary' => $dId,
 										'url' => $photo['url'],
@@ -304,21 +313,31 @@ class ImportFromTravioController extends Controller
 
 							$current_departures = [];
 							foreach ($packageData['departures'] as $departure) {
-								$departure_airport = $departure['departure-airport'] ? $db->select('travio_airports', ['code' => $departure['departure-airport']]) : null;
-								$arrival_airport = $departure['arrival-airport'] ? $db->select('travio_airports', ['code' => $departure['arrival-airport']]) : null;
-								$departure_port = $departure['departure-port'] ? $db->select('travio_ports', ['code' => $departure['departure-port']]) : null;
-								$arrival_port = $departure['arrival-port'] ? $db->select('travio_ports', ['code' => $departure['arrival-port']]) : null;
-
-								$current_departures[] = $db->updateOrInsert('travio_packages_departures', [
+								$departureId = $db->updateOrInsert('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
 								], [
-									'departure_airport' => $departure_airport ? $departure_airport['id'] : null,
-									'arrival_airport' => $arrival_airport ? $arrival_airport['id'] : null,
-									'departure_port' => $departure_port ? $departure_port['id'] : null,
-									'arrival_port' => $arrival_port ? $arrival_port['id'] : null,
+									// TODO: rimuovere questi 4 in futuro
+									'departure_airport' => $departure['departure_airport'],
+									'arrival_airport' => $departure['arrival_airport'],
+									'departure_port' => $departure['departure_port'],
+									'arrival_port' => $departure['arrival_port'],
 								]);
+
+								$current_departures[] = $departureId;
+
+								foreach ($departure['routes'] as $route) {
+									$db->insert('travio_packages_departures_routes', [
+										'departure' => $departureId,
+										'departure_airport' => $route['departure']['airport'] ?? null,
+										'departure_port' => $route['departure']['port'] ?? null,
+										'arrival_airport' => $route['arrival']['airport'] ?? null,
+										'arrival_port' => $route['arrival']['port'] ?? null,
+									], ['defer' => true]);
+								}
 							}
+
+							$db->bulkInsert('travio_packages_departures_routes');
 
 							if ($current_departures) {
 								$db->delete('travio_packages_departures', [
@@ -329,15 +348,18 @@ class ImportFromTravioController extends Controller
 								$db->delete('travio_packages_departures', ['package' => $id]);
 							}
 
-							foreach ($packageData['services'] as $service) {
-								$existing = $db->select('travio_services', ['code' => $service['code']]);
+							foreach ($packageData['rows'] as $row) {
+								if (!$row['service'])
+									continue;
+
+								$existing = $db->select('travio_services', ['travio' => $row['service']]);
 								if (!$existing)
-									throw new \Exception('Il servizio ' . $service['code'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+									throw new \Exception('Il servizio ' . $row['service'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
 
 								$db->insert('travio_packages_services', [
 									'package' => $id,
 									'service' => $existing['id'],
-									'type' => $service['type'],
+									'type' => $existing['type'],
 								]);
 							}
 
@@ -345,7 +367,7 @@ class ImportFromTravioController extends Controller
 								try {
 									$db->insert('travio_packages_guides', [
 										'package' => $id,
-										'guide' => $guide['master_data'],
+										'guide' => $guide,
 									]);
 								} catch (\Exception $e) {
 									$this->model->error('La guida #' . $guide['master_data'] . ' del pacchetto ' . $packageData['code'] . ' non sembra essere stata importata');
@@ -379,15 +401,11 @@ class ImportFromTravioController extends Controller
 							if ($target['search'] !== 'package')
 								continue;
 
-							$payload = [
-								'type' => 'package',
-								'show-names' => true,
-							];
-
+							$filters = [];
 							if (isset($target['type']))
-								$payload['service-type'] = $target['type'];
+								$filters['type'] = $target['type'];
 
-							$list = $this->model->_Travio->request('static-data', $payload);
+							$list = TravioClient::restList('packages', ['filters' => $filters, 'sort_by' => [['id', 'ASC']]]);
 
 							foreach ($list['list'] as $item) {
 								if (!$item['id'])
@@ -397,9 +415,9 @@ class ImportFromTravioController extends Controller
 
 								$items[] = [
 									'id' => $item['id'],
-									'last_update' => $item['last_update'],
+									'last_update' => $item['_meta']['last_update'],
 									'existing' => $check ? $check['id'] : null,
-									'update' => (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))),
+									'update' => (!$check or ($item['_meta']['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['_meta']['last_update'])))),
 								];
 							}
 						}
