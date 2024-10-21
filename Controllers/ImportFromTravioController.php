@@ -414,7 +414,11 @@ class ImportFromTravioController extends Controller
 								];
 							}
 
-							$list = TravioClient::restList('packages', ['filters' => $filters, 'sort_by' => [['id', 'ASC']]]);
+							$list = TravioClient::restList('packages', [
+								'filters' => $filters,
+								'sort_by' => [['id', 'ASC']],
+								'per_page' => 0,
+							]);
 
 							foreach ($list['list'] as $item) {
 								if (!$item['id'])
