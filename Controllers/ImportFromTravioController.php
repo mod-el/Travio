@@ -239,7 +239,7 @@ class ImportFromTravioController extends Controller
 								}
 							}
 
-							foreach($descriptions as $description){
+							foreach ($descriptions as $description) {
 								$db->insert('travio_packages_descriptions', [
 									'package' => $id,
 									...$description,
@@ -401,9 +401,18 @@ class ImportFromTravioController extends Controller
 							if ($target['search'] !== 'package')
 								continue;
 
-							$filters = [];
-							if (isset($target['type']))
-								$filters['type'] = $target['type'];
+							$filters = [
+								[
+									'field' => 'visibility.web',
+									'value' => true,
+								],
+							];
+							if (isset($target['type'])) {
+								$filters[] = [
+									'field' => 'type',
+									'value' => $target['type'],
+								];
+							}
 
 							$list = TravioClient::restList('packages', ['filters' => $filters, 'sort_by' => [['id', 'ASC']]]);
 
