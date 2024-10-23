@@ -313,16 +313,19 @@ class ImportFromTravioController extends Controller
 
 							$current_departures = [];
 							foreach ($packageData['departures'] as $departure) {
-								$departureId = $db->updateOrInsert('travio_packages_departures', [
+								$departureQ = $db->select('travio_packages_departures', [
 									'package' => $id,
 									'date' => $departure['date'],
-								], [
-									// TODO: rimuovere questi 4 in futuro
-									'departure_airport' => $departure['departure_airport'],
-									'arrival_airport' => $departure['arrival_airport'],
-									'departure_port' => $departure['departure_port'],
-									'arrival_port' => $departure['arrival_port'],
 								]);
+
+								if ($departureQ) {
+									$departureId = $departureQ['id'];
+								} else {
+									$departureId = $db->insert('travio_packages_departures', [
+										'package' => $id,
+										'date' => $departure['date'],
+									]);
+								}
 
 								$current_departures[] = $departureId;
 

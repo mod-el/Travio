@@ -28,6 +28,10 @@ class TravioGeoBase extends Element
 			'visible' => 1,
 		], [
 			'joins' => [
+				'travio_packages_departures_routes' => [
+					'on' => ['departure' => 'id'],
+					'fields' => ['departure_airport'],
+				],
 				'travio_packages_geo' => [
 					'on' => ['package' => 'package'],
 					'fields' => ['geo'],
@@ -37,6 +41,7 @@ class TravioGeoBase extends Element
 					'fields' => ['visible'],
 				],
 			],
+			'group_by' => 'departure_airport',
 		]);
 
 		$ids = [];
@@ -61,6 +66,10 @@ class TravioGeoBase extends Element
 			'visible' => 1,
 		], [
 			'joins' => [
+				'travio_packages_departures_routes' => [
+					'on' => ['departure' => 'id'],
+					'fields' => ['departure_port'],
+				],
 				'travio_packages_geo' => [
 					'on' => ['package' => 'package'],
 					'fields' => ['geo'],
@@ -70,6 +79,7 @@ class TravioGeoBase extends Element
 					'fields' => ['visible'],
 				],
 			],
+			'group_by' => 'departure_port',
 		]);
 
 		$ids = [];

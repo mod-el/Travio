@@ -21,6 +21,10 @@ class TravioAirportBase extends Element
 			'visible' => 1,
 		], [
 			'joins' => [
+				'travio_packages_departures_routes' => [
+					'on' => ['departure' => 'id'],
+					'fields' => ['departure_airport'],
+				],
 				'travio_packages_geo' => [
 					'on' => ['package' => 'package'],
 					'fields' => ['geo'],
@@ -30,6 +34,7 @@ class TravioAirportBase extends Element
 					'fields' => ['visible'],
 				],
 			],
+			'group_by' => 'geo',
 		]);
 
 		$ids = [];

@@ -21,6 +21,10 @@ class TravioPortBase extends Element
 			'visible' => 1,
 		], [
 			'joins' => [
+				'travio_packages_departures_routes' => [
+					'on' => ['departure' => 'id'],
+					'fields' => ['departure_port'],
+				],
 				'travio_packages_geo' => [
 					'on' => ['package' => 'package'],
 					'fields' => ['geo'],
@@ -30,6 +34,7 @@ class TravioPortBase extends Element
 					'fields' => ['visible'],
 				],
 			],
+			'group_by' => 'geo',
 		]);
 
 		$ids = [];
