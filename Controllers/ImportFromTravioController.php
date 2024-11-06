@@ -297,7 +297,6 @@ class ImportFromTravioController extends Controller
 								$dId = $db->insert('travio_packages_itinerary', [
 									'package' => $id,
 									'day' => $destination['day'],
-									'geo' => $destination['geo'],
 									'name' => $destination['name'],
 									'description' => $destination['description'],
 								]);
