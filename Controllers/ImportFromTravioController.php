@@ -447,10 +447,7 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['tags']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'tags',
-						'all-langs' => true,
-					]);
+					$list = TravioClient::restList('tags', ['per_page' => 0]);
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
@@ -459,7 +456,7 @@ class ImportFromTravioController extends Controller
 						], [
 							'parent' => $item['parent'],
 							'name' => $item['name'],
-							'full_name' => $item['full_name'],
+							'full_name' => $item['_full_name'],
 						]);
 
 						$this->model->_TravioAssets->importTag($item);
