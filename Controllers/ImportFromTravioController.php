@@ -224,7 +224,8 @@ class ImportFromTravioController extends Controller
 							$db->bulkInsert('travio_packages_tags');
 
 							$descriptions = [];
-							foreach ($packageData['descriptions'] as $lang => $description) {
+							foreach ($packageData['descriptions'] as $description) {
+								$lang = $description['lang'];
 								foreach ($description['paragraphs'] as $idx => $paragraph) {
 									if (!isset($descriptions[$idx])) {
 										$descriptions[$idx] = [
