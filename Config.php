@@ -6,7 +6,7 @@ class Config extends Module_Config
 {
 	/**
 	 */
-	protected function assetsList()
+	protected function assetsList(): void
 	{
 		if (!is_dir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities'))
 			mkdir(INCLUDE_PATH . 'app-data' . DIRECTORY_SEPARATOR . 'travio' . DIRECTORY_SEPARATOR . 'amenities', 0777, true);
