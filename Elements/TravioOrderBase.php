@@ -2,6 +2,7 @@
 
 use Model\ORM\Element;
 use Model\Payments\PaymentsOrderInterface;
+use Model\Travio\TravioClient;
 
 class TravioOrderBase extends Element implements PaymentsOrderInterface
 {
@@ -55,8 +56,7 @@ class TravioOrderBase extends Element implements PaymentsOrderInterface
 		if ($this['is_first_payment']) {
 			$this->confirm($this['amount']);
 		} else {
-			$this->model->_Travio->request('pay', [
-				'reference' => $this['reference'],
+			TravioClient::request('POST', 'accounting/pay/reservations/' . $this['reservation'], [
 				'amount' => (float)$this['amount'],
 				'payment_reference' => (string)$this['id'],
 			]);
