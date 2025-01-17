@@ -139,8 +139,16 @@ class ImportFromTravioController extends Controller
 
 							$filters = [
 								[
-									'field' => 'visibility.web',
-									'value' => true,
+									'or' => [
+										[
+											'field' => 'visibility.web_single',
+											'value' => true,
+										],
+										[
+											'field' => 'visibility.web_package',
+											'value' => true,
+										],
+									],
 								],
 							];
 							if (isset($target['type'])) {
