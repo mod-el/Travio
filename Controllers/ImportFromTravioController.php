@@ -137,15 +137,24 @@ class ImportFromTravioController extends Controller
 							if ($target['search'] !== 'service')
 								continue;
 
-							$payload = [
-								'type' => 'service',
-								'show-names' => true,
+							$filters = [
+								[
+									'field' => 'visibility.web',
+									'value' => true,
+								],
 							];
+							if (isset($target['type'])) {
+								$filters[] = [
+									'field' => 'type',
+									'value' => $target['type'],
+								];
+							}
 
-							if (isset($target['type']))
-								$payload['service-type'] = $target['type'];
-
-							$list = $this->model->_Travio->request('static-data', $payload);
+							$list = TravioClient::restList('services', [
+								'filters' => $filters,
+								'sort_by' => [['id', 'ASC']],
+								'per_page' => 0,
+							]);
 
 							foreach ($list['list'] as $item) {
 								if (!$item['id'])
@@ -155,9 +164,9 @@ class ImportFromTravioController extends Controller
 
 								$items[] = [
 									'id' => $item['id'],
-									'last_update' => $item['last_update'],
+									'last_update' => $item['_meta']['last_update'],
 									'existing' => $check ? $check['id'] : null,
-									'update' => (!$check or ($item['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['last_update'])))),
+									'update' => (!$check or ($item['_meta']['last_update'] and ($check['last_update'] === null or date_create($check['last_update']) < date_create($item['_meta']['last_update'])))),
 								];
 							}
 						}
