@@ -1,5 +1,6 @@
 <?php namespace Model\Travio\Controllers;
 
+use MJS\TopSort\Implementations\FixedArraySort;
 use Model\Core\Controller;
 use Model\Db\Db;
 use Model\Travio\TravioClient;
@@ -42,11 +43,21 @@ class ImportFromTravioController extends Controller
 
 						$list = $this->model->_Travio->request('static-data', $payload);
 
-						foreach ($list['list'] as $item) {
-							if (in_array($item['id'], $seen_ids))
+						$sorter = new FixedArraySort();
+						$geoMap = [];
+						foreach ($list['list'] as $g) {
+							$geoMap[$g['id']] = $g;
+							$sorter->add($g['id'], $g['parent'] ?? null);
+						}
+
+						$sortedGeo = $sorter->sort();
+
+						foreach ($sortedGeo as $geoId) {
+							if (in_array($geoId, $seen_ids))
 								continue;
 
-							$seen_ids[] = $item['id'];
+							$seen_ids[] = $geoId;
+							$item = $geoMap[$geoId];
 
 							if (!isset($item['meta']['last_update']))
 								$item['meta']['last_update'] = null;
@@ -466,18 +477,29 @@ class ImportFromTravioController extends Controller
 
 					$list = TravioClient::restList('tags', ['per_page' => 0]);
 
+					$sorter = new FixedArraySort();
+					$tagsMap = [];
+					foreach ($list['list'] as $tag) {
+						$tagsMap[$tag['id']] = $tag;
+						$sorter->add($tag['id'], $tag['parent'] ?? null);
+					}
+
+					$sortedTags = $sorter->sort();
+
 					$idsList = [];
-					foreach ($list['list'] as $item) {
+					foreach ($sortedTags as $tagId) {
+						$tag = $tagsMap[$tagId];
+
 						$db->updateOrInsert('travio_tags', [
-							'id' => $item['id'],
+							'id' => $tag['id'],
 						], [
-							'parent' => $item['parent'],
-							'name' => $item['name'],
-							'full_name' => $item['_full_name'],
+							'parent' => $tag['parent'],
+							'name' => $tag['name'],
+							'full_name' => $tag['_full_name'],
 						]);
 
-						$this->model->_TravioAssets->importTag($item);
-						$idsList[] = $item['id'];
+						$this->model->_TravioAssets->importTag($tag);
+						$idsList[] = $tag['id'];
 					}
 
 					if ($idsList)
