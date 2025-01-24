@@ -401,7 +401,6 @@ class ImportFromTravioController extends Controller
 										'guide' => $guide,
 									]);
 								} catch (\Exception $e) {
-									$this->model->error('La guida #' . $guide['master_data'] . ' del pacchetto ' . $packageData['code'] . ' non sembra essere stata importata');
 								}
 							}
 
