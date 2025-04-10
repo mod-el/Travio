@@ -213,6 +213,8 @@ class TravioServiceBase extends Element
 			$outAvailability = null;
 			if ($config['availability_dates']['min_stay_from'] === 'out' or $config['availability_dates']['out_weekdays_from'] === 'out') {
 				foreach ($this->availability as $availability) {
+					if ($availability['type'] === 'closed' and $day->format('Y-m-d') !== $availability['from'])
+						continue;
 					if ($day >= date_create($availability['from']) and $day <= date_create($availability['to'])) {
 						$outAvailability = $availability;
 						break;
