@@ -164,6 +164,8 @@ class TravioServiceBase extends Element
 
 	public function getCheckoutDates(\DateTime $in): array
 	{
+		$config = \Model\Config\Config::get('travio');
+
 		$inAvailability = null;
 		$lastAvailability = null;
 		foreach ($this->availability as $availability) {
@@ -198,17 +200,31 @@ class TravioServiceBase extends Element
 			if ($day < $in or $duration > 60)
 				continue;
 
-			$weekday = $weekdays[$day->format('w')];
-			if (!$inAvailability['out_' . $weekday])
-				continue;
-
-			if ($inAvailability['min_stay'] and $duration < $inAvailability['min_stay'])
-				continue;
-
 			if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
 				continue;
 
 			if ($inAvailability['fixed_duration'] and $duration !== ($inAvailability['fixed_duration'] - 1))
+				continue;
+
+			$outAvailability = null;
+			if ($config['availability_dates']['min_stay_from'] === 'out' or $config['availability_dates']['out_weekdays_from'] === 'out') {
+				foreach ($this->availability as $availability) {
+					if ($day >= date_create($availability['from']) and $day <= date_create($availability['to'])) {
+						$outAvailability = $availability;
+						break;
+					}
+				}
+			}
+
+			$weekday = $weekdays[$day->format('w')];
+			if ($config['availability_dates']['out_weekdays_from'] === 'in' and !$inAvailability['out_' . $weekday])
+				continue;
+
+			if ($config['availability_dates']['out_weekdays_from'] === 'out' and (!$outAvailability or !$outAvailability['out_' . $weekday]))
+				continue;
+
+			$minStay = $config['availability_dates']['min_stay_from'] === 'in' ? $inAvailability['min_stay'] : ($outAvailability ? $outAvailability['min_stay'] : null);
+			if ($minStay and $duration < $minStay)
 				continue;
 
 			$list[] = $day->format('Y-m-d');
