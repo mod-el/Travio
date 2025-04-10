@@ -776,6 +776,7 @@ class Travio extends Module
 					'service' => $id,
 					'from' => $availability['from'],
 					'to' => $availability['to'],
+					'type' => $availability['type'],
 					'in_monday' => (int)$availability['in_monday'],
 					'in_tuesday' => (int)$availability['in_tuesday'],
 					'in_wednesday' => (int)$availability['in_wednesday'],

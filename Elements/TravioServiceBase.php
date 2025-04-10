@@ -142,6 +142,8 @@ class TravioServiceBase extends Element
 
 		$dates = [];
 		foreach ($this->availability as $availability) {
+			if ($availability['type'] === 'closed')
+				continue;
 			if (date_create($availability['to']) < $today)
 				continue;
 
@@ -169,6 +171,8 @@ class TravioServiceBase extends Element
 		$inAvailability = null;
 		$lastAvailability = null;
 		foreach ($this->availability as $availability) {
+			if ($availability['type'] === 'closed')
+				continue;
 			if ($in >= date_create($availability['from']) and $in <= date_create($availability['to']))
 				$inAvailability = $availability;
 
