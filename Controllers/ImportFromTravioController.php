@@ -834,10 +834,13 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['payment_methods']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'payment-methods',
-						'filters' => $config['import']['payment_methods']['filters'],
-						'all-langs' => true,
+					$list = TravioClient::restList('payment-methods', [
+						'filters' => [
+							[
+								'field' => 'visible_in',
+								'value' => true,
+							],
+						],
 					]);
 
 					$idsList = [];
@@ -846,11 +849,13 @@ class ImportFromTravioController extends Controller
 						if ($check) {
 							$db->update('travio_payment_methods', $item['id'], [
 								'name' => $item['name'],
+								'gateway' => $item['gateway'],
 							]);
 						} else {
 							$db->insert('travio_payment_methods', [
 								'id' => $item['id'],
 								'name' => $item['name'],
+								'gateway' => $item['gateway'],
 								'visible' => 0,
 							]);
 						}
