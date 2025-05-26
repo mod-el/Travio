@@ -1,6 +1,7 @@
 <?php namespace Model\Travio\Controllers;
 
 use MJS\TopSort\Implementations\FixedArraySort;
+use Model\Cache\Cache;
 use Model\Core\Controller;
 use Model\Db\Db;
 use Model\Travio\TravioClient;
@@ -403,6 +404,9 @@ class ImportFromTravioController extends Controller
 								} catch (\Exception $e) {
 								}
 							}
+
+							$cacheAdapter = Cache::getCacheAdapter();
+							$cacheAdapter->invalidateTags(['travio.departures']);
 
 							$this->model->_TravioAssets->importPackage($id, $packageData);
 
