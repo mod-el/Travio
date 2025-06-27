@@ -30,6 +30,7 @@ class ImportFromTravioController extends Controller
 					foreach ($db->selectAll('travio_geo') as $g)
 						$currents[$g['id']] = $g['last_update'];
 
+					$visible_ids = [];
 					$seen_ids = [];
 
 					foreach ($config['target_types'] as $target) {
@@ -58,6 +59,9 @@ class ImportFromTravioController extends Controller
 								continue;
 
 							$seen_ids[] = $geoId;
+							if ($target['geo'] ?? true)
+								$visible_ids[] = $geoId;
+
 							$item = $geoMap[$geoId];
 
 							if (!isset($item['meta']['last_update']))
@@ -106,13 +110,13 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					if ($seen_ids) {
+					if ($visible_ids) {
 						$db->update('travio_geo', [
-							'id' => ['NOT IN', $seen_ids],
+							'id' => ['NOT IN', $visible_ids],
 						], ['visible' => 0]);
 
 						$db->update('travio_geo', [
-							'id' => ['IN', $seen_ids],
+							'id' => ['IN', $visible_ids],
 						], ['visible' => 1]);
 					} else {
 						$db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
