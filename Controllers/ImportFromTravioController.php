@@ -55,12 +55,13 @@ class ImportFromTravioController extends Controller
 						$sortedGeo = $sorter->sort();
 
 						foreach ($sortedGeo as $geoId) {
+							if (($target['geo'] ?? true) and !in_array($geoId, $visible_ids))
+								$visible_ids[] = $geoId;
+
 							if (in_array($geoId, $seen_ids))
 								continue;
 
 							$seen_ids[] = $geoId;
-							if ($target['geo'] ?? true)
-								$visible_ids[] = $geoId;
 
 							$item = $geoMap[$geoId];
 
