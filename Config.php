@@ -252,9 +252,11 @@ class TravioClassifications extends TravioClassificationsBase
 		return [
 			'rules' => [
 				'import' => 'import-from-travio',
+				'dates' => 'travio-dates',
 			],
 			'controllers' => [
 				'ImportFromTravio',
+				'GetDates',
 			],
 		];
 	}

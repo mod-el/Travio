@@ -411,7 +411,7 @@ class ImportFromTravioController extends Controller
 							}
 
 							$cacheAdapter = Cache::getCacheAdapter();
-							$cacheAdapter->invalidateTags(['travio.departures']);
+							$cacheAdapter->invalidateTags(['travio.dates']);
 
 							$this->model->_TravioAssets->importPackage($id, $packageData);
 
