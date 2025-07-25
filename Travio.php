@@ -498,14 +498,16 @@ class Travio extends Module
 
 	/**
 	 * @param int $geoId
+	 * @param string $search_type
+	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromGeo(int $geoId): array
+	public function getDatesFromGeo(int $geoId, string $search_type, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 'd' . $geoId . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId) {
+		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . date('Y-m-d');
+		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -513,55 +515,77 @@ class Travio extends Module
 
 			$el = $this->model->one('TravioGeo', $geoId);
 
-			$services = $this->model->all('TravioService', [
-				'join_geo' => $el['id'],
-				'max_date' => ['>=', date('Y-m-d')],
-			], [
-				'joins' => [
-					'travio_services_geo' => [
-						'on' => ['id' => 'service'],
-						'fields' => ['geo' => 'join_geo'],
+			$dates = ['min' => date('Y-m-d')];
+			if ($search_type === 'packages') {
+				$where = [
+					'date' => ['>=', date('Y-m-d')],
+					'join_geo' => $el['id'],
+				];
+
+				if ($poi)
+					$where['departure_' . ($poi['type'] === 'IATA' ? 'airport' : 'port')] = $poi['id'];
+
+				$datesQ = $this->model->select_all('travio_packages_departures', $where, [
+					'joins' => [
+						'travio_packages_geo' => [
+							'on' => ['package' => 'package'],
+							'fields' => ['geo' => 'join_geo'],
+						],
 					],
-				],
-			]);
+					'group_by' => 'date',
+				]);
 
-			$today = date_create();
-			$totalMinDate = null;
-			$totalMaxDate = null;
-			$list = [];
+				$dates['list'] = [];
+				foreach ($datesQ as $row)
+					$dates['list'][] = $row['date'];
+			} else {
+				$services = $this->model->all('TravioService', [
+					'join_geo' => $el['id'],
+					'max_date' => ['>=', date('Y-m-d')],
+				], [
+					'joins' => [
+						'travio_services_geo' => [
+							'on' => ['id' => 'service'],
+							'fields' => ['geo' => 'join_geo'],
+						],
+					],
+				]);
 
-			$dates = [];
-			if (!$el['has_suppliers']) {
-				foreach ($services as $service) {
-					if ($service['min_date']) {
-						$minDate = date_create($service['min_date']);
-						if ($minDate < $today)
-							$minDate = $today;
+				$today = date_create();
+				$totalMinDate = null;
+				$totalMaxDate = null;
+				$list = [];
 
-						if ($totalMinDate === null or $minDate < $totalMinDate)
-							$totalMinDate = $minDate;
+				if (!$el['has_suppliers']) {
+					foreach ($services as $service) {
+						if ($service['min_date']) {
+							$minDate = date_create($service['min_date']);
+							if ($minDate < $today)
+								$minDate = $today;
 
-						if ($service['max_date']) {
-							$maxDate = date_create($service['max_date']);
-							if ($totalMaxDate === null or $maxDate > $totalMaxDate)
-								$totalMaxDate = $maxDate;
+							if ($totalMinDate === null or $minDate < $totalMinDate)
+								$totalMinDate = $minDate;
+
+							if ($service['max_date']) {
+								$maxDate = date_create($service['max_date']);
+								if ($totalMaxDate === null or $maxDate > $totalMaxDate)
+									$totalMaxDate = $maxDate;
+							}
 						}
+
+						$checkin_dates = $service->getCheckinDates();
+						if (count($checkin_dates) > 0)
+							$list = array_merge($list, $checkin_dates);
 					}
 
-					$checkin_dates = $service->getCheckinDates();
-					if (count($checkin_dates) > 0)
-						$list = array_merge($list, $checkin_dates);
-				}
+					if ($totalMinDate and $totalMaxDate) {
+						$dates['min'] = $totalMinDate->format('Y-m-d');
+						$dates['max'] = $totalMaxDate->format('Y-m-d');
+					}
 
-				if ($totalMinDate and $totalMaxDate) {
-					$dates['min'] = $totalMinDate->format('Y-m-d');
-					$dates['max'] = $totalMaxDate->format('Y-m-d');
+					if ($list)
+						$dates['list'] = array_values(array_unique($list));
 				}
-
-				if ($list)
-					$dates['list'] = array_values(array_unique($list));
-			} else {
-				$dates['min'] = date('Y-m-d');
 			}
 
 			$airports = $db->query('SELECT a.id, a.code, a.name FROM travio_packages_departures d INNER JOIN travio_packages_departures_routes r ON r.departure = d.id INNER JOIN travio_packages_geo g ON g.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = r.departure_airport WHERE g.geo = ' . $geoId . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY r.departure_airport ORDER BY a.code')->fetchAll();
@@ -594,7 +618,7 @@ class Travio extends Module
 
 			$el = $this->model->one('TravioService', $serviceId);
 
-			$dates = [];
+			$dates = ['min' => date('Y-m-d')];
 			if (!$el['has_suppliers']) {
 				if ($el['min_date']) {
 					$today = date_create();
@@ -614,8 +638,6 @@ class Travio extends Module
 				$checkin_dates = $el->getCheckinDates();
 				if (count($checkin_dates) > 0)
 					$dates['list'] = $checkin_dates;
-			} else {
-				$dates['min'] = date('Y-m-d');
 			}
 
 			$airports = $db->query('SELECT a.id, a.code, a.name FROM travio_packages_departures d INNER JOIN travio_packages_departures_routes r ON r.departure = d.id INNER JOIN travio_packages_services s ON s.package = d.package INNER JOIN travio_packages p ON p.id = d.package AND p.visible = 1 INNER JOIN travio_airports a ON a.id = r.departure_airport WHERE s.service = ' . $serviceId . ' AND d.`date`>\'' . date('Y-m-d') . '\' GROUP BY r.departure_airport ORDER BY a.code')->fetchAll();
