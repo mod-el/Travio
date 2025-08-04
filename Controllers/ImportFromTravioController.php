@@ -147,6 +147,9 @@ class ImportFromTravioController extends Controller
 						} else {
 							$db->update('travio_services', [], ['visible' => 0], ['confirm' => true]);
 						}
+
+						$cacheAdapter = Cache::getCacheAdapter();
+						$cacheAdapter->invalidateTags(['travio.dates']);
 					} else {
 						$items = [];
 
