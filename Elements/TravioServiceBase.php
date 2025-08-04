@@ -154,7 +154,7 @@ class TravioServiceBase extends Element
 				if ($day < $today)
 					continue;
 
-				$weekday = (int)$weekdays[$day->format('w')];
+				$weekday = $weekdays[(int)$day->format('w')];
 				if (!$availability['in_' . $weekday])
 					continue;
 
