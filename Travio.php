@@ -621,41 +621,42 @@ class Travio extends Module
 			$airports = [];
 			$ports = [];
 
-			if ($search_type === 'packages') {
-				$departures = $db->query('SELECT d.`id`, d.`date` FROM `travio_packages_departures` d INNER JOIN `travio_packages_services` s ON s.`package` = d.`package` INNER JOIN `travio_packages` p ON p.`id` = d.`package` AND p.`visible` = 1 WHERE s.`service` = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' ORDER BY d.`date`')->fetchAll();
-				$departures_ids = array_map(fn($departure) => $departure['id'], $departures);
-				$routes = $db->query('SELECT r.`departure`, a.`code` AS `airport_code`, a.`name` AS `airport_name`, p.`code` AS `port_code`, p.`name` AS `port_name` FROM `travio_packages_departures_routes` r LEFT JOIN `travio_airports` a ON a.`id` = r.`departure_airport` LEFT JOIN `travio_ports` p ON p.`id` = r.`departure_port` WHERE r.`departure` IN (' . implode(',', $departures_ids) . ')')->fetchAll();
+			$departures = $db->query('SELECT d.`id`, d.`date` FROM `travio_packages_departures` d INNER JOIN `travio_packages_services` s ON s.`package` = d.`package` INNER JOIN `travio_packages` p ON p.`id` = d.`package` AND p.`visible` = 1 WHERE s.`service` = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' ORDER BY d.`date`')->fetchAll();
+			$departures_ids = array_map(fn($departure) => $departure['id'], $departures);
+			$routes = $db->query('SELECT r.`departure`, r.`departure_airport`, r.`departure_port`, a.`code` AS `airport_code`, a.`name` AS `airport_name`, p.`code` AS `port_code`, p.`name` AS `port_name` FROM `travio_packages_departures_routes` r LEFT JOIN `travio_airports` a ON a.`id` = r.`departure_airport` LEFT JOIN `travio_ports` p ON p.`id` = r.`departure_port` WHERE r.`departure` IN (' . implode(',', $departures_ids) . ')')->fetchAll();
 
+			if ($search_type === 'packages')
 				$dates = ['list' => []];
 
-				foreach ($departures as $d) {
-					if (!in_array($d['date'], $dates['list']))
-						$dates['list'][] = $d['date'];
+			foreach ($departures as $d) {
+				if ($search_type === 'packages' and !in_array($d['date'], $dates['list']))
+					$dates['list'][] = $d['date'];
 
-					foreach ($routes as $r) {
-						if ($r['departure'] === $d['id']) {
-							if ($r['departure_airport'] and !isset($airports[$r['departure_airport']])) {
-								$airports[$r['departure_airport']] = [
-									'id' => $r['departure_airport'],
-									'code' => $r['airport_code'],
-									'name' => $r['airport_name'],
-								];
-							}
+				foreach ($routes as $r) {
+					if ($r['departure'] === $d['id']) {
+						if ($r['departure_airport'] and !isset($airports[$r['departure_airport']])) {
+							$airports[$r['departure_airport']] = [
+								'id' => $r['departure_airport'],
+								'code' => $r['airport_code'],
+								'name' => $r['airport_name'],
+							];
+						}
 
-							if ($r['departure_port'] and !isset($ports[$r['departure_port']])) {
-								$ports[$r['departure_port']] = [
-									'id' => $r['departure_port'],
-									'code' => $r['port_code'],
-									'name' => $r['port_name'],
-								];
-							}
+						if ($r['departure_port'] and !isset($ports[$r['departure_port']])) {
+							$ports[$r['departure_port']] = [
+								'id' => $r['departure_port'],
+								'code' => $r['port_code'],
+								'name' => $r['port_name'],
+							];
 						}
 					}
 				}
+			}
 
-				$airports = array_values($airports);
-				$ports = array_values($ports);
-			} else {
+			$airports = array_values($airports);
+			$ports = array_values($ports);
+
+			if ($search_type !== 'packages') {
 				$dates = ['min' => date('Y-m-d')];
 				if (!$el['has_suppliers']) {
 					if ($el['min_date']) {
