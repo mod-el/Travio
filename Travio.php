@@ -623,7 +623,7 @@ class Travio extends Module
 
 			$departures = $db->query('SELECT d.`id`, d.`date` FROM `travio_packages_departures` d INNER JOIN `travio_packages_services` s ON s.`package` = d.`package` INNER JOIN `travio_packages` p ON p.`id` = d.`package` AND p.`visible` = 1 WHERE s.`service` = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' ORDER BY d.`date`')->fetchAll();
 			$departures_ids = array_map(fn($departure) => $departure['id'], $departures);
-			$routes = $db->query('SELECT r.`departure`, r.`departure_airport`, r.`departure_port`, a.`code` AS `airport_code`, a.`name` AS `airport_name`, p.`code` AS `port_code`, p.`name` AS `port_name` FROM `travio_packages_departures_routes` r LEFT JOIN `travio_airports` a ON a.`id` = r.`departure_airport` LEFT JOIN `travio_ports` p ON p.`id` = r.`departure_port` WHERE r.`departure` IN (' . implode(',', $departures_ids) . ')')->fetchAll();
+			$routes = $departures_ids ? $db->query('SELECT r.`departure`, r.`departure_airport`, r.`departure_port`, a.`code` AS `airport_code`, a.`name` AS `airport_name`, p.`code` AS `port_code`, p.`name` AS `port_name` FROM `travio_packages_departures_routes` r LEFT JOIN `travio_airports` a ON a.`id` = r.`departure_airport` LEFT JOIN `travio_ports` p ON p.`id` = r.`departure_port` WHERE r.`departure` IN (' . implode(',', $departures_ids) . ')')->fetchAll() : [];
 
 			if ($search_type === 'packages')
 				$dates = ['list' => []];
