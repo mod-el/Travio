@@ -10,7 +10,6 @@ class TravioAmenitiesBase extends AdminPage
 			'element' => 'TravioAmenity',
 			'privileges' => [
 				'C' => false,
-				'R' => file_exists(INCLUDE_PATH . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'TravioAssets' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'travio-amenities.php'),
 				'D' => false,
 			],
 			'order_by' => 'type, name',
