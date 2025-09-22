@@ -506,7 +506,7 @@ class Travio extends Module
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . json_encode($poi) . '-' . date('Y-m-d');
+		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . date('Y-m-d');
 		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
