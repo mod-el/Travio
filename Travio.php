@@ -506,6 +506,13 @@ class Travio extends Module
 	{
 		$cache = Cache::getCacheAdapter();
 
+		if ($poi) {
+			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))
+				throw new \Exception('Invalid poi type');
+			if (!isset($poi['id']) or !is_numeric($poi['id']))
+				throw new \Exception('Invalid poi id');
+		}
+
 		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . date('Y-m-d');
 		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
@@ -530,10 +537,10 @@ class Travio extends Module
 				];
 
 				if ($poi) {
-					$where['departure_' . ($poi['type'] === 'IATA' ? 'airport' : 'port')] = $poi['id'];
+					$where['departure_' . $poi['type']] = $poi['id'];
 					$joins['travio_packages_departures_routes'] = [
 						'on' => ['id' => 'departure'],
-						'fields' => ['departure_' . ($poi['type'] === 'IATA' ? 'airport' : 'port')],
+						'fields' => ['departure_' . $poi['type']],
 					];
 				}
 
