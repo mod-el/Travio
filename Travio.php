@@ -506,7 +506,7 @@ class Travio extends Module
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . date('Y-m-d');
+		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . json_encode($poi) . '-' . date('Y-m-d');
 		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
@@ -522,16 +522,23 @@ class Travio extends Module
 					'join_geo' => $el['id'],
 				];
 
-				if ($poi)
+				$joins = [
+					'travio_packages_geo' => [
+						'on' => ['package' => 'package'],
+						'fields' => ['geo' => 'join_geo'],
+					],
+				];
+
+				if ($poi) {
 					$where['departure_' . ($poi['type'] === 'IATA' ? 'airport' : 'port')] = $poi['id'];
+					$joins['travio_packages_departures_routes'] = [
+						'on' => ['id' => 'departure'],
+						'fields' => ['departure_' . ($poi['type'] === 'IATA' ? 'airport' : 'port')],
+					];
+				}
 
 				$datesQ = $this->model->select_all('travio_packages_departures', $where, [
-					'joins' => [
-						'travio_packages_geo' => [
-							'on' => ['package' => 'package'],
-							'fields' => ['geo' => 'join_geo'],
-						],
-					],
+					'joins' => $joins,
 					'group_by' => 'date',
 				]);
 
