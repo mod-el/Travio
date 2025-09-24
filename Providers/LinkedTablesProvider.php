@@ -9,6 +9,7 @@ class LinkedTablesProvider extends AbstractLinkedTablesProvider
 		return [
 			'travio_geo',
 			'travio_services',
+			'travio_subservices',
 			'travio_packages',
 			'travio_tags',
 			'travio_orders',
@@ -20,6 +21,7 @@ class LinkedTablesProvider extends AbstractLinkedTablesProvider
 			'travio_payment_conditions',
 			'travio_classifications',
 			'travio_packages_departures',
+			'travio_amenities',
 		];
 	}
 }
