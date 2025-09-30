@@ -167,6 +167,9 @@ class TravioServiceBase extends Element
 				if ($this->isInStopSales($day))
 					continue;
 
+				if (count($this->getCheckoutDates($day)) === 0)
+					continue;
+
 				$dates[] = $day->format('Y-m-d');
 			}
 		}
