@@ -246,7 +246,11 @@ class ImportFromTravioController extends Controller
 								$db->delete('travio_packages_services', ['package' => $id]);
 								$db->delete('travio_packages_guides', ['package' => $id]);
 								$db->delete('travio_packages_itinerary', ['package' => $id]);
-								$db->delete('travio_packages_departures_routes', ['package' => $id]);
+								$db->delete('travio_packages_departures_routes', ['package' => $id], [
+									'joins' => [
+										'travio_packages_departures' => ['type' => 'INNER', 'on' => 'travio_packages_departures.id = travio_packages_departures_routes.departure'],
+									],
+								]);
 							} else {
 								$data['travio'] = $packageData['id'];
 								$id = $db->insert('travio_packages', $data);
