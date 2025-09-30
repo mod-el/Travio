@@ -8,6 +8,7 @@ use Model\Db\Db;
 use Model\Multilang\Ml;
 use Model\TravioAssets\Elements\TravioOrder;
 use Model\TravioAssets\Elements\TravioService;
+use Model\Travio\TravioClient;
 
 class Travio extends Module
 {
@@ -905,6 +906,9 @@ class Travio extends Module
 			'get-availability' => $config['import']['services']['availability'] ?? false,
 		])['data'];
 
+		// TODO: spostare tutto sul nuovo endpoint
+		$newServiceData = TravioClient::restGet('services', $travioId);
+
 		try {
 			$db->beginTransaction();
 
@@ -951,6 +955,7 @@ class Travio extends Module
 				$db->delete('travio_services_files', ['service' => $id]);
 				$db->delete('travio_services_videos', ['service' => $id]);
 				$db->delete('travio_services_availability', ['service' => $id]);
+				$db->delete('travio_services_stop_sales', ['service' => $id]);
 			} else {
 				$data['travio'] = $serviceData['id'];
 				$id = $db->insert('travio_services', $data);
@@ -1155,6 +1160,19 @@ class Travio extends Module
 			}
 
 			$db->bulkInsert('travio_services_availability');
+
+			foreach ($newServiceData['stop_sales'] as $stop_sale) {
+				$db->insert('travio_services_stop_sales', [
+					'service' => $id,
+					'created' => $stop_sale['created'],
+					'type' => $stop_sale['type'],
+					'from' => $stop_sale['from'],
+					'to' => $stop_sale['to'],
+					'notes' => $stop_sale['notes'],
+				], ['defer' => true]);
+			}
+
+			$db->bulkInsert('travio_services_stop_sales');
 
 			$db->commit();
 
