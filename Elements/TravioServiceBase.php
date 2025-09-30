@@ -109,6 +109,12 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 			'order_by' => '`from`',
 		]);
+
+		$this->has('stop_sales', [
+			'table' => 'travio_services_stop_sales',
+			'field' => 'service',
+			'order_by' => '`from`',
+		]);
 	}
 
 	public function getDescriptionsByTag(string $tag): array
@@ -156,6 +162,9 @@ class TravioServiceBase extends Element
 
 				$weekday = $weekdays[(int)$day->format('w')];
 				if (!$availability['in_' . $weekday])
+					continue;
+
+				if ($this->isInStopSales($day))
 					continue;
 
 				$dates[] = $day->format('Y-m-d');
@@ -233,10 +242,38 @@ class TravioServiceBase extends Element
 			if ($minStay and $duration < $minStay)
 				continue;
 
+			$tmp = clone $in;
+			for (; $tmp < $day; $tmp->modify('+1 day')) {
+				if ($this->isInStopSales($tmp))
+					continue 2;
+			}
+
 			$list[] = $day->format('Y-m-d');
 		}
 
 		return $list;
+	}
+
+	private function isInStopSales(\DateTime $date): bool
+	{
+		$stop_sale = false;
+		foreach ($this->stop_sales as $stopSale) {
+			if ($date < date_create($stopSale['from']) or $date > date_create($stopSale['to']))
+				continue;
+
+			switch ($stopSale['type']) {
+				case 'open':
+				case 'on_request':
+					$stop_sale = null;
+					break;
+				case 'closed':
+				default:
+					$stop_sale = true;
+					break;
+			}
+		}
+
+		return $stop_sale;
 	}
 
 	public function getMainImg(): ?string
