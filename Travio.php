@@ -617,14 +617,23 @@ class Travio extends Module
 
 	/**
 	 * @param int $serviceId
+	 * @param string $search_type
+	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromService(int $serviceId, string $search_type): array
+	public function getDatesFromService(int $serviceId, string $search_type, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 's' . $serviceId . '-' . $search_type . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($serviceId, $search_type) {
+		if ($poi) {
+			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))
+				throw new \Exception('Invalid poi type');
+			if (!isset($poi['id']) or !is_numeric($poi['id']))
+				throw new \Exception('Invalid poi id');
+		}
+
+		$cacheKey = 's' . $serviceId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . '-' . date('Y-m-d');
+		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($serviceId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -643,11 +652,18 @@ class Travio extends Module
 				$dates = ['list' => []];
 
 			foreach ($departures as $d) {
-				if ($search_type === 'packages' and !in_array($d['date'], $dates['list']))
-					$dates['list'][] = $d['date'];
-
+				$found_poi = $poi === null;
 				foreach ($routes as $r) {
 					if ($r['departure'] === $d['id']) {
+						if ($poi) {
+							if ($poi['type'] === 'airport' and $r['departure_airport'] === $poi['id'])
+								$found_poi = true;
+							elseif ($poi['type'] === 'port' and $r['departure_port'] === $poi['id'])
+								$found_poi = true;
+							else
+								continue;
+						}
+
 						if ($r['departure_airport'] and !isset($airports[$r['departure_airport']])) {
 							$airports[$r['departure_airport']] = [
 								'id' => $r['departure_airport'],
@@ -665,6 +681,9 @@ class Travio extends Module
 						}
 					}
 				}
+
+				if ($search_type === 'packages' and !in_array($d['date'], $dates['list']) and $found_poi)
+					$dates['list'][] = $d['date'];
 			}
 
 			$airports = array_values($airports);
@@ -706,14 +725,22 @@ class Travio extends Module
 
 	/**
 	 * @param int $packageId
+	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromPackage(int $packageId): array
+	public function getDatesFromPackage(int $packageId, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 'p' . $packageId . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($packageId) {
+		if ($poi) {
+			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))
+				throw new \Exception('Invalid poi type');
+			if (!isset($poi['id']) or !is_numeric($poi['id']))
+				throw new \Exception('Invalid poi id');
+		}
+
+		$cacheKey = 'p' . $packageId . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . '-' . date('Y-m-d');
+		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($packageId, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -721,7 +748,11 @@ class Travio extends Module
 
 			$el = $this->model->one('TravioPackage', ['travio' => $packageId]);
 
-			$q = $db->query('SELECT d.`date`,r.`departure_airport`,r.`departure_port`,a.code AS airport_code, a.name AS airport_name,p.code AS port_code, p.name AS port_name FROM travio_packages_departures d INNER JOIN travio_packages_departures_routes r ON r.departure = d.id LEFT JOIN travio_airports a ON a.id = r.departure_airport LEFT JOIN travio_ports p ON p.id = r.departure_port WHERE d.package = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\'')->fetchAll();
+			$poi_where = '';
+			if ($poi)
+				$poi_where = ' AND r.`departure_' . $poi['type'] . '` = ' . $poi['id'];
+
+			$q = $db->query('SELECT d.`date`, r.`departure_airport`, r.`departure_port`, a.code AS airport_code, a.name AS airport_name,p.code AS port_code, p.name AS port_name FROM travio_packages_departures d LEFT JOIN travio_packages_departures_routes r ON r.departure = d.id LEFT JOIN travio_airports a ON a.id = r.departure_airport LEFT JOIN travio_ports p ON p.id = r.departure_port WHERE d.package = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' ' . $poi_where)->fetchAll();
 
 			$dates = ['list' => []];
 			foreach ($q as $departure) {

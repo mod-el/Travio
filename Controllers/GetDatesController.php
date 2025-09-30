@@ -14,10 +14,10 @@ class GetDatesController extends Controller
 				return $this->model->_Travio->getDatesFromGeo((int)$_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 			case 'service':
-				return $this->model->_Travio->getDatesFromService((int)$_GET['id'], $_GET['search_type'] ?? 'services');
+				return $this->model->_Travio->getDatesFromService((int)$_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 			case 'package':
-				return $this->model->_Travio->getDatesFromPackage((int)$_GET['id']);
+				return $this->model->_Travio->getDatesFromPackage((int)$_GET['id'], isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 			case 'tag':
 				return $this->model->_Travio->getDatesFromTag((int)$_GET['id']);
