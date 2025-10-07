@@ -907,7 +907,14 @@ class Travio extends Module
 		])['data'];
 
 		// TODO: spostare tutto sul nuovo endpoint
-		$newServiceData = TravioClient::restGet('services', $travioId);
+
+		if (is_numeric($travioId)) {
+			$newServiceData = TravioClient::restGet('services', $travioId);
+		} else {
+			if (!str_starts_with($travioId, 'TR'))
+				throw new \Exception('Invalid travio service id: ' . $travioId);
+			$newServiceData = TravioClient::restGet('suppliers-hotels', (int)substr($travioId, 2));
+		}
 
 		try {
 			$db->beginTransaction();
@@ -1161,18 +1168,20 @@ class Travio extends Module
 
 			$db->bulkInsert('travio_services_availability');
 
-			foreach ($newServiceData['stop_sales'] as $stop_sale) {
-				$db->insert('travio_services_stop_sales', [
-					'service' => $id,
-					'created' => $stop_sale['created'],
-					'type' => $stop_sale['type'],
-					'from' => $stop_sale['from'],
-					'to' => $stop_sale['to'],
-					'notes' => $stop_sale['notes'],
-				], ['defer' => true]);
-			}
+			if (is_numeric($travioId)) {
+				foreach ($newServiceData['stop_sales'] as $stop_sale) {
+					$db->insert('travio_services_stop_sales', [
+						'service' => $id,
+						'created' => $stop_sale['created'],
+						'type' => $stop_sale['type'],
+						'from' => $stop_sale['from'],
+						'to' => $stop_sale['to'],
+						'notes' => $stop_sale['notes'],
+					], ['defer' => true]);
+				}
 
-			$db->bulkInsert('travio_services_stop_sales');
+				$db->bulkInsert('travio_services_stop_sales');
+			}
 
 			$db->commit();
 
