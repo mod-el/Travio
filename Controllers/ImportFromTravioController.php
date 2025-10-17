@@ -831,8 +831,7 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['master_data']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'master-data',
+					$list = TravioClient::restList('master-data', [
 						'filters' => $config['import']['master_data']['filters'] ?? [],
 					]);
 
@@ -842,9 +841,9 @@ class ImportFromTravioController extends Controller
 						], [
 							'name' => $item['name'],
 							'surname' => $item['surname'],
-							'business_name' => $item['business-name'],
-							'full_name' => $item['full-name'],
-							'category' => $item['category'],
+							'business_name' => $item['company_name'],
+							'full_name' => $item['full_name'],
+							'category' => $item['categories'][0],
 							'username' => $item['username'],
 						]);
 
