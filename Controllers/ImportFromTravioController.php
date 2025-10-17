@@ -833,6 +833,7 @@ class ImportFromTravioController extends Controller
 
 					$list = TravioClient::restList('master-data', [
 						'filters' => $config['import']['master_data']['filters'] ?? [],
+						'per_page' => 0,
 					]);
 
 					foreach ($list['list'] as $item) {
