@@ -900,14 +900,14 @@ class Travio extends Module
 		$config = $this->retrieveConfig();
 
 		if (is_numeric($travioId)) {
-			$newServiceData = TravioClient::restGet('services', $travioId, [
+			$serviceData = TravioClient::restGet('services', $travioId, [
 				'unfold' => ['classification_id', 'master_data', 'amenities'],
 			]);
 			$is_external = false;
 		} else {
 			if (!str_starts_with($travioId, 'TR'))
 				throw new \Exception('Invalid travio service id: ' . $travioId);
-			$newServiceData = TravioClient::restGet('suppliers-hotels', (int)substr($travioId, 2));
+			$serviceData = TravioClient::restGet('suppliers-hotels', (int)substr($travioId, 2));
 			$is_external = true;
 		}
 
@@ -915,29 +915,29 @@ class Travio extends Module
 			$db->beginTransaction();
 
 			$data = [
-				'code' => $newServiceData['code'],
-				'name' => $newServiceData['name'],
-				'type' => $newServiceData['type'],
-				'typology' => $newServiceData['typology'] ?? null,
-				'supplier' => $newServiceData['supplier'] ?? null,
-				'geo' => $newServiceData['geo'] ? $newServiceData['geo'][0][count($newServiceData['geo'][0]) - 1]['id'] : null,
-				'classification_id' => $newServiceData['classification_id'] ? $newServiceData['classification_id']['id'] : null,
-				'classification' => $newServiceData['classification_id'] ? $newServiceData['classification_id']['code'] : null,
-				'classification_level' => $newServiceData['classification'] ?? null,
-				'lat' => $newServiceData['location'] ? $newServiceData['location']['lat'] : null,
-				'lng' => $newServiceData['location'] ? $newServiceData['location']['lng'] : null,
-				'address' => (!empty($newServiceData['master_data']) and $newServiceData['master_data']['addresses']) ? $newServiceData['master_data']['addresses'][0]['address'] : null,
-				'zip' => (!empty($newServiceData['master_data']) and $newServiceData['master_data']['addresses']) ? $newServiceData['master_data']['addresses'][0]['postal_code'] : null,
-				'tel' => (!empty($newServiceData['master_data']) and $newServiceData['master_data']['contacts'] and $newServiceData['master_data']['contacts'][0]['phone']) ? $newServiceData['master_data']['contacts'][0]['phone'][0] : null,
-				'email' => (!empty($newServiceData['master_data']) and $newServiceData['master_data']['contacts'] and $newServiceData['master_data']['contacts'][0]['email']) ? $newServiceData['master_data']['contacts'][0]['email'][0] : null,
-				'notes' => $newServiceData['_notes'] ? implode('<br/>', array_filter($newServiceData['_notes'], fn($n) => $n['type'] === 'web')) : '',
+				'code' => $serviceData['code'],
+				'name' => $serviceData['name'],
+				'type' => $serviceData['type'],
+				'typology' => $serviceData['typology'] ?? null,
+				'supplier' => $serviceData['supplier'] ?? null,
+				'geo' => $serviceData['geo'] ? $serviceData['geo'][0][count($serviceData['geo'][0]) - 1]['id'] : null,
+				'classification_id' => $serviceData['classification_id'] ? $serviceData['classification_id']['id'] : null,
+				'classification' => $serviceData['classification_id'] ? $serviceData['classification_id']['code'] : null,
+				'classification_level' => $serviceData['classification'] ?? null,
+				'lat' => $serviceData['location'] ? $serviceData['location']['lat'] : null,
+				'lng' => $serviceData['location'] ? $serviceData['location']['lng'] : null,
+				'address' => (!empty($serviceData['master_data']) and $serviceData['master_data']['addresses']) ? $serviceData['master_data']['addresses'][0]['address'] : null,
+				'zip' => (!empty($serviceData['master_data']) and $serviceData['master_data']['addresses']) ? $serviceData['master_data']['addresses'][0]['postal_code'] : null,
+				'tel' => (!empty($serviceData['master_data']) and $serviceData['master_data']['contacts'] and $serviceData['master_data']['contacts'][0]['phone']) ? $serviceData['master_data']['contacts'][0]['phone'][0] : null,
+				'email' => (!empty($serviceData['master_data']) and $serviceData['master_data']['contacts'] and $serviceData['master_data']['contacts'][0]['email']) ? $serviceData['master_data']['contacts'][0]['email'][0] : null,
+				'notes' => $serviceData['_notes'] ? implode('<br/>', array_filter($serviceData['_notes'], fn($n) => $n['type'] === 'web')) : '',
 				'departs_from' => null,
-				'price' => $newServiceData['estimated_price_per_pax'] ?? null,
-				'min_date' => !empty($newServiceData['availability']) ? $newServiceData['availability'][0]['from'] : null,
-				'max_date' => !empty($newServiceData['availability']) ? $newServiceData['availability'][count($newServiceData['availability']) - 1]['to'] : null,
+				'price' => $serviceData['estimated_price_per_pax'] ?? null,
+				'min_date' => !empty($serviceData['availability']) ? $serviceData['availability'][0]['from'] : null,
+				'max_date' => !empty($serviceData['availability']) ? $serviceData['availability'][count($serviceData['availability']) - 1]['to'] : null,
 				'visible' => 1,
-				'has_suppliers' => $is_external ? 1 : ($newServiceData['supplier_hotel'] ? 1 : 0),
-				'last_update' => $newServiceData['_meta']['last_update'],
+				'has_suppliers' => $is_external ? 1 : ($serviceData['supplier_hotel'] ? 1 : 0),
+				'last_update' => $serviceData['_meta']['last_update'],
 			];
 
 			$check = $db->select('travio_services', ['travio' => $travioId]);
@@ -960,7 +960,7 @@ class Travio extends Module
 				$db->delete('travio_services_availability', ['service' => $id]);
 				$db->delete('travio_services_stop_sales', ['service' => $id]);
 			} else {
-				$data['travio'] = $newServiceData['id'];
+				$data['travio'] = $serviceData['id'];
 				$id = $db->insert('travio_services', $data);
 			}
 
@@ -970,7 +970,7 @@ class Travio extends Module
 				$db->delete('travio_subservices_amenities', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 				$db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 
-				foreach ($newServiceData['subservices'] as $subservice) {
+				foreach ($serviceData['subservices'] as $subservice) {
 					if ($subservice['obsolete'])
 						continue;
 					$subservice = TravioClient::restGet('subservices', $subservice['id'], [
@@ -1069,7 +1069,7 @@ class Travio extends Module
 				$db->bulkInsert('travio_subservices_files');
 			}
 
-			foreach ($newServiceData['_tags'] as $tag) {
+			foreach ($serviceData['_tags'] as $tag) {
 				$db->insert('travio_services_tags', [
 					'service' => $id,
 					'tag' => $tag,
@@ -1080,7 +1080,7 @@ class Travio extends Module
 
 			if (($config['import']['services']['override']['descriptions'] ?? true) or !$item['existing']) {
 				$descriptions = [];
-				foreach ($newServiceData['descriptions'] as $lang_descriptions) {
+				foreach ($serviceData['descriptions'] as $lang_descriptions) {
 					foreach ($lang_descriptions['paragraphs'] as $paragraph_idx => $paragraph) {
 						if (!isset($descriptions[$paragraph_idx])) {
 							$descriptions[$paragraph_idx] = [
@@ -1106,7 +1106,7 @@ class Travio extends Module
 			}
 
 			$present_photos = [];
-			foreach ($newServiceData['images'] as $imageIdx => $image) {
+			foreach ($serviceData['images'] as $imageIdx => $image) {
 				$dataToUpdate = ['order' => $imageIdx + 1];
 				if ($config['import']['services']['override']['images_descriptions'] ?? true)
 					$dataToUpdate['description'] = $image['description'];
@@ -1133,7 +1133,7 @@ class Travio extends Module
 				$db->delete('travio_services_photos', ['service' => $id]);
 			}
 
-			foreach ($newServiceData['geo'] as $geoChain) {
+			foreach ($serviceData['geo'] as $geoChain) {
 				foreach ($geoChain as $geo) {
 					if (!$geo['id'])
 						continue;
@@ -1146,7 +1146,7 @@ class Travio extends Module
 
 			$db->bulkInsert('travio_services_geo');
 
-			foreach ($newServiceData['amenities'] as $amenity) {
+			foreach ($serviceData['amenities'] as $amenity) {
 				$db->insert('travio_services_amenities', [
 					'service' => $id,
 					'amenity' => $amenity['id'],
@@ -1158,7 +1158,7 @@ class Travio extends Module
 			$db->bulkInsert('travio_services_amenities');
 
 			if (!$is_external) {
-				foreach ($newServiceData['_attachments'] as $file) {
+				foreach ($serviceData['_attachments'] as $file) {
 					$db->insert('travio_services_files', [
 						'service' => $id,
 						'name' => $file['name'],
@@ -1168,7 +1168,7 @@ class Travio extends Module
 
 				$db->bulkInsert('travio_services_files');
 
-				foreach ($newServiceData['video'] as $video) {
+				foreach ($serviceData['video'] as $video) {
 					$db->insert('travio_services_videos', [
 						'service' => $id,
 						'video' => $video['youtube'],
@@ -1177,7 +1177,7 @@ class Travio extends Module
 
 				$db->bulkInsert('travio_services_videos');
 
-				foreach ($newServiceData['availability'] as $availability) {
+				foreach ($serviceData['availability'] as $availability) {
 					$db->insert('travio_services_availability', [
 						'service' => $id,
 						'from' => $availability['from'],
@@ -1205,7 +1205,7 @@ class Travio extends Module
 
 				$db->bulkInsert('travio_services_availability');
 
-				foreach ($newServiceData['stop_sales'] as $stop_sale) {
+				foreach ($serviceData['stop_sales'] as $stop_sale) {
 					$db->insert('travio_services_stop_sales', [
 						'service' => $id,
 						'created' => $stop_sale['created'],
