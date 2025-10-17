@@ -919,6 +919,7 @@ class Travio extends Module
 				'name' => $newServiceData['name'],
 				'type' => $newServiceData['type'],
 				'typology' => $newServiceData['typology'] ?? null,
+				'supplier' => $newServiceData['supplier'] ?? null,
 				'geo' => $newServiceData['geo'] ? $newServiceData['geo'][0][count($newServiceData['geo'][0]) - 1]['id'] : null,
 				'classification_id' => $newServiceData['classification_id'] ? $newServiceData['classification_id']['id'] : null,
 				'classification' => $newServiceData['classification_id'] ? $newServiceData['classification_id']['code'] : null,
