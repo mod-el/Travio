@@ -862,6 +862,7 @@ class ImportFromTravioController extends Controller
 								'value' => true,
 							],
 						],
+						'per_page' => 0,
 					]);
 
 					$idsList = [];
@@ -894,10 +895,7 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['payment_conditions']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'payment-conditions',
-						'all-langs' => true,
-					]);
+					$list = TravioClient::restList('payment-conditions', ['per_page' => 0]);
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
