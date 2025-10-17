@@ -844,7 +844,7 @@ class ImportFromTravioController extends Controller
 							'surname' => $item['surname'],
 							'business_name' => $item['company_name'],
 							'full_name' => $item['full_name'],
-							'category' => $item['categories'][0],
+							'category' => $item['categories'] ? $item['categories'][0] : null,
 							'username' => $item['username'],
 						]);
 
