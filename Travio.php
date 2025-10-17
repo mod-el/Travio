@@ -970,6 +970,8 @@ class Travio extends Module
 				$db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 
 				foreach ($newServiceData['subservices'] as $subservice) {
+					if ($subservice['obsolete'])
+						continue;
 					$subservice = TravioClient::restGet('subservices', $subservice['id'], [
 						'unfold' => ['amenities'],
 					]);
