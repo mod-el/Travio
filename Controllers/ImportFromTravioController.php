@@ -495,7 +495,12 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['tags']['import'])
 						break;
 
-					$list = TravioClient::restList('tags', ['per_page' => 0]);
+					$list = TravioClient::restList('tags', [
+						'filters' => $config['import']['tags']['filters'] ?? [
+								['field' => 'visible', 'value' => true],
+							],
+						'per_page' => 0,
+					]);
 
 					$sorter = new FixedArraySort();
 					$tagsMap = [];
