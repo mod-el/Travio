@@ -123,6 +123,7 @@ class ImportFromTravioController extends Controller
 						$db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
 					}
 					break;
+
 				case 'services':
 					if (!$config['import']['services']['import'])
 						break;
@@ -204,6 +205,7 @@ class ImportFromTravioController extends Controller
 						];
 					}
 					break;
+
 				case 'packages':
 					if (!$config['import']['packages']['import'])
 						break;
@@ -491,6 +493,7 @@ class ImportFromTravioController extends Controller
 						];
 					}
 					break;
+
 				case 'tags':
 					if (!$config['import']['tags']['import'])
 						break;
@@ -504,10 +507,24 @@ class ImportFromTravioController extends Controller
 
 					$sorter = new FixedArraySort();
 					$tagsMap = [];
-					foreach ($list['list'] as $tag) {
+					foreach ($list['list'] as $tag)
 						$tagsMap[$tag['id']] = $tag;
-						$sorter->add($tag['id'], $tag['parent'] ?? null);
+
+					// Remove orphans nodes
+					while (true) {
+						$removed = false;
+						foreach ($tagsMap as $tagId => $tag) {
+							if (isset($tag['parent']) and $tag['parent'] and !isset($tagsMap[$tag['parent']])) {
+								unset($tagsMap[$tagId]);
+								$removed = true;
+							}
+						}
+						if (!$removed)
+							break;
 					}
+
+					foreach ($tagsMap as $tag)
+						$sorter->add($tag['id'], $tag['parent'] ?? null);
 
 					$sortedTags = $sorter->sort();
 
@@ -532,6 +549,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_tags', [], ['confirm' => true]);
 					break;
+
 				case 'amenities':
 					if (!$config['import']['amenities']['import'])
 						break;
@@ -566,6 +584,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_amenities', [], ['confirm' => true]);
 					break;
+
 				case 'classifications':
 					if (!$config['import']['classifications']['import'])
 						break;
@@ -591,6 +610,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_classifications', [], ['confirm' => true]);
 					break;
+
 				case 'ports':
 					if (!$config['import']['ports']['import'])
 						break;
@@ -646,6 +666,7 @@ class ImportFromTravioController extends Controller
 						}
 					}
 					break;
+
 				case 'airports':
 					if (!$config['import']['airports']['import'])
 						break;
@@ -701,6 +722,7 @@ class ImportFromTravioController extends Controller
 						}
 					}
 					break;
+
 				case 'stations':
 					if (!$config['import']['stations']['import'])
 						break;
@@ -796,6 +818,7 @@ class ImportFromTravioController extends Controller
 						}
 					}
 					break;
+
 				case 'luggage-types':
 					if (!$config['import']['luggage_types']['import'])
 						break;
@@ -826,6 +849,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_luggage_types', [], ['confirm' => true]);
 					break;
+
 				case 'master-data':
 					if (!$config['import']['master_data']['import'])
 						break;
@@ -850,6 +874,7 @@ class ImportFromTravioController extends Controller
 						$this->model->_TravioAssets->importMasterData($item);
 					}
 					break;
+
 				case 'payment-methods':
 					if (!$config['import']['payment_methods']['import'])
 						break;
@@ -890,6 +915,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_payment_methods', [], ['confirm' => true]);
 					break;
+
 				case 'payment-conditions':
 					if (!$config['import']['payment_conditions']['import'])
 						break;
@@ -913,6 +939,7 @@ class ImportFromTravioController extends Controller
 					else
 						$db->delete('travio_payment_conditions', [], ['confirm' => true]);
 					break;
+
 				default:
 					throw new \Exception('Unknown type');
 			}
