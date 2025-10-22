@@ -536,19 +536,16 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['amenities']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'amenities',
-						'all-langs' => true,
-					]);
+					$list = TravioClient::restList('amenities', ['per_page' => 0]);
 
 					$idsList = [];
 					foreach ($list['list'] as $id => $item) {
-						if ($item['tag']) {
-							$type = $db->select('travio_amenities_types', ['name' => trim($item['tag'])]);
+						if ($item['type']) {
+							$type = $db->select('travio_amenities_types', ['name' => trim($item['type'])]);
 							if ($type)
 								$type = $type['id'];
 							else
-								$type = $db->insert('travio_amenities_types', ['name' => trim($item['tag'])]);
+								$type = $db->insert('travio_amenities_types', ['name' => trim($item['type'])]);
 						} else {
 							$type = null;
 						}
@@ -573,10 +570,7 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['classifications']['import'])
 						break;
 
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'classifications',
-						'all-langs' => true,
-					]);
+					$list = TravioClient::restList('classifications', ['per_page' => 0]);
 
 					$idsList = [];
 					foreach ($list['list'] as $item) {
@@ -585,7 +579,7 @@ class ImportFromTravioController extends Controller
 						], [
 							'code' => $item['code'],
 							'name' => $item['name'],
-							'level' => $item['level'],
+							'level' => $item['rating'],
 						]);
 
 						$this->model->_TravioAssets->importClassification($item);
