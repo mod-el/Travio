@@ -899,6 +899,10 @@ class Travio extends Module
 
 		$config = $this->retrieveConfig();
 
+		$existingTags = [];
+		foreach ($this->model->all('TravioTag') as $tag)
+			$existingTags[] = $tag['id'];
+
 		if (is_numeric($travioId)) {
 			$serviceData = TravioClient::restGet('services', $travioId, [
 				'unfold' => ['classification_id', 'master_data', 'amenities'],
@@ -987,6 +991,9 @@ class Travio extends Module
 					]);
 
 					foreach ($subservice['_tags'] as $tag) {
+						if (!in_array($tag, $existingTags))
+							continue;
+
 						$db->insert('travio_subservices_tags', [
 							'subservice' => $ss_id,
 							'tag' => $tag,
@@ -1070,6 +1077,9 @@ class Travio extends Module
 			}
 
 			foreach ($serviceData['_tags'] as $tag) {
+				if (!in_array($tag, $existingTags))
+					continue;
+
 				$db->insert('travio_services_tags', [
 					'service' => $id,
 					'tag' => $tag,

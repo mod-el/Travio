@@ -220,6 +220,10 @@ class ImportFromTravioController extends Controller
 						try {
 							$db->beginTransaction();
 
+							$existingTags = [];
+							foreach ($this->model->all('TravioTag') as $tag)
+								$existingTags[] = $tag['id'];
+
 							$data = [
 								'code' => $packageData['code'],
 								'name' => $packageData['name'],
@@ -263,6 +267,9 @@ class ImportFromTravioController extends Controller
 							}
 
 							foreach ($packageData['_tags'] as $tagId) {
+								if (!in_array($tagId, $existingTags))
+									continue;
+
 								$db->insert('travio_packages_tags', [
 									'package' => $id,
 									'tag' => $tagId,
