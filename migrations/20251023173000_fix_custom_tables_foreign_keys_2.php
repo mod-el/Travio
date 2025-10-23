@@ -9,6 +9,7 @@ class FixCustomTablesForeignKeys2 extends AbstractMigration
 		// List of all custom tables and their main tables
 		$custom_tables = [
 			'travio_amenities_custom' => 'travio_amenities',
+			'travio_subservices_custom' => 'travio_subservices',
 		];
 
 		foreach ($custom_tables as $custom_table => $main_table)
