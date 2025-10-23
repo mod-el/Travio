@@ -564,7 +564,7 @@ class ImportFromTravioController extends Controller
 					$list = TravioClient::restList('amenities', ['per_page' => 0]);
 
 					$idsList = [];
-					foreach ($list['list'] as $id => $item) {
+					foreach ($list['list'] as $item) {
 						if ($item['type']) {
 							$type = $db->select('travio_amenities_types', ['name' => trim($item['type'])]);
 							if ($type)
@@ -576,13 +576,13 @@ class ImportFromTravioController extends Controller
 						}
 
 						$db->updateOrInsert('travio_amenities', [
-							'id' => $id,
+							'id' => $item['id'],
 						], [
 							'name' => $item['name'],
 							'type' => $type,
 						]);
 
-						$idsList[] = $id;
+						$idsList[] = $item['id'];
 						$this->model->_TravioAssets->importAmenity($item);
 					}
 
@@ -752,10 +752,10 @@ class ImportFromTravioController extends Controller
 
 						$db->delete('travio_stations_links', [], ['confirm' => true]);
 
-						foreach ($list['list'] as $id => $item) {
-							$check = $db->select('travio_stations', $id);
+						foreach ($list['list'] as $item) {
+							$check = $db->select('travio_stations', $item['id']);
 
-							$currents[] = $id;
+							$currents[] = $item['id'];
 
 							if ($check) {
 								$data = [
@@ -768,10 +768,10 @@ class ImportFromTravioController extends Controller
 										unset($data[$k]);
 								}
 
-								$db->update('travio_stations', $id, $data);
+								$db->update('travio_stations', $item['id'], $data);
 							} else {
 								$db->insert('travio_stations', [
-									'id' => $id,
+									'id' => $item['id'],
 									'code' => $item['code'],
 									'name' => $item['name'],
 								]);
@@ -808,7 +808,7 @@ class ImportFromTravioController extends Controller
 
 									$db->insert('travio_stations_links', [
 										'type' => $link_type,
-										'station' => $id,
+										'station' => $item['id'],
 										$cacheServices[$link]['type'] => $cacheServices[$link]['id'],
 									]);
 								}
