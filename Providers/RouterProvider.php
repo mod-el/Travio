@@ -8,11 +8,11 @@ class RouterProvider extends AbstractRouterProvider
 	{
 		return [
 			[
-				'pattern' => '/import-from-travio',
+				'pattern' => 'import-from-travio',
 				'controller' => 'ImportFromTravio',
 			],
 			[
-				'pattern' => '/travio-dates',
+				'pattern' => 'travio-dates',
 				'controller' => 'GetDates',
 			],
 		];
