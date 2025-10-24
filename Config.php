@@ -244,23 +244,6 @@ class TravioClassifications extends TravioClassificationsBase
 			unlink(INCLUDE_PATH . 'app/modules/TravioAssets/AdminPages/TravioTagsTypes.php');
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getRules(): array
-	{
-		return [
-			'rules' => [
-				'import' => 'import-from-travio',
-				'dates' => 'travio-dates',
-			],
-			'controllers' => [
-				'ImportFromTravio',
-				'GetDates',
-			],
-		];
-	}
-
 	public function retrieveConfig(): array
 	{
 		return \Model\Config\Config::get('travio');
