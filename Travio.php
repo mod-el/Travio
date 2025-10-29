@@ -925,8 +925,8 @@ class Travio extends Module
 				'typology' => $serviceData['typology'] ?? null,
 				'supplier' => $serviceData['supplier'] ?? null,
 				'geo' => $serviceData['geo'] ? $serviceData['geo'][0][count($serviceData['geo'][0]) - 1]['id'] : null,
-				'classification_id' => $serviceData['classification_id'] ? $serviceData['classification_id']['id'] : null,
-				'classification' => $serviceData['classification_id'] ? $serviceData['classification_id']['code'] : null,
+				'classification_id' => !empty($serviceData['classification_id']) ? $serviceData['classification_id']['id'] : null,
+				'classification' => !empty($serviceData['classification_id']) ? $serviceData['classification_id']['code'] : null,
 				'classification_level' => $serviceData['classification'] ?? null,
 				'lat' => $serviceData['location'] ? $serviceData['location']['lat'] : null,
 				'lng' => $serviceData['location'] ? $serviceData['location']['lng'] : null,
@@ -964,7 +964,7 @@ class Travio extends Module
 				$db->delete('travio_services_availability', ['service' => $id]);
 				$db->delete('travio_services_stop_sales', ['service' => $id]);
 			} else {
-				$data['travio'] = $serviceData['id'];
+				$data['travio'] = $travioId;
 				$id = $db->insert('travio_services', $data);
 			}
 
@@ -1005,7 +1005,7 @@ class Travio extends Module
 						foreach ($lang_descriptions['paragraphs'] as $paragraph_idx => $paragraph) {
 							if (!isset($descriptions[$paragraph_idx])) {
 								$descriptions[$paragraph_idx] = [
-									'keyword' => $paragraph['tag'],
+									'keyword' => $paragraph['tag'] ?? '',
 									'title' => [],
 									'text' => [],
 								];
@@ -1094,7 +1094,7 @@ class Travio extends Module
 					foreach ($lang_descriptions['paragraphs'] as $paragraph_idx => $paragraph) {
 						if (!isset($descriptions[$paragraph_idx])) {
 							$descriptions[$paragraph_idx] = [
-								'keyword' => $paragraph['tag'],
+								'keyword' => $paragraph['tag'] ?? '',
 								'title' => [],
 								'text' => [],
 							];
