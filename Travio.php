@@ -919,7 +919,7 @@ class Travio extends Module
 			$db->beginTransaction();
 
 			$data = [
-				'code' => $serviceData['code'],
+				'code' => $serviceData['code'] ?? '',
 				'name' => $serviceData['name'],
 				'type' => $serviceData['type'],
 				'typology' => $serviceData['typology'] ?? null,
@@ -1029,7 +1029,7 @@ class Travio extends Module
 					foreach ($subservice['images'] as $imageIdx => $image) {
 						$dataToUpdate = ['order' => $imageIdx + 1];
 						if ($config['import']['services']['override']['images_descriptions'] ?? true)
-							$dataToUpdate['description'] = $image['description'];
+							$dataToUpdate['description'] = $image['description'] ?? '';
 
 						if ($image['url'])
 							$this->invalidatePhotoCache($image['url']);
@@ -1119,7 +1119,7 @@ class Travio extends Module
 			foreach ($serviceData['images'] as $imageIdx => $image) {
 				$dataToUpdate = ['order' => $imageIdx + 1];
 				if ($config['import']['services']['override']['images_descriptions'] ?? true)
-					$dataToUpdate['description'] = $image['description'];
+					$dataToUpdate['description'] = $image['description'] ?? '';
 
 				if ($image['url'])
 					$this->invalidatePhotoCache($image['url']);
