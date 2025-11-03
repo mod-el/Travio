@@ -482,22 +482,6 @@ class Travio extends Module
 	}
 
 	/**
-	 * @param array $request
-	 * @param string $rule
-	 * @return array
-	 */
-	public function getController(array $request, string $rule): ?array
-	{
-		return [
-			'controller' => match ($rule) {
-				'import' => 'ImportFromTravio',
-				'dates' => 'GetDates',
-				default => throw new \Exception('Invalid rule: ' . $rule),
-			},
-		];
-	}
-
-	/**
 	 * @param int $geoId
 	 * @param string $search_type
 	 * @param array|null $poi
