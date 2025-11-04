@@ -71,7 +71,7 @@ class ImportFromTravioController extends Controller
 							if (array_key_exists($item['id'], $currents)) {
 								if ($currents[$item['id']] === null and $item['meta']['last_update'] === null)
 									continue;
-								if ($currents[$item['id']] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]))
+								if ($currents[$item['id']] and $item['meta']['last_update'] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]))
 									continue;
 							}
 
