@@ -36,19 +36,8 @@ class FixCustomTablesForeignKeys2 extends AbstractMigration
 	{
 		// List of all custom tables
 		$custom_tables = [
-			'travio_airports_custom',
-			'travio_classifications_custom',
-			'travio_geo_custom',
-			'travio_master_data_custom',
-			'travio_orders_custom',
-			'travio_packages_custom',
-			'travio_packages_departures_custom',
-			'travio_payment_conditions_custom',
-			'travio_payment_methods_custom',
-			'travio_ports_custom',
-			'travio_services_custom',
-			'travio_stations_custom',
-			'travio_tags_custom',
+			'travio_amenities_custom',
+			'travio_subservices_custom',
 		];
 
 		// Remove foreign keys
