@@ -137,6 +137,8 @@ class TravioServiceBase extends Element
 	public function getCheckinDates(): array
 	{
 		$today = date_create(date('Y-m-d'));
+		$limit = clone $today;
+		$limit->modify('+1 year');
 
 		$weekdays = [
 			'sunday',
@@ -161,6 +163,8 @@ class TravioServiceBase extends Element
 			for (; $day <= $to; $day->modify('+1 day')) {
 				if ($day < $today)
 					continue;
+				if ($day > $limit)
+					break 2;
 
 				$weekday = $weekdays[(int)$day->format('w')];
 				if (!$availability['in_' . $weekday])
