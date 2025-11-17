@@ -128,6 +128,8 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['services']['import'])
 						break;
 
+					$cacheAdapter = Cache::getCacheAdapter();
+
 					if (isset($_GET['item'])) {
 						$item = json_decode($_GET['item'], true);
 						if (!$item or !array_key_exists('id', $item) or !array_key_exists('existing', $item))
@@ -135,6 +137,8 @@ class ImportFromTravioController extends Controller
 
 						$id = $this->model->_Travio->importService($item['id']);
 						$this->model->_TravioAssets->importService($id, $item);
+
+						$cacheAdapter->invalidateTags(['travio.dates.' . $item['id']]);
 					} elseif (isset($_POST['finalize'])) {
 						$currents = json_decode($_POST['finalize'], true) ?: [];
 						if ($currents) {
@@ -149,7 +153,6 @@ class ImportFromTravioController extends Controller
 							$db->update('travio_services', [], ['visible' => 0], ['confirm' => true]);
 						}
 
-						$cacheAdapter = Cache::getCacheAdapter();
 						$cacheAdapter->invalidateTags(['travio.dates']);
 					} else {
 						$items = [];

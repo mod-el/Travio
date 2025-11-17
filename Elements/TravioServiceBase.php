@@ -1,5 +1,6 @@
 <?php namespace Model\Travio\Elements;
 
+use Model\Cache\Cache;
 use Model\ORM\Element;
 
 class TravioServiceBase extends Element
@@ -136,50 +137,56 @@ class TravioServiceBase extends Element
 
 	public function getCheckinDates(): array
 	{
-		$today = date_create(date('Y-m-d'));
-		$limit = clone $today;
-		$limit->modify('+1 year');
+		$cache = Cache::getCacheAdapter();
 
-		$weekdays = [
-			'sunday',
-			'monday',
-			'tuesday',
-			'wednesday',
-			'thursday',
-			'friday',
-			'saturday',
-		];
+		$cacheKey = 's' . $this['id'];
+		return $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) {
+			$item->expiresAfter(3600 * 24 * 7);
+			$item->tag('travio.dates');
+			$item->tag('travio.dates.' . $this['id']);
 
-		$dates = [];
-		foreach ($this->availability as $availability) {
-			if ($availability['type'] === 'closed')
-				continue;
-			if (date_create($availability['to']) < $today)
-				continue;
+			$today = date_create(date('Y-m-d'));
 
-			$day = date_create($availability['from']);
-			$to = date_create($availability['to']);
+			$weekdays = [
+				'sunday',
+				'monday',
+				'tuesday',
+				'wednesday',
+				'thursday',
+				'friday',
+				'saturday',
+			];
 
-			for (; $day <= $to; $day->modify('+1 day')) {
-				if ($day < $today)
+			$dates = [];
+			foreach ($this->availability as $availability) {
+				if ($availability['type'] === 'closed')
 					continue;
-				if ($day > $limit)
-					break 2;
-
-				$weekday = $weekdays[(int)$day->format('w')];
-				if (!$availability['in_' . $weekday])
+				if (date_create($availability['to']) < $today)
 					continue;
 
-				if ($this->isInStopSales($day))
-					continue;
+				$day = date_create($availability['from']);
+				$to = date_create($availability['to']);
 
-				if (count($this->getCheckoutDates($day)) === 0)
-					continue;
+				for (; $day <= $to; $day->modify('+1 day')) {
+					if ($day < $today)
+						continue;
 
-				$dates[] = $day->format('Y-m-d');
+					$weekday = $weekdays[(int)$day->format('w')];
+					if (!$availability['in_' . $weekday])
+						continue;
+
+					if ($this->isInStopSales($day))
+						continue;
+
+					if (count($this->getCheckoutDates($day)) === 0)
+						continue;
+
+					$dates[] = $day->format('Y-m-d');
+				}
 			}
-		}
-		return $dates;
+
+			return $dates;
+		});
 	}
 
 	public function getCheckoutDates(\DateTime $in): array
