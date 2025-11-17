@@ -273,7 +273,7 @@ class TravioServiceBase extends Element
 			switch ($stopSale['type']) {
 				case 'open':
 				case 'on_request':
-					$stop_sale = null;
+					$stop_sale = false;
 					break;
 				case 'closed':
 				default:
