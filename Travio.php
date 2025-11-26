@@ -150,8 +150,6 @@ class Travio extends Module
 		if (curl_errno($c))
 			throw new \Exception('Errore cURL: ' . curl_error($c));
 
-		curl_close($c);
-
 		$decoded = json_decode($data, true);
 		if ($decoded === null)
 			throw new \Exception('Errore nella decodifica dei dati: ' . $data);
