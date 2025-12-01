@@ -107,12 +107,6 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 		]);
 
-		$this->has('availability', [
-			'table' => 'travio_services_availability',
-			'field' => 'service',
-			'order_by' => '`from`',
-		]);
-
 		$this->has('stop_sales', [
 			'table' => 'travio_services_stop_sales',
 			'field' => 'service',
@@ -145,45 +139,16 @@ class TravioServiceBase extends Element
 			$item->tag('travio.dates');
 			$item->tag('travio.dates.' . $this['id']);
 
-			$today = date_create(date('Y-m-d'));
-
-			$weekdays = [
-				'sunday',
-				'monday',
-				'tuesday',
-				'wednesday',
-				'thursday',
-				'friday',
-				'saturday',
-			];
+			$q = $this->model->select_all('travio_services_dates', [
+				'service' => $this['id'],
+				'checkin' => ['>=' => date('Y-m-d')],
+			], [
+				'order_by' => 'checkin',
+			]);
 
 			$dates = [];
-			foreach ($this->availability as $availability) {
-				if ($availability['type'] === 'closed')
-					continue;
-				if (date_create($availability['to']) < $today)
-					continue;
-
-				$day = date_create($availability['from']);
-				$to = date_create($availability['to']);
-
-				for (; $day <= $to; $day->modify('+1 day')) {
-					if ($day < $today)
-						continue;
-
-					$weekday = $weekdays[(int)$day->format('w')];
-					if (!$availability['in_' . $weekday])
-						continue;
-
-					if ($this->isInStopSales($day))
-						continue;
-
-					if (count($this->getCheckoutDates($day)) === 0)
-						continue;
-
-					$dates[] = $day->format('Y-m-d');
-				}
-			}
+			foreach ($q as $d)
+				$dates[] = $d['checkin'];
 
 			return $dates;
 		});
@@ -191,105 +156,12 @@ class TravioServiceBase extends Element
 
 	public function getCheckoutDates(\DateTime $in): array
 	{
-		$config = \Model\Config\Config::get('travio');
+		$q = $this->model->select('travio_services_dates', [
+			'service' => $this['id'],
+			'checkin' => $in->format('Y-m-d'),
+		]);
 
-		$inAvailability = null;
-		$lastAvailability = null;
-		foreach ($this->availability as $availability) {
-			if ($availability['type'] === 'closed')
-				continue;
-			if ($in >= date_create($availability['from']) and $in <= date_create($availability['to']))
-				$inAvailability = $availability;
-
-			$lastAvailability = $availability['to'];
-		}
-
-		if (!$inAvailability)
-			return [];
-
-		$weekdays = [
-			'sunday',
-			'monday',
-			'tuesday',
-			'wednesday',
-			'thursday',
-			'friday',
-			'saturday',
-		];
-
-		$list = [];
-
-		$lastAvailability = date_create($lastAvailability);
-		$lastAvailability->modify('+1 day');
-
-		$day = clone $in;
-
-		for (; $day <= $lastAvailability; $day->modify('+1 day')) {
-			$duration = date_diff($day, $in, true)->days;
-			if ($day < $in or $duration > 60)
-				continue;
-
-			if ($inAvailability['only_multiples_of'] and $duration % $inAvailability['only_multiples_of'] > 0)
-				continue;
-
-			if ($inAvailability['fixed_duration'] and $duration !== ($inAvailability['fixed_duration'] - 1))
-				continue;
-
-			$outAvailability = null;
-			if ($config['availability_dates']['min_stay_from'] === 'out' or $config['availability_dates']['out_weekdays_from'] === 'out') {
-				foreach ($this->availability as $availability) {
-					if ($availability['type'] === 'closed' and $day->format('Y-m-d') !== $availability['from'])
-						continue;
-					if ($day >= date_create($availability['from']) and $day <= date_create($availability['to'])) {
-						$outAvailability = $availability;
-						break;
-					}
-				}
-			}
-
-			$weekday = $weekdays[$day->format('w')];
-			if ($config['availability_dates']['out_weekdays_from'] === 'in' and !$inAvailability['out_' . $weekday])
-				continue;
-
-			if ($config['availability_dates']['out_weekdays_from'] === 'out' and (!$outAvailability or !$outAvailability['out_' . $weekday]))
-				continue;
-
-			$minStay = $config['availability_dates']['min_stay_from'] === 'in' ? $inAvailability['min_stay'] : ($outAvailability ? $outAvailability['min_stay'] : null);
-			if ($minStay and $duration < $minStay)
-				continue;
-
-			$tmp = clone $in;
-			for (; $tmp < $day; $tmp->modify('+1 day')) {
-				if ($this->isInStopSales($tmp))
-					continue 2;
-			}
-
-			$list[] = $day->format('Y-m-d');
-		}
-
-		return $list;
-	}
-
-	private function isInStopSales(\DateTime $date): bool
-	{
-		$stop_sale = false;
-		foreach ($this->stop_sales as $stopSale) {
-			if ($date < date_create($stopSale['from']) or $date > date_create($stopSale['to']))
-				continue;
-
-			switch ($stopSale['type']) {
-				case 'open':
-				case 'on_request':
-					$stop_sale = false;
-					break;
-				case 'closed':
-				default:
-					$stop_sale = true;
-					break;
-			}
-		}
-
-		return $stop_sale;
+		return $q ? array_column($q, 'date') : [];
 	}
 
 	public function getMainImg(): ?string

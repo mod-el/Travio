@@ -943,7 +943,7 @@ class Travio extends Module
 				$db->delete('travio_services_amenities', ['service' => $id]);
 				$db->delete('travio_services_files', ['service' => $id]);
 				$db->delete('travio_services_videos', ['service' => $id]);
-				$db->delete('travio_services_availability', ['service' => $id]);
+				$db->delete('travio_services_dates', ['service' => $id]);
 				$db->delete('travio_services_stop_sales', ['service' => $id]);
 			} else {
 				$data['travio'] = $travioId;
@@ -1169,34 +1169,6 @@ class Travio extends Module
 
 				$db->bulkInsert('travio_services_videos');
 
-				foreach ($serviceData['availability'] as $availability) {
-					$db->insert('travio_services_availability', [
-						'service' => $id,
-						'from' => $availability['from'],
-						'to' => $availability['to'],
-						'type' => $availability['type'],
-						'in_monday' => (int)in_array('monday', $availability['weekdays_in']),
-						'in_tuesday' => (int)in_array('tuesday', $availability['weekdays_in']),
-						'in_wednesday' => (int)in_array('wednesday', $availability['weekdays_in']),
-						'in_thursday' => (int)in_array('thursday', $availability['weekdays_in']),
-						'in_friday' => (int)in_array('friday', $availability['weekdays_in']),
-						'in_saturday' => (int)in_array('saturday', $availability['weekdays_in']),
-						'in_sunday' => (int)in_array('sunday', $availability['weekdays_in']),
-						'out_monday' => (int)in_array('monday', $availability['weekdays_out']),
-						'out_tuesday' => (int)in_array('tuesday', $availability['weekdays_out']),
-						'out_wednesday' => (int)in_array('wednesday', $availability['weekdays_out']),
-						'out_thursday' => (int)in_array('thursday', $availability['weekdays_out']),
-						'out_friday' => (int)in_array('friday', $availability['weekdays_out']),
-						'out_saturday' => (int)in_array('saturday', $availability['weekdays_out']),
-						'out_sunday' => (int)in_array('sunday', $availability['weekdays_out']),
-						'min_stay' => $availability['min_stay'],
-						'only_multiples_of' => $availability['only_multiples_of'],
-						'fixed_duration' => $availability['fixed_duration'],
-					], ['defer' => true]);
-				}
-
-				$db->bulkInsert('travio_services_availability');
-
 				foreach ($serviceData['stop_sales'] as $stop_sale) {
 					$db->insert('travio_services_stop_sales', [
 						'service' => $id,
@@ -1209,6 +1181,19 @@ class Travio extends Module
 				}
 
 				$db->bulkInsert('travio_services_stop_sales');
+
+				foreach ($serviceData['dates'] as $d) {
+					$db->insert('travio_services_dates', [
+						'service' => $id,
+						'checkin' => $d['checkin'],
+						'time' => $d['time'],
+						'departure' => $d['departure'],
+						'arrival' => $d['arrival'],
+						'checkouts' => json_encode($d['checkouts']),
+					], ['defer' => true]);
+				}
+
+				$db->bulkInsert('travio_services_dates');
 			}
 
 			$db->commit();

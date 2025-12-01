@@ -1,7 +1,7 @@
 {
 	"name": "Travio",
 	"description": "Integration with Travio API",
-	"version": "0.17.0",
+	"version": "0.18.0",
 	"dependencies": {
 		"Core": ">=3.0.0",
 		"Db": ">=5.0.0",
