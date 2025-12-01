@@ -84,6 +84,7 @@ class TravioServiceBase extends Element
 				'table' => 'travio_services_geo',
 				'parent' => 'service',
 				'field' => 'geo',
+				'order_by' => 'id',
 			],
 		]);
 
