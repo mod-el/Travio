@@ -1189,7 +1189,7 @@ class Travio extends Module
 						'time' => $d['time'],
 						'departure' => $d['departure'],
 						'arrival' => $d['arrival'],
-						'checkouts' => json_encode($d['checkouts']),
+						'checkouts' => $d['checkouts'],
 					], ['defer' => true]);
 				}
 
