@@ -1187,8 +1187,8 @@ class Travio extends Module
 						'service' => $id,
 						'checkin' => $d['checkin'],
 						'time' => $d['time'],
-						'departure' => $d['departure'],
-						'arrival' => $d['arrival'],
+						'departure' => $d['departure'] ? $d['departure']['type'] . ':' . $d['departure']['id'] : null,
+						'arrival' => $d['arrival'] ? $d['arrival']['type'] . ':' . $d['arrival']['id'] : null,
 						'checkouts' => $d['checkouts'],
 					], ['defer' => true]);
 				}
