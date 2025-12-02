@@ -19,5 +19,7 @@ class ServicesDates extends AbstractMigration
 			->addIndex(['service', 'checkin'])
 			->addIndex(['service', 'departure'])
 			->create();
+
+		$this->execute('UPDATE travio_services SET last_update = NULL');
 	}
 }
