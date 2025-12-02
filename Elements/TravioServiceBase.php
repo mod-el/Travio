@@ -162,7 +162,7 @@ class TravioServiceBase extends Element
 			'checkin' => $in->format('Y-m-d'),
 		]);
 
-		return $q ? array_column($q, 'date') : [];
+		return ($q and $q['checkouts']) ? array_column($q['checkouts'], 'date') : [];
 	}
 
 	public function getMainImg(): ?string
