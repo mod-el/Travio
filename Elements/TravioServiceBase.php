@@ -142,7 +142,7 @@ class TravioServiceBase extends Element
 
 			$q = $this->model->select_all('travio_services_dates', [
 				'service' => $this['id'],
-				'checkin' => ['>=' => date('Y-m-d')],
+				'checkin' => ['>=', date('Y-m-d')],
 			], [
 				'order_by' => 'checkin',
 			]);
