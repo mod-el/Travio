@@ -4,6 +4,7 @@ use MJS\TopSort\Implementations\FixedArraySort;
 use Model\Cache\Cache;
 use Model\Core\Controller;
 use Model\Db\Db;
+use Model\Multilang\Ml;
 use Model\Travio\TravioClient;
 
 class ImportFromTravioController extends Controller
@@ -26,9 +27,21 @@ class ImportFromTravioController extends Controller
 					if (!$config['import']['geo']['import'])
 						break;
 
+					$texts = [];
+					foreach ($db->selectAll('travio_geo_texts') as $t) {
+						if (!isset($texts[$t['parent']]))
+							$texts[$t['parent']] = ['name' => [], 'parent_name' => []];
+
+						$texts[$t['parent']]['name'][$t['lang']] = $t['name'];
+						$texts[$t['parent']]['parent_name'][$t['lang']] = $t['parent_name'];
+					}
+
 					$currents = [];
-					foreach ($db->selectAll('travio_geo') as $g)
-						$currents[$g['id']] = $g['last_update'];
+					foreach ($db->selectAll('travio_geo') as $g) {
+						$g['name'] = $texts[$g['id']]['name'] ?? [];
+						$g['parent_name'] = $texts[$g['id']]['parent_name'] ?? [];
+						$currents[$g['id']] = $g;
+					}
 
 					$visible_ids = [];
 					$seen_ids = [];
@@ -68,23 +81,48 @@ class ImportFromTravioController extends Controller
 							if (!isset($item['meta']['last_update']))
 								$item['meta']['last_update'] = null;
 
-							if (array_key_exists($item['id'], $currents)) {
-								if ($currents[$item['id']] === null and $item['meta']['last_update'] === null)
+							if (isset($currents[$geoId])) {
+								if ($currents[$item['id']]['last_update'] === null and $item['meta']['last_update'] === null)
 									continue;
-								if ($currents[$item['id']] and $item['meta']['last_update'] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]))
+								if ($currents[$item['id']]['last_update'] and $item['meta']['last_update'] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]['last_update']))
 									continue;
 							}
 
-							$db->updateOrInsert('travio_geo', [
-								'id' => $item['id'],
-							], [
+
+							foreach (($item['name'] ?? []) as $lang => $v) {
+								if (!in_array($lang, Ml::getLangs()))
+									unset($item['name'][$lang]);
+							}
+
+							foreach (($item['parent-name'] ?? []) as $lang => $v) {
+								if (!in_array($lang, Ml::getLangs()))
+									unset($item['parent-name'][$lang]);
+							}
+
+							$update = [
 								'name' => $item['name'],
 								'parent' => $item['parent'],
 								'parent_name' => $item['parent-name'],
 								'has_suppliers' => (int)$item['has_suppliers'],
 								'visible' => 1,
 								'last_update' => $item['meta']['last_update'],
-							]);
+							];
+
+							if (isset($currents[$geoId])) {
+								$toUpdate = false;
+								foreach ($update as $k => $v) {
+									if (json_encode($v) !== json_encode($currents[$geoId][$k]))
+										$toUpdate = true;
+								}
+
+								if ($toUpdate)
+									$db->update('travio_geo', ['id' => $item['id']], $update);
+							} else {
+								$db->insert('travio_geo', [
+									'id' => $item['id'],
+									...$update,
+								]);
+							}
 
 							$this->model->_TravioAssets->importGeo($item);
 						}
