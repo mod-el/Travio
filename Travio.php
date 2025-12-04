@@ -771,9 +771,7 @@ class Travio extends Module
 						}
 					}
 
-					$checkin_dates = $el->getCheckinDates();
-					if (count($checkin_dates) > 0)
-						$dates['list'] = $checkin_dates;
+					$dates['list'] = $el->getCheckinDates();
 				}
 			}
 
