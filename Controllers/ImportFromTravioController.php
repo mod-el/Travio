@@ -415,11 +415,15 @@ class ImportFromTravioController extends Controller
 								]);
 
 								if ($departureQ) {
+									if ($departureQ['duration'] !== $departure['duration'])
+										$db->update('travio_packages_departures', $departureQ['id'], ['duration' => $departure['duration']]);
+
 									$departureId = $departureQ['id'];
 								} else {
 									$departureId = $db->insert('travio_packages_departures', [
 										'package' => $id,
 										'date' => $departure['date'],
+										'duration' => $departure['duration'],
 									]);
 								}
 
