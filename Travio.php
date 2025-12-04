@@ -485,7 +485,7 @@ class Travio extends Module
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromGeo(int $geoId, string $search_type, ?array $poi = null): array
+	public function getCheckinFromGeo(int $geoId, string $search_type, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
@@ -497,7 +497,7 @@ class Travio extends Module
 		}
 
 		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -527,7 +527,7 @@ class Travio extends Module
 					];
 				}
 
-				$datesQ = $this->model->select_all('travio_packages_departures', $where, [
+				$datesQ = $db->selectAll('travio_packages_departures', $where, [
 					'joins' => $joins,
 					'group_by' => 'date',
 				]);
@@ -599,12 +599,93 @@ class Travio extends Module
 	}
 
 	/**
+	 * @param int $geoId
+	 * @param \DateTime $checkin
+	 * @param string $search_type
+	 * @param array|null $poi
+	 * @return array
+	 */
+	public function getCheckoutFromGeo(int $geoId, \DateTime $checkin, string $search_type, ?array $poi = null): array
+	{
+		$db = Db::getConnection();
+
+		$dates = [];
+		$open = false;
+
+		if ($search_type === 'packages') {
+			$where = [
+				'date' => $checkin->format('Y-m-d'),
+				'join_geo' => $geoId,
+			];
+
+			$joins = [
+				'travio_packages_geo' => [
+					'on' => ['package' => 'package'],
+					'fields' => ['geo' => 'join_geo'],
+				],
+			];
+
+			if ($poi) {
+				$where['departure_' . $poi['type']] = $poi['id'];
+				$joins['travio_packages_departures_routes'] = [
+					'on' => ['id' => 'departure'],
+					'fields' => ['departure_' . $poi['type']],
+				];
+			}
+
+			$datesQ = $db->selectAll('travio_packages_departures', $where, [
+				'joins' => $joins,
+				'group_by' => 'date',
+			]);
+
+			foreach ($datesQ as $row) {
+				$co = clone $checkin;
+				$co->modify('+' . ($row['duration'] - 1) . ' days');
+
+				$checkout_date = $co->format('Y-m-d');
+				if (!in_array($checkout_date, $dates))
+					$dates[] = $checkout_date;
+			}
+		} else {
+			$geo = $this->model->one('TravioGeo', $geoId);
+
+			if ($geo['has_suppliers']) {
+				$open = true;
+			} else {
+				$datesQ = $db->selectAll('travio_services_dates', [
+					'checkin' => $checkin->format('Y-m-d'),
+					'join_geo' => $geoId,
+				], [
+					'joins' => [
+						'travio_services_geo' => [
+							'on' => ['service' => 'service'],
+							'fields' => ['geo' => 'join_geo'],
+						],
+					],
+				]);
+
+				foreach ($datesQ as $d) {
+					foreach ($d['checkouts'] as $co) {
+						if (!in_array($co['date'], $dates))
+							$dates[] = $co;
+					}
+				}
+			}
+		}
+
+		return [
+			'dates' => $dates,
+			'open' => $open,
+		];
+	}
+
+	/**
 	 * @param int $serviceId
 	 * @param string $search_type
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromService(int $serviceId, string $search_type, ?array $poi = null): array
+	public function getCheckinFromService(int $serviceId, string $search_type, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
@@ -616,7 +697,7 @@ class Travio extends Module
 		}
 
 		$cacheKey = 's' . $serviceId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($serviceId, $search_type, $poi) {
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($serviceId, $search_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -707,11 +788,66 @@ class Travio extends Module
 	}
 
 	/**
+	 * @param int $serviceId
+	 * @param \DateTime $checkin
+	 * @param string $search_type
+	 * @param array|null $poi
+	 * @return array
+	 */
+	public function getCheckoutFromService(int $serviceId, \DateTime $checkin, string $search_type, ?array $poi = null): array
+	{
+		if ($poi) {
+			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))
+				throw new \Exception('Invalid poi type');
+			if (!isset($poi['id']) or !is_numeric($poi['id']))
+				throw new \Exception('Invalid poi id');
+		}
+
+		$db = Db::getConnection();
+
+		$el = $this->model->one('TravioService', ['travio' => $serviceId]);
+
+		$open = false;
+		$dates = [];
+
+		if ($search_type === 'packages') {
+			$departures = $db->query('SELECT d.`id`, d.`duration` FROM `travio_packages_departures` d INNER JOIN `travio_packages_services` s ON s.`package` = d.`package` INNER JOIN `travio_packages` p ON p.`id` = d.`package` AND p.`visible` = 1 WHERE s.`service` = ' . $el['id'] . ' AND d.`date`=\'' . $checkin->format('Y-m-d') . '\'')->fetchAll();
+			foreach ($departures as $departure) {
+				if ($poi) {
+					$check = $db->select('travio_packages_departures_routes', [
+						'departure' => $departure['id'],
+						'departure_' . $poi['type'] => $poi['id'],
+					]);
+
+					if (!$check)
+						continue;
+				}
+
+				$checkout = clone $checkin;
+				$checkout->modify('+' . ($departure['duration'] - 1) . ' days');
+				$checkout_date = $checkout->format('Y-m-d');
+				if (!in_array($checkout_date, $dates))
+					$dates[] = $checkout_date;
+			}
+		} else {
+			if ($el['has_suppliers'])
+				$open = true;
+			else
+				$dates = $el->getCheckoutDates($checkin);
+		}
+
+		return [
+			'dates' => $dates,
+			'open' => $open,
+		];
+	}
+
+	/**
 	 * @param int $packageId
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getDatesFromPackage(int $packageId, ?array $poi = null): array
+	public function getCheckinFromPackage(int $packageId, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
@@ -723,7 +859,7 @@ class Travio extends Module
 		}
 
 		$cacheKey = 'p' . $packageId . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($packageId, $poi) {
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($packageId, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -771,15 +907,64 @@ class Travio extends Module
 	}
 
 	/**
+	 * @param int $packageId
+	 * @param \DateTime $checkin
+	 * @param array|null $poi
+	 * @return array
+	 */
+	public function getCheckoutFromPackage(int $packageId, \DateTime $checkin, ?array $poi = null): array
+	{
+		if ($poi) {
+			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))
+				throw new \Exception('Invalid poi type');
+			if (!isset($poi['id']) or !is_numeric($poi['id']))
+				throw new \Exception('Invalid poi id');
+		}
+
+		$db = Db::getConnection();
+
+		$el = $this->model->one('TravioPackage', ['travio' => $packageId]);
+
+		$departures = $db->selectAll('travio_packages_departures', [
+			'package' => $el['id'],
+			'date' => $checkin->format('Y-m-d'),
+		]);
+
+		$dates = [];
+		foreach ($departures as $departure) {
+			if ($poi) {
+				$check = $db->select('travio_packages_departures_routes', [
+					'departure' => $departure['id'],
+					'departure_' . $poi['type'] => $poi['id'],
+				]);
+
+				if (!$check)
+					continue;
+			}
+
+			$checkout = clone $checkin;
+			$checkout->modify('+' . ($departure['duration'] - 1) . ' days');
+			$checkout_date = $checkout->format('Y-m-d');
+			if (!in_array($checkout_date, $dates))
+				$dates[] = $checkout_date;
+		}
+
+		return [
+			'dates' => $dates,
+			'open' => false,
+		];
+	}
+
+	/**
 	 * @param int $tagId
 	 * @return array
 	 */
-	public function getDatesFromTag(int $tagId): array
+	public function getCheckinFromTag(int $tagId): array
 	{
 		$cache = Cache::getCacheAdapter();
 
 		$cacheKey = 't' . $tagId . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.dates.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($tagId) {
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($tagId) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -828,6 +1013,49 @@ class Travio extends Module
 			'dates' => $dates,
 			'airports' => $airports,
 			'ports' => $ports,
+		];
+	}
+
+	/**
+	 * @param int $tagId
+	 * @param \DateTime $checkin
+	 * @return array
+	 */
+	public function getCheckoutFromTag(int $tagId, \DateTime $checkin): array
+	{
+		$services = $this->model->all('TravioService', [
+			'tag' => $tagId,
+			'max_date' => ['>=', $checkin->format('Y-m-d')],
+		], [
+			'joins' => [
+				'travio_services_tags' => [
+					'on' => ['id' => 'service'],
+					'fields' => ['tag'],
+				],
+			],
+		]);
+
+		$seen = [];
+		$dates = [];
+		$open = false;
+		foreach ($services as $service) {
+			if (in_array($service['id'], $seen))
+				continue;
+			$seen[] = $service['id'];
+
+			if ($service['has_suppliers']) {
+				$open = true;
+				$dates = [];
+				break;
+			} else {
+				$service_dates = $service->getCheckoutDates($checkin);
+				$dates = array_merge($dates, $service_dates);
+			}
+		}
+
+		return [
+			'dates' => array_unique($dates),
+			'open' => $open,
 		];
 	}
 

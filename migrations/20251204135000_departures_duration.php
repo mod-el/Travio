@@ -9,5 +9,7 @@ class DeparturesDuration extends AbstractMigration
 		$this->table('travio_packages_departures')
 			->addColumn('duration', 'integer', ['null' => true])
 			->update();
+
+		$this->execute('UPDATE travio_packages SET last_update = NULL');
 	}
 }
