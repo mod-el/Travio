@@ -871,6 +871,8 @@ class Travio extends Module
 
 			$q = $db->query('SELECT d.`date`, r.`departure_airport`, r.`departure_port`, a.code AS airport_code, a.name AS airport_name,p.code AS port_code, p.name AS port_name FROM travio_packages_departures d LEFT JOIN travio_packages_departures_routes r ON r.departure = d.id LEFT JOIN travio_airports a ON a.id = r.departure_airport LEFT JOIN travio_ports p ON p.id = r.departure_port WHERE d.package = ' . $el['id'] . ' AND d.`date`>\'' . date('Y-m-d') . '\' ' . $poi_where)->fetchAll();
 
+			$airports = [];
+			$ports = [];
 			$dates = ['list' => []];
 			foreach ($q as $departure) {
 				$date = date_create($departure['date']);
