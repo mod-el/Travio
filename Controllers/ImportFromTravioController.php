@@ -265,13 +265,19 @@ class ImportFromTravioController extends Controller
 							foreach ($this->model->all('TravioTag') as $tag)
 								$existingTags[] = $tag['id'];
 
+							$duration = null;
+							foreach ($packageData['departures'] as $departure) {
+								if ($departure['duration'] > $duration)
+									$duration = $departure['duration'];
+							}
+
 							$data = [
 								'code' => $packageData['code'],
 								'name' => $packageData['name'],
 								'type' => $packageData['type'],
 								'price' => $packageData['shown_price'],
 								'geo' => $packageData['geo'][0][count($packageData['geo'][0]) - 1]['id'] ?? null,
-								'duration' => $packageData['duration'],
+								'duration' => $duration,
 								'min_pax' => $packageData['min_pax'],
 								'visible' => 1,
 								'last_update' => $packageData['_meta']['last_update'],
