@@ -267,7 +267,7 @@ class ImportFromTravioController extends Controller
 
 							$duration = null;
 							foreach ($packageData['departures'] as $departure) {
-								if ($departure['duration'] > $duration)
+								if ($departure['duration'] > $duration or $duration === null)
 									$duration = $departure['duration'];
 							}
 
