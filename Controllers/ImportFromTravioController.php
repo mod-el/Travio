@@ -739,7 +739,7 @@ class ImportFromTravioController extends Controller
 
 					$filters = [];
 					if ($config['import']['airports']['only_used']) {
-						$type = count($targets) === 1 ? 'both' : $targets[0]; // services, packages, or both
+						$type = count($targets) != 1 ? 'both' : $targets[0]; // services, packages, or both
 						$filters[] = [
 							'field' => 'used_in',
 							'value' => $type,
