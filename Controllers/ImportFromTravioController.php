@@ -731,46 +731,54 @@ class ImportFromTravioController extends Controller
 
 					$currents = [];
 
+					$targets = [];
 					foreach ($config['target_types'] as $target) {
-						$payload = [
-							'type' => 'airports',
-							'search-type' => $target['search'],
+						if (!in_array($target['search'] . 's', $targets)) // $target['search'] can be 'service' or 'package', so we add the 's' to form 'services' or 'packages'
+							$targets[] = $target['search'] . 's';
+					}
+
+					$filters = [];
+					if ($config['import']['airports']['only_used']) {
+						$type = count($targets) > 1 ? 'both' : $targets[0]; // services, packages, or both
+						$filters[] = [
+							'field' => 'used_in',
+							'value' => $type,
 						];
+					}
 
-						if ($target['type'] ?? null)
-							$payload['service-type'] = $target['type'];
+					$list = TravioClient::restList('airports', [
+						'filters' => $filters,
+						'per_page' => 0,
+					]);
 
-						$list = $this->model->_Travio->request('static-data', $payload);
+					foreach ($list['list'] as $item) {
+						$check = $db->select('travio_airports', $item['id']);
 
-						foreach ($list['list'] as $item) {
-							$check = $db->select('travio_airports', $item['id']);
+						$currents[] = $item['id'];
 
-							$currents[] = $item['id'];
+						if ($check) {
+							$data = [
+								'code' => $item['code'],
+								'name' => $item['name'],
+								'departure' => $item['is_departure'] ? 1 : 0,
+							];
 
-							if ($check) {
-								$data = [
-									'code' => $item['code'],
-									'name' => $item['name'],
-									'departure' => $item['departure'] ? 1 : 0,
-								];
-
-								foreach (($config['import']['airports']['override'] ?? []) as $k => $override) {
-									if (!$override)
-										unset($data[$k]);
-								}
-
-								$db->update('travio_airports', $item['id'], $data);
-							} else {
-								$db->insert('travio_airports', [
-									'id' => $item['id'],
-									'code' => $item['code'],
-									'name' => $item['name'],
-									'departure' => $item['departure'] ? 1 : 0,
-								]);
+							foreach (($config['import']['airports']['override'] ?? []) as $k => $override) {
+								if (!$override)
+									unset($data[$k]);
 							}
 
-							$this->model->_TravioAssets->importAirport($item);
+							$db->update('travio_airports', $item['id'], $data);
+						} else {
+							$db->insert('travio_airports', [
+								'id' => $item['id'],
+								'code' => $item['code'],
+								'name' => $item['name'],
+								'departure' => $item['is_departure'] ? 1 : 0,
+							]);
 						}
+
+						$this->model->_TravioAssets->importAirport($item);
 					}
 
 					foreach ($db->selectAll('travio_airports', $currents ? ['id' => ['NOT IN', $currents]] : []) as $airport) {
