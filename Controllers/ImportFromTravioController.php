@@ -759,7 +759,7 @@ class ImportFromTravioController extends Controller
 						if ($check) {
 							$data = [
 								'code' => $item['code'],
-								'name' => $item['name'],
+								'name' => $item['name']['it'],
 								'departure' => $item['is_departure'] ? 1 : 0,
 							];
 
@@ -773,7 +773,7 @@ class ImportFromTravioController extends Controller
 							$db->insert('travio_airports', [
 								'id' => $item['id'],
 								'code' => $item['code'],
-								'name' => $item['name'],
+								'name' => $item['name']['it'],
 								'departure' => $item['is_departure'] ? 1 : 0,
 							]);
 						}
