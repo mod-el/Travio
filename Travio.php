@@ -667,7 +667,7 @@ class Travio extends Module
 				foreach ($datesQ as $d) {
 					foreach ($d['checkouts'] as $co) {
 						if (!in_array($co['date'], $dates))
-							$dates[] = $co;
+							$dates[] = $co['date'];
 					}
 				}
 			}
