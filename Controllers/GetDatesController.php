@@ -10,7 +10,7 @@ class GetDatesController extends Controller
 			throw new \Exception('Missing type or id parameter');
 
 		$side = $_GET['side'] ?? 'checkin';
-		$service_type = $_GET['service_type'] ?? 'all';
+		$service_type = $_GET['service_type'] ?? null;
 
 		switch ($side) {
 			case 'checkin':
