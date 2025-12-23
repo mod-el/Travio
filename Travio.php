@@ -662,16 +662,24 @@ class Travio extends Module
 					'checkin' => $checkin->format('Y-m-d'),
 					'join_geo' => $geoId,
 				];
-				if ($service_type)
-					$where['type'] = TravioClient::getServiceTypeId($service_type);
+
+				$joins = [
+					'travio_services_geo' => [
+						'on' => ['service' => 'service'],
+						'fields' => ['geo' => 'join_geo'],
+					],
+				];
+
+				if ($service_type) {
+					$where['service_type'] = TravioClient::getServiceTypeId($service_type);
+					$joins['travio_services'] = [
+						'on' => ['service' => 'id'],
+						'fields' => ['type' => 'service_type'],
+					];
+				}
 
 				$datesQ = $db->selectAll('travio_services_dates', $where, [
-					'joins' => [
-						'travio_services_geo' => [
-							'on' => ['service' => 'service'],
-							'fields' => ['geo' => 'join_geo'],
-						],
-					],
+					'joins' => $joins,
 				]);
 
 				foreach ($datesQ as $d) {
