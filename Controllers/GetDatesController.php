@@ -10,12 +10,13 @@ class GetDatesController extends Controller
 			throw new \Exception('Missing type or id parameter');
 
 		$side = $_GET['side'] ?? 'checkin';
+		$service_type = $_GET['service_type'] ?? 'all';
 
 		switch ($side) {
 			case 'checkin':
 				switch ($_GET['type']) {
 					case 'geo':
-						return $this->model->_Travio->getCheckinFromGeo((int)$_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
+						return $this->model->_Travio->getCheckinFromGeo((int)$_GET['id'], $_GET['search_type'] ?? 'services', $service_type, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'service':
 						return $this->model->_Travio->getCheckinFromService((int)$_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
@@ -24,7 +25,7 @@ class GetDatesController extends Controller
 						return $this->model->_Travio->getCheckinFromPackage((int)$_GET['id'], isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'tag':
-						return $this->model->_Travio->getCheckinFromTag((int)$_GET['id']);
+						return $this->model->_Travio->getCheckinFromTag((int)$_GET['id'], $_GET['search_type'] ?? 'services', $service_type);
 
 					default:
 						throw new \Exception('Invalid type parameter');
@@ -40,7 +41,7 @@ class GetDatesController extends Controller
 
 				switch ($_GET['type']) {
 					case 'geo':
-						return $this->model->_Travio->getCheckoutFromGeo((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
+						return $this->model->_Travio->getCheckoutFromGeo((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', $service_type, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'service':
 						return $this->model->_Travio->getCheckoutFromService((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
@@ -49,7 +50,7 @@ class GetDatesController extends Controller
 						return $this->model->_Travio->getCheckoutFromPackage((int)$_GET['id'], $checkin, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'tag':
-						return $this->model->_Travio->getCheckoutFromTag((int)$_GET['id'], $checkin);
+						return $this->model->_Travio->getCheckoutFromTag((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', $service_type);
 
 					default:
 						throw new \Exception('Invalid type parameter for checkout');

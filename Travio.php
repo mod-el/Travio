@@ -482,10 +482,11 @@ class Travio extends Module
 	/**
 	 * @param int $geoId
 	 * @param string $search_type
+	 * @param string|null $service_type
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getCheckinFromGeo(int $geoId, string $search_type, ?array $poi = null): array
+	public function getCheckinFromGeo(int $geoId, string $search_type, ?string $service_type = null, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
@@ -496,8 +497,8 @@ class Travio extends Module
 				throw new \Exception('Invalid poi id');
 		}
 
-		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $poi) {
+		$cacheKey = 'd' . $geoId . '-' . $search_type . '-' . $service_type . '-' . ($poi ? $poi['type'] . '-' . $poi['id'] . '-' : '') . date('Y-m-d');
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($geoId, $search_type, $service_type, $poi) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
@@ -536,24 +537,28 @@ class Travio extends Module
 				foreach ($datesQ as $row)
 					$dates['list'][] = $row['date'];
 			} else {
-				$services = $this->model->all('TravioService', [
-					'join_geo' => $el['id'],
-					'max_date' => ['>=', date('Y-m-d')],
-				], [
-					'joins' => [
-						'travio_services_geo' => [
-							'on' => ['id' => 'service'],
-							'fields' => ['geo' => 'join_geo'],
-						],
-					],
-				]);
-
 				$today = date_create();
 				$totalMinDate = null;
 				$totalMaxDate = null;
 				$list = [];
 
-				if (!$el['has_suppliers']) {
+				if (!$el['has_suppliers'] or ($service_type ?? 'hotels') !== 'hotels') {
+					$where = [
+						'join_geo' => $el['id'],
+						'max_date' => ['>=', date('Y-m-d')],
+					];
+					if ($service_type)
+						$where['type'] = TravioClient::getServiceTypeId($service_type);
+
+					$services = $this->model->all('TravioService', $where, [
+						'joins' => [
+							'travio_services_geo' => [
+								'on' => ['id' => 'service'],
+								'fields' => ['geo' => 'join_geo'],
+							],
+						],
+					]);
+
 					foreach ($services as $service) {
 						if ($service['min_date']) {
 							$minDate = date_create($service['min_date']);
@@ -602,10 +607,11 @@ class Travio extends Module
 	 * @param int $geoId
 	 * @param \DateTime $checkin
 	 * @param string $search_type
+	 * @param string|null $service_type
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getCheckoutFromGeo(int $geoId, \DateTime $checkin, string $search_type, ?array $poi = null): array
+	public function getCheckoutFromGeo(int $geoId, \DateTime $checkin, string $search_type, ?string $service_type = null, ?array $poi = null): array
 	{
 		$db = Db::getConnection();
 
@@ -649,13 +655,17 @@ class Travio extends Module
 		} else {
 			$geo = $this->model->one('TravioGeo', $geoId);
 
-			if ($geo['has_suppliers']) {
+			if ($geo['has_suppliers'] and ($service_type ?? 'hotels') === 'hotels') {
 				$open = true;
 			} else {
-				$datesQ = $db->selectAll('travio_services_dates', [
+				$where = [
 					'checkin' => $checkin->format('Y-m-d'),
 					'join_geo' => $geoId,
-				], [
+				];
+				if ($service_type)
+					$where['type'] = TravioClient::getServiceTypeId($service_type);
+
+				$datesQ = $db->selectAll('travio_services_dates', $where, [
 					'joins' => [
 						'travio_services_geo' => [
 							'on' => ['service' => 'service'],
@@ -957,20 +967,28 @@ class Travio extends Module
 
 	/**
 	 * @param int $tagId
+	 * @param string $search_type
+	 * @param string|null $service_type
 	 * @return array
 	 */
-	public function getCheckinFromTag(int $tagId): array
+	public function getCheckinFromTag(int $tagId, string $search_type, ?string $service_type = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
-		$cacheKey = 't' . $tagId . '-' . date('Y-m-d');
-		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($tagId) {
+		$cacheKey = 't' . $tagId . '-' . $search_type . '-' . $service_type . '-' . date('Y-m-d');
+		[$dates, $airports, $ports] = $cache->get('travio.checkin.' . $cacheKey, function (\Symfony\Contracts\Cache\ItemInterface $item) use ($tagId, $search_type, $service_type) {
 			$item->expiresAfter(3600 * 24);
 			$item->tag('travio.dates');
 
 			$db = Db::getConnection();
 
-			$services = $db->selectAll('travio_services', ['tag' => $tagId], [
+			// TODO: $search_type==='packages'
+
+			$where = ['tag' => $tagId];
+			if ($service_type)
+				$where['type'] = TravioClient::getServiceTypeId($service_type);
+
+			$services = $db->selectAll('travio_services', $where, [
 				'joins' => [
 					'travio_services_tags' => [
 						'on' => ['id' => 'service'],
@@ -1018,15 +1036,23 @@ class Travio extends Module
 
 	/**
 	 * @param int $tagId
+	 * @param string $search_type
+	 * @param string|null $service_type
 	 * @param \DateTime $checkin
 	 * @return array
 	 */
-	public function getCheckoutFromTag(int $tagId, \DateTime $checkin): array
+	public function getCheckoutFromTag(int $tagId, \DateTime $checkin, string $search_type, ?string $service_type = null): array
 	{
-		$services = $this->model->all('TravioService', [
+		// TODO: $search_type==='packages'
+
+		$where = [
 			'tag' => $tagId,
 			'max_date' => ['>=', $checkin->format('Y-m-d')],
-		], [
+		];
+		if ($service_type)
+			$where['type'] = TravioClient::getServiceTypeId($service_type);
+
+		$services = $this->model->all('TravioService', $where, [
 			'joins' => [
 				'travio_services_tags' => [
 					'on' => ['id' => 'service'],
@@ -1299,7 +1325,7 @@ class Travio extends Module
 
 			$db->bulkInsert('travio_services_tags');
 
-			if (($config['import']['services']['override']['descriptions'] ?? true) or !$item['existing']) {
+			if (($config['import']['services']['override']['descriptions'] ?? true) or !$check) {
 				$descriptions = [];
 				foreach ($serviceData['descriptions'] as $lang_descriptions) {
 					foreach ($lang_descriptions['paragraphs'] as $paragraph_idx => $paragraph) {
