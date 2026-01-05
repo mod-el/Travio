@@ -68,8 +68,8 @@ class ImportFromTravioController extends Controller
 						$sortedGeo = $sorter->sort();
 
 						foreach ($sortedGeo as $geoId) {
-							if (($target['geo'] ?? true) and !in_array($geoId, $visible_ids))
-								$visible_ids[] = $geoId;
+							if (($target['geo'] ?? true) and !isset($visible_ids[$geoId]))
+								$visible_ids[$geoId] = true;
 
 							if (in_array($geoId, $seen_ids))
 								continue;
@@ -115,22 +115,28 @@ class ImportFromTravioController extends Controller
 										$toUpdate = true;
 								}
 
-								if ($toUpdate)
+								if ($toUpdate) {
 									$db->update('travio_geo', ['id' => $item['id']], $update);
+									$this->model->_TravioAssets->importGeo($item);
+								}
 							} else {
 								$db->insert('travio_geo', [
 									'id' => $item['id'],
 									...$update,
 								]);
-							}
 
-							$this->model->_TravioAssets->importGeo($item);
+								$this->model->_TravioAssets->importGeo($item);
+							}
 						}
 					}
 
 					$db->delete('travio_geo_parents', [], ['confirm' => true]);
 
+					$set_non_visible = [];
 					foreach ($this->model->all('TravioGeo') as $geo) {
+						if ($geo['visible'] and !isset($visible_ids[$geo['id']]))
+							$set_non_visible[] = $geo['id'];
+
 						$parents = [];
 						$el = clone $geo;
 						while ($el and $el['parent']) {
@@ -149,17 +155,13 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					if ($visible_ids) {
-						$db->update('travio_geo', [
-							'id' => ['NOT IN', $visible_ids],
-						], ['visible' => 0]);
+					unset($currents);
+					unset($visible_ids);
+					unset($seen_ids);
+					gc_collect_cycles();
 
-						$db->update('travio_geo', [
-							'id' => ['IN', $visible_ids],
-						], ['visible' => 1]);
-					} else {
-						$db->update('travio_geo', [], ['visible' => 0], ['confirm' => true]);
-					}
+					if ($set_non_visible)
+						$db->update('travio_geo', ['id' => ['IN', $set_non_visible]], ['visible' => 0]);
 					break;
 
 				case 'services':
