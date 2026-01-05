@@ -132,6 +132,11 @@ class ImportFromTravioController extends Controller
 
 					$db->delete('travio_geo_parents', [], ['confirm' => true]);
 
+					unset($texts);
+					unset($currents);
+					unset($seen_ids);
+					gc_collect_cycles();
+
 					$set_non_visible = [];
 					foreach ($this->model->all('TravioGeo') as $geo) {
 						if ($geo['visible'] and !isset($visible_ids[$geo['id']]))
@@ -155,9 +160,7 @@ class ImportFromTravioController extends Controller
 						}
 					}
 
-					unset($currents);
 					unset($visible_ids);
-					unset($seen_ids);
 					gc_collect_cycles();
 
 					if ($set_non_visible)
