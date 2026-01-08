@@ -678,10 +678,7 @@ class Travio extends Module
 					];
 				}
 
-				$datesQ = $db->selectAll('travio_services_dates', $where, [
-					'joins' => $joins,
-				]);
-
+				$datesQ = $db->selectAll('travio_services_dates', $where, ['joins' => $joins]);
 				foreach ($datesQ as $d) {
 					foreach ($d['checkouts'] as $co) {
 						if (!in_array($co['date'], $dates))
@@ -1446,14 +1443,19 @@ class Travio extends Module
 				$db->bulkInsert('travio_services_stop_sales');
 
 				foreach ($serviceData['dates'] as $d) {
-					$db->insert('travio_services_dates', [
-						'service' => $id,
-						'checkin' => $d['checkin'],
-						'time' => $d['time'],
-						'departure' => $d['departure'] ? $d['departure']['type'] . ':' . $d['departure']['id'] : null,
-						'arrival' => $d['arrival'] ? $d['arrival']['type'] . ':' . $d['arrival']['id'] : null,
-						'checkouts' => $d['checkouts'],
-					], ['defer' => true]);
+					if (!$d['routes'])
+						$d['routes'] = [['departure' => null, 'arrival' => null]];
+
+					foreach ($d['routes'] as $route) {
+						$db->insert('travio_services_dates', [
+							'service' => $id,
+							'checkin' => $d['checkin'],
+							'time' => $d['time'],
+							'departure' => $route['departure'] ? $route['departure']['type'] . ':' . $route['departure']['id'] : null,
+							'arrival' => $route['arrival'] ? $route['arrival']['type'] . ':' . $route['arrival']['id'] : null,
+							'checkouts' => $d['checkouts'],
+						], ['defer' => true]);
+					}
 				}
 
 				$db->bulkInsert('travio_services_dates');
