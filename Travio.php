@@ -550,6 +550,7 @@ class Travio extends Module
 				if (!$el['has_suppliers'] or ($service_type ?? 'hotels') !== 'hotels') {
 					$where = [
 						'join_geo' => $el['id'],
+						'visible' => 1,
 						'max_date' => ['>=', date('Y-m-d')],
 					];
 					if ($service_type)
@@ -670,23 +671,26 @@ class Travio extends Module
 			} else {
 				$where = [
 					'checkin' => $checkin->format('Y-m-d'),
+					'visible' => 1,
 					'join_geo' => $geoId,
 				];
 
 				$joins = [
+					'travio_services' => [
+						'on' => ['service' => 'id'],
+						'fields' => [
+							'type' => 'service_type',
+							'visible',
+						],
+					],
 					'travio_services_geo' => [
 						'on' => ['service' => 'service'],
 						'fields' => ['geo' => 'join_geo'],
 					],
 				];
 
-				if ($service_type) {
+				if ($service_type)
 					$where['service_type'] = TravioClient::getServiceTypeId($service_type);
-					$joins['travio_services'] = [
-						'on' => ['service' => 'id'],
-						'fields' => ['type' => 'service_type'],
-					];
-				}
 
 				$datesQ = $db->selectAll('travio_services_dates', $where, ['joins' => $joins]);
 				foreach ($datesQ as $d) {
