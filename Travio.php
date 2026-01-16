@@ -652,10 +652,13 @@ class Travio extends Module
 
 			$datesQ = $db->selectAll('travio_packages_departures', $where, [
 				'joins' => $joins,
-				'group_by' => 'date',
+				'group_by' => 'date, duration',
 			]);
 
 			foreach ($datesQ as $row) {
+				if ($row['duration'] === null) // TODO
+					continue;
+
 				$co = clone $checkin;
 				$co->modify('+' . ($row['duration'] - 1) . ' days');
 
