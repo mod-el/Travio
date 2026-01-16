@@ -510,10 +510,15 @@ class Travio extends Module
 			if ($search_type === 'packages') {
 				$where = [
 					'date' => ['>=', date('Y-m-d')],
+					'visible' => 1,
 					'join_geo' => $el['id'],
 				];
 
 				$joins = [
+					'travio_packages' => [
+						'on' => ['package' => 'id'],
+						'fields' => ['visible'],
+					],
 					'travio_packages_geo' => [
 						'on' => ['package' => 'package'],
 						'fields' => ['geo' => 'join_geo'],
@@ -621,10 +626,15 @@ class Travio extends Module
 		if ($search_type === 'packages') {
 			$where = [
 				'date' => $checkin->format('Y-m-d'),
+				'visible' => 1,
 				'join_geo' => $geoId,
 			];
 
 			$joins = [
+				'travio_packages' => [
+					'on' => ['package' => 'id'],
+					'fields' => ['visible'],
+				],
 				'travio_packages_geo' => [
 					'on' => ['package' => 'package'],
 					'fields' => ['geo' => 'join_geo'],
