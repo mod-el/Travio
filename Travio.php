@@ -233,7 +233,8 @@ class Travio extends Module
 		$check = $db->select('travio_services', ['travio' => $id]);
 		if (!$check or !$check['visible']) {
 			try {
-				$this->importService($id);
+				$db_id = $this->importService($id);
+				$this->model->_TravioAssets->importService($db_id, ['id' => $id]);
 				$check = $db->select('travio_services', ['travio' => $id]);
 			} catch (\Throwable $e) {
 				return null;
