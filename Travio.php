@@ -1269,6 +1269,9 @@ class Travio extends Module
 					$descriptions = [];
 					foreach ($subservice['descriptions'] as $lang_descriptions) {
 						foreach ($lang_descriptions['paragraphs'] as $paragraph_idx => $paragraph) {
+							if (empty($paragraph['text']))
+								continue;
+
 							if (!isset($descriptions[$paragraph_idx])) {
 								$descriptions[$paragraph_idx] = [
 									'keyword' => $paragraph['tag'] ?? '',
@@ -1277,7 +1280,7 @@ class Travio extends Module
 								];
 							}
 
-							$descriptions[$paragraph_idx]['title'][$lang_descriptions['lang']] = $paragraph['title'];
+							$descriptions[$paragraph_idx]['title'][$lang_descriptions['lang']] = $paragraph['title'] ?? '';
 							$descriptions[$paragraph_idx]['text'][$lang_descriptions['lang']] = $paragraph['text'];
 						}
 					}
