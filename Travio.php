@@ -1178,6 +1178,18 @@ class Travio extends Module
 		try {
 			$db->beginTransaction();
 
+			if ($is_external or $serviceData['supplier_hotel']) {
+				$has_suppliers = 1;
+			} else {
+				$has_suppliers = 0;
+				foreach ($serviceData['suppliers_associations'] as $assoc) {
+					if ($assoc['active']) {
+						$has_suppliers = 1;
+						break;
+					}
+				}
+			}
+
 			$data = [
 				'code' => $serviceData['code'] ?? '',
 				'name' => $serviceData['name'],
@@ -1200,7 +1212,7 @@ class Travio extends Module
 				'min_date' => !empty($serviceData['availability']) ? $serviceData['availability'][0]['from'] : null,
 				'max_date' => !empty($serviceData['availability']) ? $serviceData['availability'][count($serviceData['availability']) - 1]['to'] : null,
 				'visible' => 1,
-				'has_suppliers' => $is_external ? 1 : ($serviceData['supplier_hotel'] ? 1 : 0),
+				'has_suppliers' => $has_suppliers,
 				'last_update' => $serviceData['_meta']['last_update'],
 			];
 
