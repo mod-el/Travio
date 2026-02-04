@@ -1246,6 +1246,7 @@ class Travio extends Module
 				$db->delete('travio_subservices_amenities', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 				$db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 
+				$ss_to_retain = [];
 				foreach ($serviceData['subservices'] as $subservice) {
 					if ($subservice['obsolete']) {
 						$check = $db->select('travio_subservices', $subservice['id']);
@@ -1267,6 +1268,8 @@ class Travio extends Module
 						'type' => $subservice['type'],
 						'name' => $subservice['name'],
 					]);
+
+					$ss_to_retain[] = $ss_id;
 
 					foreach ($subservice['_tags'] as $tag) {
 						if (!in_array($tag, $existingTags))
@@ -1351,6 +1354,13 @@ class Travio extends Module
 						], ['defer' => true]);
 					}
 				}
+
+				$db->delete('travio_subservices', [
+					'service' => $id,
+					...[
+						$ss_to_retain ? ['id', 'NOT IN', $ss_to_retain] : [],
+					],
+				]);
 
 				$db->bulkInsert('travio_subservices_tags');
 				$db->bulkInsert('travio_subservices_amenities');
