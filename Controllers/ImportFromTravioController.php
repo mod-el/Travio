@@ -463,17 +463,21 @@ class ImportFromTravioController extends Controller
 							}
 
 							foreach ($packageData['rows'] as $row) {
-								if (!$row['service'])
-									continue;
-
-								$existing = $db->select('travio_services', ['travio' => $row['service']]);
-								if (!$existing)
-									throw new \Exception('Il servizio ' . $row['service'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+								if ($row['service']) {
+									$existing = $db->select('travio_services', ['travio' => $row['service']]);
+									if (!$existing)
+										throw new \Exception('Il servizio ' . $row['service'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+								}
 
 								$db->insert('travio_packages_services', [
 									'package' => $id,
-									'service' => $existing['id'],
-									'type' => $existing['type'],
+									'type' => $row['type'],
+									'from' => $row['from'],
+									'to' => $row['to'],
+									'service' => $row['service'] ?? null,
+									'tag' => $row['tag'] ?? null,
+									'alternative' => $row['alternative'] ?: null,
+									'service_type' => $row['service'] ? $existing['type'] : null, // Retrocompatibilità
 								]);
 							}
 
