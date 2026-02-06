@@ -463,6 +463,7 @@ class ImportFromTravioController extends Controller
 							}
 
 							foreach ($packageData['rows'] as $row) {
+								$existing = null;
 								if ($row['service']) {
 									$existing = $db->select('travio_services', ['travio' => $row['service']]);
 									if (!$existing)
@@ -474,7 +475,7 @@ class ImportFromTravioController extends Controller
 									'type' => $row['type'],
 									'from' => $row['from'],
 									'to' => $row['to'],
-									'service' => $row['service'] ?? null,
+									'service' => $row['service'] ? $existing['id'] : null,
 									'tag' => $row['tag'] ?? null,
 									'alternative' => $row['alternative'] ?: null,
 									'service_type' => $row['service'] ? $existing['type'] : null, // Retrocompatibilità
