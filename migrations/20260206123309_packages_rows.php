@@ -16,5 +16,7 @@ class PackagesRows extends AbstractMigration
 			->addColumn('alternative', 'string', ['null' => true])
 			->addForeignKey('tag', 'travio_tags', 'id', ['delete' => 'RESTRICT', 'update' => 'CASCADE'])
 			->update();
+
+		$this->execute('UPDATE travio_packages SET last_update = NULL');
 	}
 }
