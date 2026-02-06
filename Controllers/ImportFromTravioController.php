@@ -463,11 +463,20 @@ class ImportFromTravioController extends Controller
 							}
 
 							foreach ($packageData['rows'] as $row) {
-								$existing = null;
-								if ($row['service']) {
-									$existing = $db->select('travio_services', ['travio' => $row['service']]);
-									if (!$existing)
-										throw new \Exception('Il servizio ' . $row['service'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+								$dbService = null;
+								$tagId = null;
+								switch ($row['type']) {
+									case 'service':
+										if ($row['service']) {
+											$dbService = $db->select('travio_services', ['travio' => $row['service']]);
+											if (!$dbService)
+												throw new \Exception('Il servizio ' . $row['service'] . ' del pacchetto ' . $packageData['code'] . ' non sembra esistere o essere visibile');
+										}
+										break;
+
+									case 'tag':
+										$tagId = $row['tag'] ?? null;
+										break;
 								}
 
 								$db->insert('travio_packages_services', [
@@ -475,10 +484,10 @@ class ImportFromTravioController extends Controller
 									'type' => $row['type'],
 									'from' => $row['from'],
 									'to' => $row['to'],
-									'service' => $row['service'] ? $existing['id'] : null,
-									'tag' => $row['tag'] ?? null,
+									'service' => $dbService ? $dbService['id'] : null,
+									'tag' => $tagId,
 									'alternative' => $row['alternative'] ?: null,
-									'service_type' => $row['service'] ? $existing['type'] : null, // Retrocompatibilità
+									'service_type' => $dbService ? $dbService['type'] : null, // Retrocompatibilità
 								]);
 							}
 
