@@ -1357,9 +1357,7 @@ class Travio extends Module
 
 				$db->delete('travio_subservices', [
 					'service' => $id,
-					...[
-						$ss_to_retain ? ['id', 'NOT IN', $ss_to_retain] : [],
-					],
+					...($ss_to_retain ? [['id', 'NOT IN', $ss_to_retain]] : []),
 				]);
 
 				$db->bulkInsert('travio_subservices_tags');
