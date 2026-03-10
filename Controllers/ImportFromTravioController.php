@@ -466,6 +466,7 @@ class ImportFromTravioController extends Controller
 								$dbService = null;
 								$tagId = null;
 								switch ($row['type']) {
+									case 'api':
 									case 'service':
 										if ($row['service']) {
 											$dbService = $db->select('travio_services', ['travio' => $row['service']]);
