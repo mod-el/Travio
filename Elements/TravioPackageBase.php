@@ -107,7 +107,10 @@ class TravioPackageBase extends Element
 				'table' => 'travio_packages_services',
 				'parent' => 'package',
 				'field' => 'service',
-				'where' => ['type' => 'service', 'service' => ['!=', null]],
+				'where' => [
+					'type' => ['IN', ['service', 'api']],
+					'service' => ['!=', null],
+				],
 			],
 		]);
 	}
