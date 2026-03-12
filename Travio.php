@@ -1164,7 +1164,7 @@ class Travio extends Module
 
 		if (is_numeric($travioId)) {
 			$serviceData = TravioClient::restGet('services', $travioId, [
-				'unfold' => ['classification_id', 'master_data', 'amenities'],
+				'unfold' => ['classification_id', 'master_data', 'amenities', 'subservices', 'subservices.amenities'],
 				'unfold_sublists' => ['master_data'],
 			]);
 			$is_external = false;
@@ -1247,7 +1247,7 @@ class Travio extends Module
 				$db->delete('travio_subservices_files', ['service' => $id], ['joins' => ['travio_subservices' => ['service']]]);
 
 				$ss_to_retain = [];
-				foreach ($serviceData['subservices'] as $subservice) {
+				foreach (($serviceData['subservices'] ?? []) as $subservice) {
 					if ($subservice['obsolete']) {
 						$check = $db->select('travio_subservices', $subservice['id']);
 						if ($check)
@@ -1255,10 +1255,6 @@ class Travio extends Module
 
 						continue;
 					}
-
-					$subservice = TravioClient::restGet('subservices', $subservice['id'], [
-						'unfold' => ['amenities'],
-					]);
 
 					$ss_id = $db->updateOrInsert('travio_subservices', [
 						'id' => $subservice['id'],
