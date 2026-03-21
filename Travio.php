@@ -92,11 +92,6 @@ class Travio extends Module
 					'rule' => 'travio-payment-conditions',
 				],
 				[
-					'name' => 'Tipi  bagaglio',
-					'page' => 'TravioLuggageTypes',
-					'rule' => 'travio-luggage-types',
-				],
-				[
 					'name' => 'Anagrafiche',
 					'page' => 'TravioMasterData',
 					'rule' => 'travio-master-data',

@@ -91,11 +91,4 @@
 		</div>
 		<div class="col" data-import="payment-conditions"></div>
 	</div>
-
-	<div class="py-2 row">
-		<div class="col-4">
-			Tipi bagaglio
-		</div>
-		<div class="col" data-import="luggage-types"></div>
-	</div>
 </div>

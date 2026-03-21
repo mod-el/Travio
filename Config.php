@@ -204,22 +204,6 @@ class TravioPaymentConditions extends TravioPaymentConditionsBase
 {
 }
 ');
-		$this->checkFile('app/modules/TravioAssets/Elements/TravioLuggageType.php', '<?php namespace Model\\TravioAssets\\Elements;
-
-use Model\\Travio\\Elements\\TravioLuggageTypeBase;
-
-class TravioLuggageType extends TravioLuggageTypeBase
-{
-}
-');
-		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioLuggageTypes.php', '<?php namespace Model\\TravioAssets\\AdminPages;
-
-use Model\\Travio\\AdminPages\\TravioLuggageTypesBase;
-
-class TravioLuggageTypes extends TravioLuggageTypesBase
-{
-}
-');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioClassification.php', '<?php namespace Model\\TravioAssets\\Elements;
 
 use Model\\Travio\\Elements\\TravioClassificationBase;

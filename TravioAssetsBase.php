@@ -48,10 +48,6 @@ class TravioAssetsBase extends Module
 	{
 	}
 
-	public function importLuggageType(array $id): void
-	{
-	}
-
 	public function importMasterData(array $id): void
 	{
 	}
