@@ -905,37 +905,6 @@ class ImportFromTravioController extends Controller
 					}
 					break;
 
-				case 'luggage-types':
-					if (!$config['import']['luggage_types']['import'])
-						break;
-
-					$list = $this->model->_Travio->request('static-data', [
-						'type' => 'luggage-types',
-						'all-langs' => true,
-					]);
-
-					$idsList = [];
-					foreach ($list['list'] as $item) {
-						$db->updateOrInsert('travio_luggage_types', [
-							'id' => $item['id'],
-						], [
-							'name' => $item['name'],
-							'weight' => $item['weight'],
-							'length' => $item['length'],
-							'width' => $item['width'],
-							'height' => $item['height'],
-						]);
-
-						$this->model->_TravioAssets->importLuggageType($item);
-						$idsList[] = $item['id'];
-					}
-
-					if ($idsList)
-						$db->delete('travio_luggage_types', ['id' => ['NOT IN', $idsList]]);
-					else
-						$db->delete('travio_luggage_types', [], ['confirm' => true]);
-					break;
-
 				case 'master-data':
 					if (!$config['import']['master_data']['import'])
 						break;
