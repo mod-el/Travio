@@ -1230,6 +1230,7 @@ class Travio extends Module
 				$db->delete('travio_services_videos', ['service' => $id]);
 				$db->delete('travio_services_dates', ['service' => $id]);
 				$db->delete('travio_services_stop_sales', ['service' => $id]);
+				$db->delete('travio_services_itinerary', ['service' => $id]);
 			} else {
 				$data['travio'] = $travioId;
 				$id = $db->insert('travio_services', $data);
@@ -1500,6 +1501,23 @@ class Travio extends Module
 				}
 
 				$db->bulkInsert('travio_services_dates');
+
+        foreach ($serviceData['schedule'] as $destination) {
+          $dId = $db->insert('travio_services_itinerary', [
+            'service' => $id,
+            'day' => $destination['day'],
+            'name' => $destination['name'],
+            'description' => $destination['description'],
+          ]);
+
+          foreach ($destination['images'] as $photo) {
+            $db->insert('travio_services_itinerary_photos', [
+              'itinerary' => $dId,
+              'url' => $photo['url'],
+              'thumb' => $photo['thumb'] ?: $photo['url'],
+            ]);
+          }
+        }
 			}
 
 			$db->commit();

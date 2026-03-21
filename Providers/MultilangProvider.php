@@ -11,6 +11,7 @@ class MultilangProvider extends AbstractMultilangProvider
 			'travio_geo',
 			'travio_services',
 			'travio_services_descriptions',
+			'travio_services_itinerary',
 			'travio_subservices',
 			'travio_subservices_descriptions',
 			'travio_packages',
