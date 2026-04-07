@@ -1502,22 +1502,59 @@ class Travio extends Module
 
 				$db->bulkInsert('travio_services_dates');
 
-        foreach ($serviceData['schedule'] as $destination) {
-          $dId = $db->insert('travio_services_itinerary', [
-            'service' => $id,
-            'day' => $destination['day'],
-            'name' => $destination['name'],
-            'description' => $destination['description'],
-          ]);
+				foreach ($serviceData['schedule'] as $destination) {
+					$dId = $db->insert('travio_services_itinerary', [
+						'service' => $id,
+						'day' => $destination['day'],
+						'name' => $destination['name'],
+						'description' => $destination['description'],
+					]);
 
-          foreach ($destination['images'] as $photo) {
-            $db->insert('travio_services_itinerary_photos', [
-              'itinerary' => $dId,
-              'url' => $photo['url'],
-              'thumb' => $photo['thumb'] ?: $photo['url'],
-            ]);
-          }
-        }
+					foreach ($destination['images'] as $photo) {
+						$db->insert('travio_services_itinerary_photos', [
+							'itinerary' => $dId,
+							'url' => $photo['url'],
+							'thumb' => $photo['thumb'] ?: $photo['url'],
+						]);
+					}
+				}
+
+				$current_departures = [];
+				foreach ($serviceData['departures'] as $departure) {
+					$departureQ = $db->select('travio_services_departures', [
+						'service' => $id,
+						'date' => $departure['date'],
+					]);
+
+					if ($departureQ) {
+						if ($departureQ['duration'] !== $departure['expected_duration'] or json_encode($departureQ['guides']) !== json_encode($departure['guides'])) {
+							$db->update('travio_services_departures', $departureQ['id'], [
+								'duration' => $departure['expected_duration'],
+								'guides' => json_encode($departure['guides']),
+							]);
+						}
+
+						$departureId = $departureQ['id'];
+					} else {
+						$departureId = $db->insert('travio_services_departures', [
+							'service' => $id,
+							'date' => $departure['date'],
+							'duration' => $departure['expected_duration'],
+							'guides' => json_encode($departure['guides']),
+						]);
+					}
+
+					$current_departures[] = $departureId;
+				}
+
+				if ($current_departures) {
+					$db->delete('travio_services_departures', [
+						'service' => $id,
+						'id' => ['NOT IN', $current_departures],
+					]);
+				} else {
+					$db->delete('travio_services_departures', ['service' => $id]);
+				}
 			}
 
 			$db->commit();

@@ -119,6 +119,12 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 			'order_by' => 'day, id',
 		]);
+
+		$this->has('departures', [
+			'table' => 'travio_services_departures',
+			'field' => 'service',
+			'order_by' => 'date',
+		]);
 	}
 
 	public function getDescriptionsByTag(string $tag): array

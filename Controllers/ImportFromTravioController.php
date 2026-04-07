@@ -426,8 +426,12 @@ class ImportFromTravioController extends Controller
 								]);
 
 								if ($departureQ) {
-									if ($departureQ['duration'] !== $departure['duration'])
-										$db->update('travio_packages_departures', $departureQ['id'], ['duration' => $departure['duration']]);
+									if ($departureQ['duration'] !== $departure['duration'] or json_encode($departureQ['guides']) !== json_encode($departure['guides'])) {
+										$db->update('travio_packages_departures', $departureQ['id'], [
+											'duration' => $departure['duration'],
+											'guides' => json_encode($departure['guides']),
+										]);
+									}
 
 									$departureId = $departureQ['id'];
 								} else {
@@ -435,6 +439,7 @@ class ImportFromTravioController extends Controller
 										'package' => $id,
 										'date' => $departure['date'],
 										'duration' => $departure['duration'],
+										'guides' => json_encode($departure['guides']),
 									]);
 								}
 
