@@ -263,6 +263,7 @@ class ImportFromTravioController extends Controller
 
 						$packageData = TravioClient::restGet('packages', $item['id'], [
 							'unfold' => ['departures.departure'],
+							'unfold_sublists' => ['departures.departure'],
 						]);
 
 						try {

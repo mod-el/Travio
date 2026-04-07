@@ -1160,7 +1160,7 @@ class Travio extends Module
 		if (is_numeric($travioId)) {
 			$serviceData = TravioClient::restGet('services', $travioId, [
 				'unfold' => ['classification_id', 'master_data', 'amenities', 'subservices', 'subservices.amenities', 'departures.departure'],
-				'unfold_sublists' => ['master_data'],
+				'unfold_sublists' => ['master_data', 'departures.departure'],
 			]);
 			$is_external = false;
 		} else {
