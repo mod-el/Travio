@@ -261,7 +261,9 @@ class ImportFromTravioController extends Controller
 						if (!$item or !array_key_exists('id', $item) or !array_key_exists('existing', $item) or !array_key_exists('last_update', $item))
 							die('Wrong item format');
 
-						$packageData = TravioClient::restGet('packages', $item['id']);
+						$packageData = TravioClient::restGet('packages', $item['id'], [
+							'unfold' => ['departures.departure'],
+						]);
 
 						try {
 							$db->beginTransaction();
