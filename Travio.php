@@ -1527,7 +1527,7 @@ class Travio extends Module
 					]);
 
 					if ($departureQ) {
-						if ($departureQ['duration'] !== $departure['expected_duration'] or json_encode($departureQ['guides']) !== json_encode($departure['guides'])) {
+						if ($departureQ['duration'] !== $departure['expected_duration'] or json_encode($departure['departure'] ? $departure['departure']['guides'] : [])) {
 							$db->update('travio_services_departures', $departureQ['id'], [
 								'duration' => $departure['expected_duration'],
 								'guides' => json_encode($departure['departure'] ? $departure['departure']['guides'] : []),
