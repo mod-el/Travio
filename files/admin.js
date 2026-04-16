@@ -1,3 +1,22 @@
+async function resetTravioUpdates(page) {
+	if (!confirm('Questo re-importerà tutti gli elementi al prossimo import; confermi?'))
+		return;
+
+	try {
+		toolbarButtonLoading('reset-updates');
+		const response = await adminApiRequest('page/' + page + '/reset-updates');
+
+		if (response.success)
+			alert(response.message);
+		else
+			throw new Error('Operation failed');
+	} catch (e) {
+		alert(e.message || e);
+	} finally {
+		toolbarButtonRestore('reset-updates');
+	}
+}
+
 function importNextFromTravio() {
 	Array.from(document.querySelectorAll('[data-import]')).some(div => {
 		if (div.getAttribute('data-imported') !== null && div.getAttribute('data-imported') !== '')

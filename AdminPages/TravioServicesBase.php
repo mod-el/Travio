@@ -1,6 +1,7 @@
 <?php namespace Model\Travio\AdminPages;
 
 use Model\Admin\AdminPage;
+use Model\Db\Db;
 
 class TravioServicesBase extends AdminPage
 {
@@ -22,6 +23,25 @@ class TravioServicesBase extends AdminPage
 				'visible',
 				'last_update',
 			],
+			'actions' => [
+				'reset-updates' => [
+					'text' => 'Reset updates',
+					'specific' => 'list',
+					'fa-icon' => 'fas fa-undo',
+					'action' => 'resetTravioUpdates("travio-services")',
+				],
+			],
+		];
+	}
+
+	public function resetUpdates(array $payload): array
+	{
+		$db = Db::getConnection();
+		$db->update('travio_services', [], ['last_update' => null], ['confirm' => true]);
+
+		return [
+			'success' => true,
+			'message' => 'Updates reset successfully',
 		];
 	}
 
