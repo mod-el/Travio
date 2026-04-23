@@ -697,6 +697,32 @@ class ImportFromTravioController extends Controller
 						$db->delete('travio_classifications', [], ['confirm' => true]);
 					break;
 
+				case 'services-typologies':
+					/* if (!$config['import']['services-typologies']['import'])
+						break; */
+
+					$list = TravioClient::restList('services-typologies', ['per_page' => 0]);
+
+					$idsList = [];
+					foreach ($list['list'] as $item) {
+						$db->updateOrInsert('travio_services_typologies', [
+							'id' => $item['id'],
+						], [
+							'code' => $item['code'],
+							'name' => $item['name'],
+							'type' => $item['type'],
+						]);
+
+						$this->model->_TravioAssets->importServiceTypology($item);
+						$idsList[] = $item['id'];
+					}
+
+					if ($idsList)
+						$db->delete('travio_services_typologies', ['id' => ['NOT IN', $idsList]]);
+					else
+						$db->delete('travio_services_typologies', [], ['confirm' => true]);
+					break;
+
 				case 'ports':
 					if (!$config['import']['ports']['import'])
 						break;

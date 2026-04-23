@@ -72,6 +72,11 @@ class Travio extends Module
 					'rule' => 'travio-amenities-types',
 				],
 				[
+					'name' => 'Sottotipologie servizi',
+					'page' => 'TravioTypologies',
+					'rule' => 'travio-services-typologies',
+				],
+				[
 					'name' => 'Classificazioni',
 					'page' => 'TravioClassifications',
 					'rule' => 'travio-classifications',

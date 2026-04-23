@@ -52,6 +52,13 @@
 
 	<div class="py-2 row">
 		<div class="col-4">
+			Sottotipologie servizi
+		</div>
+		<div class="col" data-import="services-typologies"></div>
+	</div>
+
+	<div class="py-2 row">
+		<div class="col-4">
 			Anagrafiche
 		</div>
 		<div class="col" data-import="master-data"></div>

@@ -220,6 +220,22 @@ class TravioClassifications extends TravioClassificationsBase
 {
 }
 ');
+		$this->checkFile('app/modules/TravioAssets/Elements/TravioTypology.php', '<?php namespace Model\\TravioAssets\\Elements;
+
+use Model\\Travio\\Elements\\TravioTypologyBase;
+
+class TravioTypology extends TravioTypologyBase
+{
+}
+');
+		$this->checkFile('app/modules/TravioAssets/AdminPages/TravioTypologies.php', '<?php namespace Model\\TravioAssets\\AdminPages;
+
+use Model\\Travio\\AdminPages\\TravioTypologiesBase;
+
+class TravioTypologies extends TravioTypologiesBase
+{
+}
+');
 		$this->checkFile('app/modules/TravioAssets/Elements/TravioOrder.php', file_get_contents(INCLUDE_PATH . 'model' . DIRECTORY_SEPARATOR . 'Travio' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'TravioOrderBaseContent.php'));
 
 		if (file_exists(INCLUDE_PATH . 'app/modules/TravioAssets/Elements/TravioTagType.php'))

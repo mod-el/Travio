@@ -28,6 +28,10 @@ class TravioAssetsBase extends Module
 	{
 	}
 
+	public function importServiceTypology(array $id): void
+	{
+	}
+
 	public function importPort(array $port): void
 	{
 	}
