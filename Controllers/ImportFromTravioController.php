@@ -948,6 +948,7 @@ class ImportFromTravioController extends Controller
 						'per_page' => 0,
 					]);
 
+					$idsList = [];
 					foreach ($list['list'] as $item) {
 						$db->updateOrInsert('travio_master_data', [
 							'id' => $item['id'],
@@ -961,7 +962,13 @@ class ImportFromTravioController extends Controller
 						]);
 
 						$this->model->_TravioAssets->importMasterData($item);
+						$idsList[] = $item['id'];
 					}
+
+					if ($idsList)
+						$db->delete('travio_master_data', ['id' => ['NOT IN', $idsList]]);
+					else
+						$db->delete('travio_master_data', [], ['confirm' => true]);
 					break;
 
 				case 'payment-methods':
