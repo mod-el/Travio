@@ -1190,6 +1190,24 @@ class Travio extends Module
 				}
 			}
 
+			$min_date = null;
+			$max_date = null;
+
+			foreach (($serviceData['dates'] ?? []) as $d) {
+				if ($min_date === null or date_create($d['checkin']) < $min_date)
+					$min_date = date_create($d['checkin']);
+
+				if ($d['checkouts'] ?? []) {
+					foreach ($d['checkouts'] as $co) {
+						if ($max_date === null or date_create($co['date']) > $max_date)
+							$max_date = date_create($co['date']);
+					}
+				} else {
+					if ($max_date === null or date_create($d['checkin']) > $max_date)
+						$max_date = date_create($d['checkin']);
+				}
+			}
+
 			$data = [
 				'code' => $serviceData['code'] ?? '',
 				'name' => $serviceData['name'],
@@ -1209,8 +1227,8 @@ class Travio extends Module
 				'notes' => $serviceData['_notes'] ? implode('<br/>', array_filter($serviceData['_notes'], fn($n) => $n['type'] === 'web')) : '',
 				'departs_from' => null,
 				'price' => $serviceData['estimated_price_per_pax'] ?? null,
-				'min_date' => !empty($serviceData['availability']) ? $serviceData['availability'][0]['from'] : null,
-				'max_date' => !empty($serviceData['availability']) ? $serviceData['availability'][count($serviceData['availability']) - 1]['to'] : null,
+				'min_date' => $min_date,
+				'max_date' => $max_date,
 				'visible' => 1,
 				'has_suppliers' => $has_suppliers,
 				'last_update' => $serviceData['_meta']['last_update'],
