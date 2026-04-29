@@ -100,6 +100,7 @@ class Booking extends Base
 
 		$show = (isset($_POST['show']) and in_array($_POST['show'], ['geo', 'services', 'both'])) ? $_POST['show'] : 'both';
 		$type = isset($_POST['type']) ? explode('-', $_POST['type']) : [null, null];
+		$source = (isset($_POST['source']) and in_array($_POST['source'], ['internal', 'external', 'both'])) ? $_POST['source'] : 'both';
 		if (count($type) === 1)
 			$type[] = null;
 		if (count($type) > 2)
@@ -228,6 +229,15 @@ class Booking extends Base
 				$where['type'] = $type[1];
 			elseif ($type[0] === 'package')
 				$where['type'] = 2;
+
+			switch ($source) {
+				case 'internal':
+					$where['travio'] = ['NOT LIKE', 'TR%'];
+					break;
+				case 'external':
+					$where['travio'] = ['LIKE', 'TR%'];
+					break;
+			}
 
 			$joins = [];
 			if ($show === 'both') {
