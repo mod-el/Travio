@@ -6,8 +6,15 @@ class GuidesNullableFk extends AbstractMigration
 {
 	public function change()
 	{
+		$table = $this->table('travio_packages_guides', ['signed' => true]);
+
+		if ($table->hasForeignKey('guide')) {
+			$table->dropForeignKey('guide')
+				->update();
+		}
+
 		$this->table('travio_packages_guides', ['signed' => true])
-			->dropForeignKey('guide')
+			->changeColumn('guide', 'integer', ['null' => true, 'signed' => true])
 			->addForeignKey('guide', 'travio_master_data', 'id', ['delete' => 'SET NULL', 'update' => 'CASCADE'])
 			->update();
 	}
