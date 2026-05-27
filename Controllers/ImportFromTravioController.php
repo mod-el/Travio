@@ -287,6 +287,7 @@ class ImportFromTravioController extends Controller
 								'geo' => $packageData['geo'][0][count($packageData['geo'][0]) - 1]['id'] ?? null,
 								'duration' => $duration,
 								'min_pax' => $packageData['min_pax'],
+								'departs_from' => $packageData['departs_from'],
 								'visible' => 1,
 								'last_update' => $packageData['_meta']['last_update'],
 							];
