@@ -713,12 +713,12 @@ class Travio extends Module
 	}
 
 	/**
-	 * @param int $serviceId
+	 * @param string $serviceId
 	 * @param string $search_type
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getCheckinFromService(int $serviceId, string $search_type, ?array $poi = null): array
+	public function getCheckinFromService(string $serviceId, string $search_type, ?array $poi = null): array
 	{
 		$cache = Cache::getCacheAdapter();
 
@@ -819,13 +819,13 @@ class Travio extends Module
 	}
 
 	/**
-	 * @param int $serviceId
+	 * @param string $serviceId
 	 * @param \DateTime $checkin
 	 * @param string $search_type
 	 * @param array|null $poi
 	 * @return array
 	 */
-	public function getCheckoutFromService(int $serviceId, \DateTime $checkin, string $search_type, ?array $poi = null): array
+	public function getCheckoutFromService(string $serviceId, \DateTime $checkin, string $search_type, ?array $poi = null): array
 	{
 		if ($poi) {
 			if (!isset($poi['type']) or !in_array($poi['type'], ['airport', 'port']))

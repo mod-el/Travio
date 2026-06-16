@@ -19,7 +19,7 @@ class GetDatesController extends Controller
 						return $this->model->_Travio->getCheckinFromGeo((int)$_GET['id'], $_GET['search_type'] ?? 'services', $service_type, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'service':
-						return $this->model->_Travio->getCheckinFromService((int)$_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
+						return $this->model->_Travio->getCheckinFromService($_GET['id'], $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'package':
 						return $this->model->_Travio->getCheckinFromPackage((int)$_GET['id'], isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
@@ -44,7 +44,7 @@ class GetDatesController extends Controller
 						return $this->model->_Travio->getCheckoutFromGeo((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', $service_type, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'service':
-						return $this->model->_Travio->getCheckoutFromService((int)$_GET['id'], $checkin, $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
+						return $this->model->_Travio->getCheckoutFromService($_GET['id'], $checkin, $_GET['search_type'] ?? 'services', isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
 
 					case 'package':
 						return $this->model->_Travio->getCheckoutFromPackage((int)$_GET['id'], $checkin, isset($_GET['poi']) ? json_decode($_GET['poi'], true) : null);
