@@ -82,9 +82,9 @@ class ImportFromTravioController extends Controller
 								$item['meta']['last_update'] = null;
 
 							if (isset($currents[$geoId])) {
-								if ($currents[$item['id']]['last_update'] === null and $item['meta']['last_update'] === null)
+								if ($currents[$geoId]['last_update'] === null and $item['meta']['last_update'] === null)
 									continue;
-								if ($currents[$item['id']]['last_update'] and $item['meta']['last_update'] and date_create($item['meta']['last_update']) <= date_create($currents[$item['id']]['last_update']))
+								if ($currents[$geoId]['last_update'] and $item['meta']['last_update'] and date_create($item['meta']['last_update']) <= date_create($currents[$geoId]['last_update']))
 									continue;
 							}
 
@@ -116,12 +116,12 @@ class ImportFromTravioController extends Controller
 								}
 
 								if ($toUpdate) {
-									$db->update('travio_geo', ['id' => $item['id']], $update);
+									$db->update('travio_geo', ['id' => $geoId], $update);
 									$this->model->_TravioAssets->importGeo($item);
 								}
 							} else {
 								$db->insert('travio_geo', [
-									'id' => $item['id'],
+									'id' => $geoId,
 									...$update,
 								]);
 
@@ -138,9 +138,12 @@ class ImportFromTravioController extends Controller
 					gc_collect_cycles();
 
 					$set_non_visible = [];
+					$set_visible = [];
 					foreach ($this->model->all('TravioGeo') as $geo) {
 						if ($geo['visible'] and !isset($visible_ids[$geo['id']]))
 							$set_non_visible[] = $geo['id'];
+						if (!$geo['visible'] and isset($visible_ids[$geo['id']]))
+							$set_visible[] = $geo['id'];
 
 						$parents = [];
 						$el = clone $geo;
@@ -165,6 +168,9 @@ class ImportFromTravioController extends Controller
 
 					if ($set_non_visible)
 						$db->update('travio_geo', ['id' => ['IN', $set_non_visible]], ['visible' => 0]);
+
+					if ($set_visible)
+						$db->update('travio_geo', ['id' => ['IN', $set_visible]], ['visible' => 1]);
 					break;
 
 				case 'services':
