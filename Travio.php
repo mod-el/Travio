@@ -2,7 +2,6 @@
 
 use Model\Assets\Assets;
 use Model\Cache\Cache;
-use Model\Core\Globals;
 use Model\Core\Module;
 use Model\Db\Db;
 use Model\Multilang\Ml;
@@ -22,87 +21,6 @@ class Travio extends Module
 	{
 		if (!$this->model->isLoaded('Multilang')) // La presenza di Multilang fra i moduli caricati è requisito fondamentale per il buon funzionamento di questo modulo
 			$this->model->load('Multilang');
-
-		if (!isset(Globals::$data['adminAdditionalPages']))
-			Globals::$data['adminAdditionalPages'] = [];
-
-		Globals::$data['adminAdditionalPages'][] = [
-			'name' => 'Travio',
-			'page' => 'TravioImport',
-			'rule' => 'travio-import',
-			'sub' => [
-				[
-					'name' => 'Destinazioni',
-					'page' => 'TravioGeo',
-					'rule' => 'travio-geo',
-				],
-				[
-					'name' => 'Servizi',
-					'page' => 'TravioServices',
-					'rule' => 'travio-services',
-				],
-				[
-					'name' => 'Pacchetti',
-					'page' => 'TravioPackages',
-					'rule' => 'travio-packages',
-				],
-				[
-					'name' => 'Porti',
-					'page' => 'TravioPorts',
-					'rule' => 'travio-ports',
-				],
-				[
-					'name' => 'Aeroporti',
-					'page' => 'TravioAirports',
-					'rule' => 'travio-airports',
-				],
-				[
-					'name' => 'Tags',
-					'page' => 'TravioTags',
-					'rule' => 'travio-tags',
-				],
-				[
-					'name' => 'Amenities',
-					'page' => 'TravioAmenities',
-					'rule' => 'travio-amenities',
-				],
-				[
-					'name' => 'Tipi amenities',
-					'page' => 'TravioAmenitiesTypes',
-					'rule' => 'travio-amenities-types',
-				],
-				[
-					'name' => 'Sottotipologie servizi',
-					'page' => 'TravioTypologies',
-					'rule' => 'travio-services-typologies',
-				],
-				[
-					'name' => 'Classificazioni',
-					'page' => 'TravioClassifications',
-					'rule' => 'travio-classifications',
-				],
-				[
-					'name' => 'Stazioni transfer',
-					'page' => 'TravioStations',
-					'rule' => 'travio-stations',
-				],
-				[
-					'name' => 'Metodi di pagamento',
-					'page' => 'TravioPaymentMethods',
-					'rule' => 'travio-payment-methods',
-				],
-				[
-					'name' => 'Condizioni di pagamento',
-					'page' => 'TravioPaymentConditions',
-					'rule' => 'travio-payment-conditions',
-				],
-				[
-					'name' => 'Anagrafiche',
-					'page' => 'TravioMasterData',
-					'rule' => 'travio-master-data',
-				],
-			],
-		];
 
 		Assets::add('model/Travio/files/admin.js', ['withTags' => ['provider' => 'AdminFront']]);
 		Assets::add('model/Travio/files/admin.css', ['withTags' => ['provider' => 'AdminFront']]);
