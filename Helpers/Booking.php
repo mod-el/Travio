@@ -111,8 +111,6 @@ class Booking extends Base
 			$type[0] = 'service';
 			$type[1] = 2;
 		}
-		if ($type[0] === 'packages')
-			$type[0] = 'package';
 		/***************************/
 
 		$query = trim($query);
