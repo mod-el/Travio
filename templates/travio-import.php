@@ -170,12 +170,17 @@
 			row.appendChild(label);
 
 			let link = document.createElement('a');
-			link.href = '#';
 			link.textContent = item.name || item.code || ('#' + item.id);
-			link.addEventListener('click', event => {
-				event.preventDefault();
-				loadAdminPage(item.rule + '/edit/' + item.id);
-			});
+			if (item.url) {
+				link.href = item.url;
+				link.target = '_blank';
+			} else {
+				link.href = '#';
+				link.addEventListener('click', event => {
+					event.preventDefault();
+					loadAdminPage(item.rule + '/edit/' + item.id);
+				});
+			}
 			row.appendChild(link);
 
 			let details = [];

@@ -202,6 +202,7 @@ class TravioImport extends AdminPage
 			'id' => $elementId,
 			'name' => (string)($element['name'] ?? ''),
 			'code' => (string)($element['code'] ?? ''),
+			'url' => $element->getUrl(),
 			'travio_id' => $element['travio'] ?? null,
 			'photo_id' => $photo['id'],
 			'field' => $this->getMatchedField($photo, $url),
