@@ -1070,6 +1070,21 @@ class Travio extends Module
 		return 'app-data/travio/cache/' . substr($url, 26);
 	}
 
+	/**
+	 * Removes leading/trailing whitespace from a name coming from Travio (plain string or multilang array).
+	 * Needed because the router matches slugs with "LIKE 'slug%'": a leading space would make the page unreachable.
+	 */
+	public function trimName(mixed $name): mixed
+	{
+		if (is_string($name))
+			return trim($name);
+
+		if (is_array($name))
+			return array_map(fn($v) => is_string($v) ? trim($v) : $v, $name);
+
+		return $name;
+	}
+
 	public function importService(string $travioId): int
 	{
 		$db = Db::getConnection();
@@ -1128,7 +1143,7 @@ class Travio extends Module
 
 			$data = [
 				'code' => $serviceData['code'] ?? '',
-				'name' => $serviceData['name'],
+				'name' => $this->trimName($serviceData['name']),
 				'type' => $serviceData['type'],
 				'typology' => $serviceData['typology'] ?? null,
 				'supplier' => $serviceData['supplier'] ?? null,
@@ -1199,7 +1214,7 @@ class Travio extends Module
 						'service' => $id,
 						'code' => $subservice['code'],
 						'type' => $subservice['type'],
-						'name' => $subservice['name'],
+						'name' => $this->trimName($subservice['name']),
 					]);
 
 					$ss_to_retain[] = $ss_id;
@@ -1274,7 +1289,7 @@ class Travio extends Module
 						$db->insert('travio_subservices_amenities', [
 							'subservice' => $ss_id,
 							'amenity' => $amenity['id'],
-							'name' => $amenity['name']['it'],
+							'name' => $this->trimName($amenity['name']['it']),
 							'tag' => $amenity['type'] ?: null,
 						], ['defer' => true]);
 					}
@@ -1385,7 +1400,7 @@ class Travio extends Module
 				$db->insert('travio_services_amenities', [
 					'service' => $id,
 					'amenity' => $amenity['id'],
-					'name' => $amenity['name']['it'],
+					'name' => $this->trimName($amenity['name']['it']),
 					'tag' => $amenity['type'] ?: null,
 				], ['defer' => true]);
 			}
@@ -1447,7 +1462,7 @@ class Travio extends Module
 					$dId = $db->insert('travio_services_itinerary', [
 						'service' => $id,
 						'day' => $destination['day'],
-						'name' => $destination['name'],
+						'name' => $this->trimName($destination['name']),
 						'description' => $destination['description'],
 					]);
 

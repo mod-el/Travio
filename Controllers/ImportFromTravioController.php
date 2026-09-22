@@ -100,9 +100,9 @@ class ImportFromTravioController extends Controller
 							}
 
 							$update = [
-								'name' => $item['name'],
+								'name' => $this->model->_Travio->trimName($item['name']),
 								'parent' => $item['parent'],
-								'parent_name' => $item['parent-name'],
+								'parent_name' => $this->model->_Travio->trimName($item['parent-name']),
 								'has_suppliers' => (int)$item['has_suppliers'],
 								'visible' => 1,
 								'last_update' => $item['meta']['last_update'],
@@ -287,7 +287,7 @@ class ImportFromTravioController extends Controller
 
 							$data = [
 								'code' => $packageData['code'],
-								'name' => $packageData['name'],
+								'name' => $this->model->_Travio->trimName($packageData['name']),
 								'type' => $packageData['type'],
 								'price' => $packageData['shown_price'],
 								'geo' => $packageData['geo'][0][count($packageData['geo'][0]) - 1]['id'] ?? null,
@@ -415,7 +415,7 @@ class ImportFromTravioController extends Controller
 								$dId = $db->insert('travio_packages_itinerary', [
 									'package' => $id,
 									'day' => $destination['day'],
-									'name' => $destination['name'],
+									'name' => $this->model->_Travio->trimName($destination['name']),
 									'description' => $destination['description'],
 								]);
 
@@ -629,7 +629,7 @@ class ImportFromTravioController extends Controller
 							'id' => $tag['id'],
 						], [
 							'parent' => $tag['parent'],
-							'name' => $tag['name'],
+							'name' => $this->model->_Travio->trimName($tag['name']),
 							'full_name' => $tag['_full_name'],
 						]);
 
@@ -664,7 +664,7 @@ class ImportFromTravioController extends Controller
 						$db->updateOrInsert('travio_amenities', [
 							'id' => $item['id'],
 						], [
-							'name' => $item['name'],
+							'name' => $this->model->_Travio->trimName($item['name']),
 							'type' => $type,
 						]);
 
@@ -690,7 +690,7 @@ class ImportFromTravioController extends Controller
 							'id' => $item['id'],
 						], [
 							'code' => $item['code'],
-							'name' => $item['name'],
+							'name' => $this->model->_Travio->trimName($item['name']),
 							'level' => $item['rating'],
 						]);
 
@@ -716,7 +716,7 @@ class ImportFromTravioController extends Controller
 							'id' => $item['id'],
 						], [
 							'code' => $item['code'],
-							'name' => $item['name'],
+							'name' => $this->model->_Travio->trimName($item['name']),
 							'type' => $item['type'],
 						]);
 
@@ -755,7 +755,7 @@ class ImportFromTravioController extends Controller
 							if ($check) {
 								$data = [
 									'code' => $item['code'],
-									'name' => $item['name'],
+									'name' => $this->model->_Travio->trimName($item['name']),
 									'departure' => $item['departure'] ? 1 : 0,
 								];
 
@@ -769,7 +769,7 @@ class ImportFromTravioController extends Controller
 								$db->insert('travio_ports', [
 									'id' => $item['id'],
 									'code' => $item['code'],
-									'name' => $item['name'],
+									'name' => $this->model->_Travio->trimName($item['name']),
 									'departure' => $item['departure'] ? 1 : 0,
 								]);
 							}
@@ -820,7 +820,7 @@ class ImportFromTravioController extends Controller
 						if ($check) {
 							$data = [
 								'code' => $item['code'],
-								'name' => $item['name']['it'],
+								'name' => $this->model->_Travio->trimName($item['name']['it']),
 								'departure' => $item['is_departure'] ? 1 : 0,
 							];
 
@@ -834,7 +834,7 @@ class ImportFromTravioController extends Controller
 							$db->insert('travio_airports', [
 								'id' => $item['id'],
 								'code' => $item['code'],
-								'name' => $item['name']['it'],
+								'name' => $this->model->_Travio->trimName($item['name']['it']),
 								'departure' => $item['is_departure'] ? 1 : 0,
 							]);
 						}
@@ -880,7 +880,7 @@ class ImportFromTravioController extends Controller
 							if ($check) {
 								$data = [
 									'code' => $item['code'],
-									'name' => $item['name'],
+									'name' => $this->model->_Travio->trimName($item['name']),
 								];
 
 								foreach (($config['import']['stations']['override'] ?? []) as $k => $override) {
@@ -893,7 +893,7 @@ class ImportFromTravioController extends Controller
 								$db->insert('travio_stations', [
 									'id' => $item['id'],
 									'code' => $item['code'],
-									'name' => $item['name'],
+									'name' => $this->model->_Travio->trimName($item['name']),
 								]);
 							}
 
@@ -960,10 +960,10 @@ class ImportFromTravioController extends Controller
 						$db->updateOrInsert('travio_master_data', [
 							'id' => $item['id'],
 						], [
-							'name' => $item['name'],
-							'surname' => $item['surname'],
-							'business_name' => $item['company_name'],
-							'full_name' => $item['full_name'],
+							'name' => $this->model->_Travio->trimName($item['name']),
+							'surname' => $this->model->_Travio->trimName($item['surname']),
+							'business_name' => $this->model->_Travio->trimName($item['company_name']),
+							'full_name' => $this->model->_Travio->trimName($item['full_name']),
 							'category' => $item['categories'] ? $item['categories'][0] : null,
 							'username' => $item['username'],
 						]);
@@ -997,13 +997,13 @@ class ImportFromTravioController extends Controller
 						$check = $db->select('travio_payment_methods', $item['id']);
 						if ($check) {
 							$db->update('travio_payment_methods', $item['id'], [
-								'name' => $item['name'],
+								'name' => $this->model->_Travio->trimName($item['name']),
 								'gateway' => $item['gateway'],
 							]);
 						} else {
 							$db->insert('travio_payment_methods', [
 								'id' => $item['id'],
-								'name' => $item['name'],
+								'name' => $this->model->_Travio->trimName($item['name']),
 								'gateway' => $item['gateway'],
 								'visible' => 0,
 							]);
@@ -1030,7 +1030,7 @@ class ImportFromTravioController extends Controller
 						$db->updateOrInsert('travio_payment_conditions', [
 							'id' => $item['id'],
 						], [
-							'name' => $item['name'],
+							'name' => $this->model->_Travio->trimName($item['name']),
 						]);
 
 						$this->model->_TravioAssets->importPaymentCondition($item);
