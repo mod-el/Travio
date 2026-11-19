@@ -65,14 +65,8 @@ class TravioServiceBase extends Element
 			'field' => 'service',
 			'order_by' => '`order`, `id`',
 			'afterGet' => function (array $photos) {
-				if (!defined('DISABLE_LOCAL_TRAVIO_PHOTOS')) {
-					foreach ($photos as &$photo) {
-						if ($photo['url'])
-							$photo['url'] = $this->model->_Travio->checkPhotoCache($photo['url']);
-						if ($photo['thumb'])
-							$photo['thumb'] = $this->model->_Travio->checkPhotoCache($photo['thumb']);
-					}
-				}
+				foreach ($photos as &$photo)
+					$photo = $this->model->_Travio->processPhoto($photo);
 
 				return $photos;
 			},

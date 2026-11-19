@@ -77,9 +77,10 @@ class TravioImport extends AdminPage
 		$path = rawurldecode(trim($path));
 
 		$cachePosition = strpos($path, self::CACHE_PATH);
-		if ($cachePosition !== false)
+		if ($cachePosition !== false) {
 			$path = substr($path, $cachePosition + strlen(self::CACHE_PATH));
-		elseif (str_starts_with($path, self::STORAGE_URL))
+			$path = preg_replace('/^sizes\/[0-9]*x[0-9]*\//', '', $path); // Resized variants
+		} elseif (str_starts_with($path, self::STORAGE_URL))
 			$path = substr($path, strlen(self::STORAGE_URL));
 
 		$path = ltrim($path, '/');

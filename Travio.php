@@ -1028,12 +1028,131 @@ class Travio extends Module
 
 	/* Photo caching methods */
 
+	private const PHOTO_STORAGE_URL = 'https://storage.travio.it/';
+	private const PHOTO_CACHE_PATH = 'app-data/travio/cache/';
+
+	private ?array $photoSizes = null;
+
+	/**
+	 * Applies local caching to a photo row (url and thumb) and adds the "sizes" key, with the resized variants configured in travio.photos.sizes
+	 *
+	 * @param array $photo
+	 * @return array
+	 */
+	public function processPhoto(array $photo): array
+	{
+		$originalUrl = $photo['url'] ?? null;
+		$localPhotos = !defined('DISABLE_LOCAL_TRAVIO_PHOTOS');
+
+		if ($localPhotos) {
+			if ($photo['url'] ?? null)
+				$photo['url'] = $this->checkPhotoCache($photo['url']);
+			if ($photo['thumb'] ?? null)
+				$photo['thumb'] = $this->checkPhotoCache($photo['thumb']);
+		}
+
+		$photo['sizes'] = [];
+		foreach ($this->getPhotoSizes() as $size) {
+			if ($originalUrl and $localPhotos)
+				$photo['sizes'][$size['label']] = $this->checkPhotoSizeCache($originalUrl, $size);
+			else
+				$photo['sizes'][$size['label']] = $originalUrl;
+		}
+
+		return $photo;
+	}
+
 	public function checkPhotoCache(string $url): string
 	{
-		if (in_array(\Model\Config\Config::getEnv(), ['staging', 'production']) and str_starts_with($url, 'https://storage.travio.it/'))
+		if ($this->canCachePhoto($url))
 			return $this->getPhotoFromCache($url);
 		else
 			return $url;
+	}
+
+	/**
+	 * Returns the url of a resized variant of the given (full size) photo, generating it if needed
+	 *
+	 * @param string $url
+	 * @param array $size Normalized size, as returned by getPhotoSizes
+	 * @return string
+	 */
+	public function checkPhotoSizeCache(string $url, array $size): string
+	{
+		if (!$this->canCachePhoto($url))
+			return $url;
+
+		$fullUrl = $this->getPhotoFromCache($url);
+
+		try {
+			$fullPath = $this->convertUrlToCachePath($url);
+			$path = $this->convertUrlToCachePath($url, $size['label']);
+
+			if (!file_exists(INCLUDE_PATH . $path) or filesize(INCLUDE_PATH . $path) === 0) {
+				$dir = pathinfo(INCLUDE_PATH . $path, PATHINFO_DIRNAME);
+				if (!is_dir($dir))
+					mkdir($dir, 0777, true);
+
+				$image = new \Model\Images\Image(INCLUDE_PATH . $fullPath);
+
+				// No upscaling: if the original is already small enough, it is saved as-is
+				$newSizes = [];
+				if (($size['w'] !== null and $image->w > $size['w']) or ($size['h'] !== null and $image->h > $size['h'])) {
+					if ($size['w'] !== null)
+						$newSizes['w'] = $size['w'];
+					if ($size['h'] !== null)
+						$newSizes['h'] = $size['h'];
+				}
+
+				$image->save(INCLUDE_PATH . $path, $newSizes);
+				$image->destroy();
+			}
+
+			return PATH . $path;
+		} catch (\Throwable $e) {
+			return $fullUrl;
+		}
+	}
+
+	/**
+	 * Normalizes the sizes in travio.photos.sizes config; each entry can be an int (width) or an array with "w" and/or "h" keys
+	 *
+	 * @return array List of ['label' => string, 'w' => ?int, 'h' => ?int]
+	 */
+	public function getPhotoSizes(): array
+	{
+		if ($this->photoSizes === null) {
+			$this->photoSizes = [];
+
+			$config = $this->retrieveConfig();
+			foreach (($config['photos']['sizes'] ?? []) as $size) {
+				if (is_numeric($size))
+					$size = ['w' => $size];
+				if (!is_array($size))
+					continue;
+
+				$w = (isset($size['w']) and $size['w']) ? (int)$size['w'] : null;
+				$h = (isset($size['h']) and $size['h']) ? (int)$size['h'] : null;
+				if ($w === null and $h === null)
+					continue;
+
+				$label = ($w ?? '') . 'x' . ($h ?? '');
+				$this->photoSizes[$label] = [
+					'label' => $label,
+					'w' => $w,
+					'h' => $h,
+				];
+			}
+
+			$this->photoSizes = array_values($this->photoSizes);
+		}
+
+		return $this->photoSizes;
+	}
+
+	private function canCachePhoto(string $url): bool
+	{
+		return (in_array(\Model\Config\Config::getEnv(), ['staging', 'production']) and str_starts_with($url, self::PHOTO_STORAGE_URL));
 	}
 
 	private function getPhotoFromCache(string $url): string
@@ -1050,7 +1169,7 @@ class Travio extends Module
 			$url[] = $filename;
 			$url = implode('/', $url);
 
-			file_put_contents($path, file_get_contents($url));
+			file_put_contents(INCLUDE_PATH . $path, file_get_contents($url));
 		}
 
 		return PATH . $path;
@@ -1058,16 +1177,34 @@ class Travio extends Module
 
 	public function invalidatePhotoCache(string $url): void
 	{
-		if (str_starts_with($url, 'https://storage.travio.it/')) {
+		if (str_starts_with($url, self::PHOTO_STORAGE_URL)) {
 			$path = $this->convertUrlToCachePath($url);
-			if ($path and file_exists(INCLUDE_PATH . $path))
-				unlink($path);
+			if (file_exists(INCLUDE_PATH . $path))
+				unlink(INCLUDE_PATH . $path);
+
+			// Resized variants (also the ones of sizes no longer in config)
+			$sizesDir = INCLUDE_PATH . self::PHOTO_CACHE_PATH . 'sizes';
+			if (is_dir($sizesDir)) {
+				$relativePath = substr($url, strlen(self::PHOTO_STORAGE_URL));
+				foreach (scandir($sizesDir) as $label) {
+					if ($label === '.' or $label === '..')
+						continue;
+
+					$sizePath = $sizesDir . '/' . $label . '/' . $relativePath;
+					if (file_exists($sizePath))
+						unlink($sizePath);
+				}
+			}
 		}
 	}
 
-	private function convertUrlToCachePath(string $url): string
+	private function convertUrlToCachePath(string $url, ?string $sizeLabel = null): string
 	{
-		return 'app-data/travio/cache/' . substr($url, 26);
+		$path = self::PHOTO_CACHE_PATH;
+		if ($sizeLabel !== null)
+			$path .= 'sizes/' . $sizeLabel . '/';
+
+		return $path . substr($url, strlen(self::PHOTO_STORAGE_URL));
 	}
 
 	/**
