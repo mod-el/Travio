@@ -1294,7 +1294,7 @@ class Travio extends Module
 				'zip' => (!empty($serviceData['master_data']) and $serviceData['master_data']['addresses']) ? $serviceData['master_data']['addresses'][0]['postal_code'] : null,
 				'tel' => (!empty($serviceData['master_data']) and $serviceData['master_data']['contacts'] and $serviceData['master_data']['contacts'][0]['phone']) ? $serviceData['master_data']['contacts'][0]['phone'][0] : null,
 				'email' => (!empty($serviceData['master_data']) and $serviceData['master_data']['contacts'] and $serviceData['master_data']['contacts'][0]['email']) ? $serviceData['master_data']['contacts'][0]['email'][0] : null,
-				'notes' => $serviceData['_notes'] ? implode('<br/>', array_filter($serviceData['_notes'], fn($n) => $n['type'] === 'web')) : '',
+				'notes' => !empty($serviceData['_notes']) ? implode('<br/>', array_filter(array_map(fn($n) => trim($n['text'] ?? ''), array_filter((array)$serviceData['_notes'], fn($n) => ($n['type'] ?? '') === 'note_web')))) : '',
 				'departs_from' => null,
 				'price' => $serviceData['estimated_price_per_pax'] ?? null,
 				'min_date' => $min_date,
