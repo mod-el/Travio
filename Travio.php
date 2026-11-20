@@ -1036,10 +1036,10 @@ class Travio extends Module
 	/**
 	 * Applies local caching to a photo row (url and thumb) and adds the "sizes" key, with the resized variants configured in travio.photos.sizes
 	 *
-	 * @param array $photo
-	 * @return array
+	 * @param array|\Model\ORM\Element $photo
+	 * @return array|\Model\ORM\Element
 	 */
-	public function processPhoto(array $photo): array
+	public function processPhoto(array|\Model\ORM\Element $photo): array|\Model\ORM\Element
 	{
 		$originalUrl = $photo['url'] ?? null;
 		$localPhotos = !defined('DISABLE_LOCAL_TRAVIO_PHOTOS');
@@ -1051,13 +1051,14 @@ class Travio extends Module
 				$photo['thumb'] = $this->checkPhotoCache($photo['thumb']);
 		}
 
-		$photo['sizes'] = [];
+		$sizes = [];
 		foreach ($this->getPhotoSizes() as $size) {
 			if ($originalUrl and $localPhotos)
-				$photo['sizes'][$size['label']] = $this->checkPhotoSizeCache($originalUrl, $size);
+				$sizes[$size['label']] = $this->checkPhotoSizeCache($originalUrl, $size);
 			else
-				$photo['sizes'][$size['label']] = $originalUrl;
+				$sizes[$size['label']] = $originalUrl;
 		}
+		$photo['sizes'] = $sizes;
 
 		return $photo;
 	}
