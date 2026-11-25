@@ -47,23 +47,10 @@ class ImportFromTravioController extends Controller
 					$seen_ids = [];
 
 					foreach ($config['target_types'] as $target) {
-						$payload = [
-							'type' => 'geo',
-							'search-type' => $target['search'],
-							'all-langs' => true,
-						];
-
-						if (isset($target['type']))
-							$payload['service-type'] = $target['type'];
-
-						$list = $this->model->_Travio->request('static-data', $payload);
-
 						$sorter = new FixedArraySort();
-						$geoMap = [];
-						foreach ($list['list'] as $g) {
-							$geoMap[$g['id']] = $g;
+						$geoMap = $this->fetchGeoList($target);
+						foreach ($geoMap as $g)
 							$sorter->add($g['id'], $g['parent'] ?? null);
-						}
 
 						$sortedGeo = $sorter->sort();
 
@@ -1052,5 +1039,90 @@ class ImportFromTravioController extends Controller
 		}
 
 		return 'ok';
+	}
+
+	/**
+	 * Retrieves from Travio the geo nodes to import for a target type: the visible ones used by at least one web-visible
+	 * service / package of that type (or associated to a supplier), plus all of their ancestors.
+	 *
+	 * @param array $target
+	 * @return array Nodes indexed by id
+	 */
+	private function fetchGeoList(array $target): array
+	{
+		$list = TravioClient::restList('geo', [
+			'filters' => [
+				['field' => 'visible', 'value' => true],
+				[
+					'or' => [
+						[
+							'field' => $target['search'] === 'package' ? 'used_in_packages' : 'used_in_services',
+							'value' => $target['type'] ?? true,
+						],
+						['field' => 'has_suppliers', 'value' => true],
+					],
+				],
+			],
+			'per_page' => 0,
+		]);
+
+		$geoMap = [];
+		foreach ($list['list'] as $g)
+			$geoMap[$g['id']] = $g;
+
+		// Ancestors are needed even if they do not match the filters themselves, or the tree could not be built
+		while (true) {
+			$missing = [];
+			foreach ($geoMap as $g) {
+				if (!empty($g['parent']) and !isset($geoMap[$g['parent']]))
+					$missing[$g['parent']] = true;
+			}
+
+			if (!$missing)
+				break;
+
+			$found = false;
+			foreach (array_chunk(array_keys($missing), 200) as $chunk) { // Filters travel in the query string
+				$parents = TravioClient::restList('geo', [
+					'filters' => [
+						['field' => 'id', 'operator' => 'IN', 'value' => $chunk],
+					],
+					'per_page' => 0,
+				]);
+
+				foreach ($parents['list'] as $g) {
+					$geoMap[$g['id']] = $g;
+					$found = true;
+				}
+			}
+
+			if (!$found) // The remaining ancestors are not readable (e.g. hidden for this API key)
+				break;
+		}
+
+		// Remove the nodes left without their parent
+		do {
+			$removed = false;
+			foreach ($geoMap as $geoId => $g) {
+				if (!empty($g['parent']) and !isset($geoMap[$g['parent']])) {
+					unset($geoMap[$geoId]);
+					$removed = true;
+				}
+			}
+		} while ($removed);
+
+		$nodes = [];
+		foreach ($geoMap as $geoId => $g) {
+			$nodes[$geoId] = [
+				'id' => $g['id'],
+				'parent' => $g['parent'] ?: null,
+				'parent-name' => !empty($g['parent']) ? ($geoMap[$g['parent']]['name'] ?: null) : null,
+				'name' => $g['name'] ?: [],
+				'has_suppliers' => (bool)$g['has_suppliers'],
+				'meta' => $g['_meta'] ?? [],
+			];
+		}
+
+		return $nodes;
 	}
 }
