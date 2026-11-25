@@ -723,46 +723,69 @@ class ImportFromTravioController extends Controller
 
 					$currents = [];
 
+					// A port is imported if used by at least one target type, and it is a departure one if it is for at least one of them
+					$ports = [];
+					$departures = [];
 					foreach ($config['target_types'] as $target) {
-						$payload = [
-							'type' => 'ports',
-							'search-type' => $target['search'],
-						];
+						$usage = ($target['search'] === 'package' ? 'packages' : 'services');
+						$type = $target['type'] ?? true;
 
-						if ($target['type'] ?? null)
-							$payload['service-type'] = $target['type'];
+						$list = TravioClient::restList('ports', [
+							'filters' => [
+								[
+									'or' => [
+										['field' => 'used_in_' . $usage, 'value' => $type],
+										['field' => 'is_departing', 'value' => true],
+									],
+								],
+							],
+							'per_page' => 0,
+						]);
 
-						$list = $this->model->_Travio->request('static-data', $payload);
+						foreach ($list['list'] as $item)
+							$ports[$item['id']] = $item;
 
-						foreach ($list['list'] as $item) {
-							$check = $db->select('travio_ports', $item['id']);
+						$list = TravioClient::restList('ports', [
+							'filters' => [
+								['field' => 'departure_in_' . $usage, 'value' => $type],
+							],
+							'per_page' => 0,
+						]);
 
-							$currents[] = $item['id'];
+						foreach ($list['list'] as $item)
+							$departures[$item['id']] = true;
+					}
 
-							if ($check) {
-								$data = [
-									'code' => $item['code'],
-									'name' => $this->model->_Travio->trimName($item['name']),
-									'departure' => $item['departure'] ? 1 : 0,
-								];
+					foreach ($ports as $item) {
+						$item['departure'] = isset($departures[$item['id']]);
 
-								foreach (($config['import']['ports']['override'] ?? []) as $k => $override) {
-									if (!$override)
-										unset($data[$k]);
-								}
+						$check = $db->select('travio_ports', $item['id']);
 
-								$db->update('travio_ports', $item['id'], $data);
-							} else {
-								$db->insert('travio_ports', [
-									'id' => $item['id'],
-									'code' => $item['code'],
-									'name' => $this->model->_Travio->trimName($item['name']),
-									'departure' => $item['departure'] ? 1 : 0,
-								]);
+						$currents[] = $item['id'];
+
+						if ($check) {
+							$data = [
+								'code' => $item['code'],
+								'name' => $this->model->_Travio->trimName($item['name']),
+								'departure' => $item['departure'] ? 1 : 0,
+							];
+
+							foreach (($config['import']['ports']['override'] ?? []) as $k => $override) {
+								if (!$override)
+									unset($data[$k]);
 							}
 
-							$this->model->_TravioAssets->importPort($item);
+							$db->update('travio_ports', $item['id'], $data);
+						} else {
+							$db->insert('travio_ports', [
+								'id' => $item['id'],
+								'code' => $item['code'],
+								'name' => $this->model->_Travio->trimName($item['name']),
+								'departure' => $item['departure'] ? 1 : 0,
+							]);
 						}
+
+						$this->model->_TravioAssets->importPort($item);
 					}
 
 					foreach ($db->selectAll('travio_ports', $currents ? ['id' => ['NOT IN', $currents]] : []) as $port) {
